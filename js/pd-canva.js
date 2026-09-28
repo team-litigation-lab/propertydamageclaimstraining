@@ -1,9 +1,12 @@
 /* ============================================================
    Canva slides — each day's lesson slides are that day's Canva deck.
    The deck replaces the written Task Overview and topic slides in the day's
-   slideshow; the interactive steps stay around it:
-     (Day 1: Meet the Claim) → 🎨 Day N slides → Quick Checks → Skill Builders
+   slideshow and is the first thing a day shows; the interactive steps follow:
+     🎨 Day N slides → (Day 1: Meet the Claim) → Quick Checks → Skill Builders
      → Trainer Checkpoint → Knowledge Check
+   Opening a day goes straight to the deck (the "Before you start" overview is
+   under 📋 Objectives), and positions saved under the old, longer slide list
+   are moved to the deck once.
    The deck is embedded, never linked: there is no "Open in Canva" link
    anywhere in the course, and the embed runs sandboxed without pop-ups or
    top-level navigation, so Canva's own links inside it can't open either.
@@ -42,18 +45,48 @@ css.textContent = `
 `;
 document.head.appendChild(css);
 
-/* The day's steps: the deck in place of the Task Overview and topic slides. */
+/* The day's steps: the deck first, in place of the Task Overview and topic slides. */
 const __buildDaySlides = window.buildDaySlides;
 window.buildDaySlides = function(d){
   if(!d || !deckFor(d.id)) return __buildDaySlides(d);
-  const slides = [];
+  const slides = [{type:"canva"}];
   if(d.id===1) slides.push({type:"meetClient"});
-  slides.push({type:"canva"});
   d.lessons.forEach((l,i)=>{ if((d.quickChecks||[]).some(q=>q.afterIndex===i)) slides.push({type:"quickCheck", lessonIndex:i}); });
   if(d.recapVideo) slides.push({type:"video"});
   if(relatedTools(d.id).length) slides.push({type:"practiceLab"});
   if(d.discussionQuestion && trainerInline()) slides.push({type:"discussion"});
   return slides;
+};
+
+/* Saved positions ("last-slide", "slide-progress") from before the decks point into the old,
+   ~27-step list, which would drop a returning trainee on the last step, past the deck. Once per
+   trainee (the marker travels with their synced "last-slide"), move them to the deck; a day whose
+   Knowledge Check is passed stays fully open. */
+const SLIDE_LAYOUT = "canva-deck-first";
+function migrateSlidePositions(){
+  if(typeof state==="undefined" || typeof DAYS==="undefined") return;
+  const ls = (state.lastSlide && typeof state.lastSlide==="object") ? state.lastSlide : (state.lastSlide = {});
+  if(ls.layout===SLIDE_LAYOUT) return;
+  const sp = (state.slideProgress && typeof state.slideProgress==="object") ? state.slideProgress : (state.slideProgress = {});
+  DAYS.forEach(d=>{
+    if(!deckFor(d.id)) return;
+    const done = !!(state.progress && state.progress[d.id] && state.progress[d.id].done);
+    if(typeof ls[d.id]==="number") ls[d.id] = 0;
+    if(typeof sp[d.id]==="number") sp[d.id] = done ? buildDaySlides(d).length-1 : 0;
+  });
+  ls.layout = SLIDE_LAYOUT;
+  try{ storeSet("last-slide", ls); storeSet("slide-progress", sp); }catch(e){}
+}
+const __resumeSlideFor = window.resumeSlideFor;
+window.resumeSlideFor = function(dayId){ migrateSlidePositions(); return __resumeSlideFor(dayId); };
+/* Opening a day shows the deck straight away, not the "Before you start" overview. */
+const __goto = window.goto;
+window.goto = function(view, id){
+  if(view==="day" && deckFor(id)){
+    migrateSlidePositions();
+    if(!introSeen(id)){ state.introSeen = state.introSeen || {}; state.introSeen[id] = true; try{ storeSet("intro-seen", state.introSeen); }catch(e){} }
+  }
+  return __goto.apply(this, arguments);
 };
 
 const __daySlideTitle = window.daySlideTitle;
