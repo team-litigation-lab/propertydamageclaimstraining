@@ -21,7 +21,8 @@ The facts are in `build/pd_casefile.js` (the Claim File page). The AI grader rea
 
 | Area | Where |
 |---|---|
-| **Days 1–5 lessons** (65 topics, 15 Quick Checks, 75 Knowledge Check questions) | `build/day1.js` – `build/day5.js` |
+| **Day slides: the Canva decks** | `js/pd-canva.js`: each day's slides are that day's Canva deck, embedded in the slideshow in place of the written Task Overview and topic slides — (Day 1: Meet the Claim) → 🎨 Day N Slides → Quick Checks → Skill Builders → Trainer Checkpoint → Knowledge Check. The decks are embedded, never linked: there's no "Open in Canva" link, and the embed runs sandboxed without pop-ups or top-level navigation, so Canva's own links inside it can't open. On the deck, ← → turn its pages; Next moves on. To swap a deck, paste the design ID and view token from its share link into `PD_CANVA_DECKS`. |
+| **Days 1–5 lessons** (65 topics, 15 Quick Checks, 75 Knowledge Check questions) | `build/day1.js` – `build/day5.js`. The topics no longer show as slides (the Canva decks do), but they still feed the Quick Checks, Knowledge Checks, the day's Objectives and the trainer's talking points in Presenter view |
 | **Skill Builders** (one per day, 4 parts each) | registry in `build/pd_practice_tools.js`; the exercises are in `js/pd-skillbuilders.js` |
 | **📁 Documents** (21 claim documents, 4 templates, 5 handouts — all mock PDFs) | generated into `documents/` by `build/make_documents.py`; every page is marked *TRAINING — MOCK DOCUMENT*. Metadata and trainer audit keys in `js/pd-documents.js` |
 | **🧪 Practice** | `js/pd-practice.js`: every day has three columns — 🧠 Skill Builder, 🗣 Communication (Call Simulator line + roleplay), 🗂 Systems (the CMS) |
@@ -67,7 +68,7 @@ python3 build/build.py ../Case-Management-Training/index.html      # path to the
 
 `build.py` rewords the CM page for PD, then inserts the PD content from `build/`. Every edit checks that its anchor exists, so the script stops with an error if the CM page changed that part. When that happens, update the anchor in `build.py` and run it again. Carry new features from the CM course's `js/cm-updates.js` and `js/cm-skillbuilders.js` into `js/pd-updates.js` and `js/pd-skillbuilders.js` by hand. `js/daily-activities.js` is the same file as in the CM course.
 
-**Content source:** the lessons were written for this build from standard PI-firm PD claims practice. The Canva decks the course is meant to follow couldn't be opened from the build environment. Before the first live batch, compare `build/day1.js`–`day5.js` with the decks and adjust.
+**Content source:** the topics, Quick Checks and Knowledge Checks were written for this build from standard PI-firm PD claims practice; the slides trainees see are the Canva decks (Day 1–5 in the order they were shared). The decks couldn't be opened from the build environment, so before the first live batch, check that each day's deck is the right one and that the Quick Checks and Knowledge Check questions in `build/day1.js`–`day5.js` match what the deck teaches.
 
 ## Checks
 
