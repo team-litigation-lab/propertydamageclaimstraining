@@ -1,0 +1,25 @@
+const DAY_ORDER = ["Mon","Tue","Wed","Thu","Fri"];
+const CAL_EVENTS = [
+  {t:"New PD File — Angela Carter: open Crestline claim + LOR", day:"Mon", s:9, e:9.75, p:"High", loc:"Phone", type:"Claim Setup"},
+  {t:"Team PD Standup", day:"Mon", s:9.5, e:10, p:"Medium", loc:"Virtual", type:"Internal"},
+  {t:"Harbor Point first-party claim — rental coverage (Carter)", day:"Mon", s:10, e:10.5, p:"High", loc:"Phone", type:"Claim Setup"},
+  {t:"Rental pickup setup — Metro Car Rental (Carter)", day:"Mon", s:10.5, e:11, p:"High", loc:"Phone", type:"Rental"},
+  {t:"Day-one client call — Angela Carter", day:"Mon", s:11, e:11.5, p:"High", loc:"Phone", type:"Client"},
+  {t:"Payoff letter request — Riverbank Auto Finance", day:"Mon", s:14, e:14.25, p:"Medium", loc:"Phone", type:"Claim Setup"},
+  {t:"Liability follow-up — Okafor PD (day 5)", day:"Tue", s:9, e:9.5, p:"High", loc:"Phone", type:"Adjuster"},
+  {t:"Tow release + move — A-1 Metro to Riverside (Carter)", day:"Tue", s:9.25, e:10, p:"High", loc:"Phone", type:"Vehicle / Shop"},
+  {t:"Estimate review — Martinez (shop vs carrier)", day:"Tue", s:11, e:12, p:"Medium", loc:"CMS", type:"Vehicle / Shop"},
+  {t:"Rental end-date check — all open rentals", day:"Tue", s:15, e:15.5, p:"Medium", loc:"CMS", type:"Rental"},
+  {t:"Crestline liability decision due — Carter", day:"Wed", s:9, e:9.5, p:"High", loc:"Phone", type:"Adjuster"},
+  {t:"Field inspection at Riverside — Carter (appraiser on site)", day:"Wed", s:10, e:11, p:"High", loc:"Riverside Collision", type:"Vehicle / Shop"},
+  {t:"Diminished value submission — Rivera", day:"Wed", s:13, e:14, p:"Medium", loc:"Email", type:"Negotiation"},
+  {t:"Client update texts — PD caseload", day:"Wed", s:15, e:15.5, p:"Low", loc:"Text", type:"Client"},
+  {t:"Supplement follow-up — Riverside / Crestline (Carter)", day:"Thu", s:9, e:9.5, p:"High", loc:"Phone", type:"Adjuster"},
+  {t:"Total-loss valuation audit — Nguyen", day:"Thu", s:10, e:11.5, p:"High", loc:"CMS", type:"Negotiation"},
+  {t:"Subrogation status — Harbor Point (Castillo deductible)", day:"Thu", s:13, e:13.5, p:"Low", loc:"Phone", type:"Closing"},
+  {t:"Release review to attorney — Okafor PD", day:"Thu", s:14, e:14.5, p:"High", loc:"Email", type:"Closing"},
+  {t:"Total-loss negotiation call — Nguyen", day:"Fri", s:9.5, e:10.25, p:"High", loc:"Phone", type:"Negotiation"},
+  {t:"Payment routing — Castillo (payoff + client equity)", day:"Fri", s:11, e:11.5, p:"Medium", loc:"CMS", type:"Closing"},
+  {t:"PD closing notes + BI handoffs", day:"Fri", s:14, e:15, p:"Medium", loc:"CMS", type:"Closing"},
+  {t:"Week wrap-up", day:"Fri", s:14.5, e:15, p:"Low", loc:"Virtual", type:"Internal"}
+];
