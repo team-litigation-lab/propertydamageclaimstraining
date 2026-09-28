@@ -161,11 +161,11 @@ function pdTool(id){
 }
 window.pdTool = pdTool;
 function toolHref(t){
-  // The CMS serves every LSH program: ?program=pd tags the PD course's saved cases.
-  if(t.id==="cms") return t.url + (t.url.includes("?") ? "&" : "?") + "program=pd";
-  if(!t.portalSim) return t.url;
-  const q = new URLSearchParams({program:"PD"});
+  if(!t.portalSim && t.id!=="cms") return t.url;
   const name = String(state.certName || state.traineeName || "").trim(), batch = String(state.traineeBatch || "").trim();
+  // The CMS serves every LSH program: ?program=pd tags the PD course's saved cases, and
+  // from=pd lets trainees in with just their name (filled in from name= and batch=).
+  const q = t.id==="cms" ? new URLSearchParams({program:"pd", from:"pd"}) : new URLSearchParams({program:"PD"});
   if(name && !state.isAdmin) q.set("name", name);
   if(batch && !state.isAdmin) q.set("batch", batch);
   return t.url + (t.url.includes("?") ? "&" : "?") + q.toString();
