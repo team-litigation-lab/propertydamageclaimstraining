@@ -2,7 +2,7 @@
 
 The Property Damage (PD) version of the LSH training portal, for PD Specialists at personal-injury law firms. It runs on the same engine as the EA/PA and Case Management portals (sign-in and approvals, lessons as slides, Knowledge Checks, the random Task simulator, AI-graded practice, Live Roleplay, Presenter view, SOP run of show, feedback, rankings, certificates and admin tools). All the content is property damage, built around one running claim.
 
-It is a separate training module with its own repository and its own Cloudflare Worker, like the Case Management course. It started in a folder of EA-PA-TRAINING and moved here.
+It is a separate training module with its own repository and its own Cloudflare Worker, like the Case Management course. Live at https://propertydamageclaimstraining.legalsupporthelp.workers.dev/ and listed on the LSH Training Portal's Training Index as **Property Damage Claims Training**. It started in a folder of EA-PA-TRAINING and moved here.
 
 ## The running claim: Angela Carter
 
@@ -23,7 +23,7 @@ The facts are in `build/pd_casefile.js` (the Claim File page). The AI grader rea
 |---|---|
 | **Days 1–5 lessons** (65 topics, 15 Quick Checks, 75 Knowledge Check questions) | `build/day1.js` – `build/day5.js` |
 | **Skill Builders** (one per day, 4 parts each) | registry in `build/pd_practice_tools.js`; the exercises are in `js/pd-skillbuilders.js` |
-| **📁 Documents** (21 claim documents, 4 templates, 5 handouts) | generated into `documents/` by `build/make_documents.py`; metadata and trainer audit keys in `js/pd-documents.js` |
+| **📁 Documents** (21 claim documents, 4 templates, 5 handouts — all mock PDFs) | generated into `documents/` by `build/make_documents.py`; every page is marked *TRAINING — MOCK DOCUMENT*. Metadata and trainer audit keys in `js/pd-documents.js` |
 | **🧪 Practice** | `js/pd-practice.js`: every day has three columns — 🧠 Skill Builder, 🗣 Communication (Call Simulator line + roleplay), 🗂 Systems (the CMS) |
 | **🔥 Live Roleplay** | `build/pd_roleplay.js`: 14 situations with clients, adjusters, tow yards, rental counters and lenders, plus a live call inside each Skill Builder |
 | **📞 Call Simulator** | the LSH Training Portal's shared Call Simulator, Property Damage pack (Training-Portal `simulators/call-pack-pd.js`), opened with `?program=PD` |
@@ -60,7 +60,7 @@ The course opens it at `https://cm-training-activity.pages.dev/simulators/call.h
 `index.html` is generated from the **Case Management course's** `index.html` (Case-Management-Training, last built from its `main` at `f02d92c`). That page is itself generated from the EA/PA portal, so the chain is EA/PA → CM → PD. To pick up engine changes:
 
 ```
-python3 build/make_documents.py                                     # only if the claim documents changed
+python3 build/make_documents.py                                     # only if the claim documents changed (needs Node + Playwright: it prints the PDFs)
 python3 build/build.py ../Case-Management-Training/index.html      # path to the CM course's index.html
 ```
 
@@ -90,7 +90,7 @@ The smoke test needs Playwright.
 
 ## Deploy (Cloudflare Workers)
 
-1. In Cloudflare → Workers & Pages → Create, import this repository (leave the root directory as the repository root). The Worker is `pd-claims-training` (the `name` in `wrangler.json`).
+1. In Cloudflare → Workers & Pages → Create, import this repository (leave the root directory as the repository root). The Worker is `propertydamageclaimstraining` (the `name` in `wrangler.json` must match the Worker name in Cloudflare), so the course is at `https://propertydamageclaimstraining.legalsupporthelp.workers.dev/`.
 2. KV: the Worker binds the same `LSH_KV` namespace as EA/PA and CM. **All PD keys are stored under a `pd:` prefix**, so PD trainees, progress and settings never mix with EA/PA (no prefix) or CM (`cm:`). To use a separate namespace, change the `id` in `wrangler.json`.
 3. Secrets (the same as the CM course):
    - `ADMIN_PASSPHRASE`: admin sign-in; turns on secure mode.

@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
-"""Writes the PD course's simulated claim-file documents (documents/*.html).
+"""Writes the PD course's mock claim-file documents as PDFs (documents/**/*.pdf).
 
-Every page is marked TRAINING — SIMULATED DOCUMENT. The numbers here are the
-single source for the Angela Carter file; the lessons, Skill Builders and the
-Call Simulator pack use the same figures. Run: python3 build/make_documents.py
+Each document is laid out here as a page, then printed to PDF by
+build/render_pdfs.cjs (Playwright + Chromium), with "TRAINING — MOCK DOCUMENT"
+on every page. Only the PDFs are published. The numbers here are the single
+source for the Angela Carter file; the lessons, Skill Builders and the Call
+Simulator pack use the same figures.
+
+Run: python3 build/make_documents.py   (needs Node and Playwright: npm i playwright)
 """
-import os
+import os, shutil, subprocess, tempfile
 from decimal import Decimal, ROUND_HALF_UP
 
 B = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(os.path.dirname(B), "documents")
+PDF_OUT = os.path.join(os.path.dirname(B), "documents")
+OUT = tempfile.mkdtemp(prefix="pd-docs-")   # the page sources (not published)
 TAX = Decimal("0.0825")
 
 
@@ -18,7 +23,8 @@ def c(x):
 
 
 def m(x):
-    return "${:,.2f}".format(c(x))
+    v = c(x)
+    return ("−" if v < 0 else "") + "${:,.2f}".format(abs(v))
 
 
 def page(path, title, body, kind="Claim file"):
@@ -35,7 +41,7 @@ def page(path, title, body, kind="Claim file"):
 <link rel="stylesheet" href="{css}">
 </head>
 <body>
-<div class="sim">TRAINING — SIMULATED DOCUMENT · LSH Property Damage Claims Training · {kind}</div>
+<div class="sim">TRAINING — MOCK DOCUMENT · LSH Property Damage Claims Training · {kind}</div>
 <main class="doc">
 {body.strip()}
 </main>
@@ -82,10 +88,10 @@ tr.total td{font-weight:700;background:#FFF6EC}
 ol,ul{padding-left:22px}
 li{margin-bottom:4px}
 .clause{margin:10px 0;padding-left:34px;text-indent:-34px}
-.clause b{display:inline-block;width:30px;text-indent:0}
+.clause .n{display:inline-block;width:34px;text-indent:0;font-weight:700}
 .foot{max-width:860px;margin:0 auto 26px;font:12px Arial,sans-serif;color:var(--soft);text-align:center;padding:0 16px}
 @media(max-width:640px){.doc{margin:0;padding:20px 16px;border:0}.sig{grid-template-columns:1fr}table{font-size:12px}th,td{padding:5px}.doc .hdr .meta{text-align:left}}
-@media print{body{background:#fff}.doc{box-shadow:none;border:0;margin:0}}
+@media print{body{background:#fff;font-size:13px;line-height:1.45}.doc{box-shadow:none;border:0;margin:0;padding:0;max-width:none}.foot{margin:10px 0 0}.sim{padding:5px 10px;font-size:10.5px;margin-bottom:12px}.doc h1{font-size:19px}.doc h2{margin:14px 0 6px;font-size:13px}table{font-size:11.5px;line-height:1.3;margin:6px 0 10px}th,td{padding:3px 7px}tr,.note,.sig,.clause{break-inside:avoid}.doc h2,.hdr{break-after:avoid}}
 """
 
 
@@ -428,13 +434,13 @@ def build():
     # ---------------- settlement ----------------
     page("settlement/AC_19_Crestline_Release_DRAFT.html", "Crestline Release — DRAFT", hdr("Crestline Mutual Insurance", "Claim CMI-26-0918-4471<br>Draft sent 10/12/2026") + """
 <h1>RELEASE OF ALL CLAIMS</h1>
-<p class="clause"><b>1.</b> For the sole consideration of <b>$33,534.63</b>, the undersigned, Angela Carter (“Releasor”), releases and forever discharges Linda Hale, Kevin Hale and Crestline Mutual Insurance (“Releasees”) from <b>any and all claims, demands, damages, actions and causes of action, including but not limited to bodily injury, medical expenses, known or unknown injuries</b>, property damage and loss of use, arising from the accident of 09/18/2026.</p>
-<p class="clause"><b>2.</b> The consideration is for the 2022 Toyota RAV4, VIN TRNG4RAV4XLE22014, declared a total loss.</p>
-<p class="clause"><b>3.</b> Payment will be made by one check payable jointly to <b>“Angela Carter and Riverbank Auto Finance”</b> for the full consideration.</p>
-<p class="clause"><b>4.</b> Releasor agrees to <b>indemnify and hold harmless</b> the Releasees from any lien, claim or subrogation interest of any person arising from the accident.</p>
-<p class="clause"><b>5.</b> Releasor agrees to keep the terms and amount of this settlement <b>confidential</b>.</p>
-<p class="clause"><b>6.</b> Releasor will sign the title documents and power of attorney and deliver the keys on receipt of payment.</p>
-<p class="clause"><b>7.</b> This release is the entire agreement and is not an admission of liability.</p>
+<p class="clause"><span class="n">1.</span> For the sole consideration of <b>$33,534.63</b>, the undersigned, Angela Carter (“Releasor”), releases and forever discharges Linda Hale, Kevin Hale and Crestline Mutual Insurance (“Releasees”) from <b>any and all claims, demands, damages, actions and causes of action, including but not limited to bodily injury, medical expenses, known or unknown injuries</b>, property damage and loss of use, arising from the accident of 09/18/2026.</p>
+<p class="clause"><span class="n">2.</span> The consideration is for the 2022 Toyota RAV4, VIN TRNG4RAV4XLE22014, declared a total loss.</p>
+<p class="clause"><span class="n">3.</span> Payment will be made by one check payable jointly to <b>“Angela Carter and Riverbank Auto Finance”</b> for the full consideration.</p>
+<p class="clause"><span class="n">4.</span> Releasor agrees to <b>indemnify and hold harmless</b> the Releasees from any lien, claim or subrogation interest of any person arising from the accident.</p>
+<p class="clause"><span class="n">5.</span> Releasor agrees to keep the terms and amount of this settlement <b>confidential</b>.</p>
+<p class="clause"><span class="n">6.</span> Releasor will sign the title documents and power of attorney and deliver the keys on receipt of payment.</p>
+<p class="clause"><span class="n">7.</span> This release is the entire agreement and is not an admission of liability.</p>
 <div class="sig"><div>Releasor: Angela Carter · Date</div><div>Notary</div></div>""")
 
     page("settlement/AC_20_Child_Car_Seat_Receipt.html", "Receipt — Child Car Seat", hdr("KidSafe Baby Supply", "Store #212 · Riverview Park<br>02/14/2026 13:22") + "<h1>Sales Receipt</h1>" + table(["Item", "Qty", "Price"], [
@@ -521,5 +527,15 @@ def build():
     print(f"carrier ACV {m(ACV_CARRIER)} offer {m(OFFER)} · LSH ACV {m(ACV_LSH)} counter {m(COUNTER)} · agreed {m(AGREED)} · payoff 10/20 {m(PAYOFF_1020)} · equity {m(EQUITY)}")
 
 
+def render():
+    """Print every page to PDF under documents/, replacing what was there."""
+    if os.path.isdir(PDF_OUT):
+        shutil.rmtree(PDF_OUT)
+    os.makedirs(PDF_OUT)
+    subprocess.run(["node", os.path.join(B, "render_pdfs.cjs"), OUT, PDF_OUT], check=True)
+    shutil.rmtree(OUT, ignore_errors=True)
+
+
 if __name__ == "__main__":
     build()
+    render()

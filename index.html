@@ -9747,11 +9747,11 @@ function assessSubmissionQuality(text){
 /* Plain-English reason for an AI failure (shown instead of a generic "check your connection"). */
 function friendlyAiError(e){
   const m = String((e && e.message) || e || "");
-  if(/x-api-key|authentication_error|invalid api key|API key not valid/i.test(m)) return /gemini/i.test(m) ? "The Gemini API key on the server is invalid — replace GEMINI_API_KEY10 in Cloudflare (Workers & Pages → pd-claims-training → Settings → Variables and Secrets)." : "The AI key on the server is invalid — replace it in Cloudflare (Settings → Variables and Secrets).";
+  if(/x-api-key|authentication_error|invalid api key|API key not valid/i.test(m)) return /gemini/i.test(m) ? "The Gemini API key on the server is invalid — replace GEMINI_API_KEY10 in Cloudflare (Workers & Pages → propertydamageclaimstraining → Settings → Variables and Secrets)." : "The AI key on the server is invalid — replace it in Cloudflare (Settings → Variables and Secrets).";
   if(/quota|RESOURCE_EXHAUSTED|free tier/i.test(m)) return "AI generation limit reached. Try again in a minute.";
   if(/401|sign-in required|unauthor/i.test(m)) return (state.isAdmin || state.view==="admin") ? "Your admin sign-in has expired or was made before secure mode was switched on. Click 🛡 Admin → Sign out, then sign in again with the passphrase and retry." : "Your session needs refreshing — sign out and back in, then try again.";
   if(/403|not allowed/i.test(m)) return "The server refused this request for your account type. Sign out and back in, then try again.";
-  if(/GEMINI_API_KEY|not configured|No AI key/i.test(m)) return "No AI key is set on the server — add GEMINI_API_KEY10 (free, from Google AI Studio) as a Secret in Cloudflare (Workers & Pages → pd-claims-training → Settings → Variables and Secrets).";
+  if(/GEMINI_API_KEY|not configured|No AI key/i.test(m)) return "No AI key is set on the server — add GEMINI_API_KEY10 (free, from Google AI Studio) as a Secret in Cloudflare (Workers & Pages → propertydamageclaimstraining → Settings → Variables and Secrets).";
   if(/credit|billing|balance/i.test(m)) return "The Gemini account has hit its quota or billing limit — check Google AI Studio, then retry.";
   if(/429|rate limit/i.test(m)) return "AI generation limit reached. Try again in a minute.";
   if(/overloaded|529|503/i.test(m)) return "The AI service is busy right now. Try again in a minute.";
