@@ -28,6 +28,7 @@ The facts are in `build/pd_casefile.js` (the Claim File page). The AI grader rea
 | **🔥 Live Roleplay** | `build/pd_roleplay.js`: 14 situations with clients, adjusters, tow yards, rental counters and lenders, plus a live call inside each Skill Builder |
 | **📞 Call Simulator** | the LSH Training Portal's shared Call Simulator, Property Damage pack (Training-Portal `simulators/call-pack-pd.js`), opened with `?program=PD` |
 | Portal features (Presenter view, SOP, top bar) | `js/pd-updates.js`, a PD copy of the CM course's `js/cm-updates.js` |
+| 🏠 Main Portal (admins) | `js/portal-link.js`, the same file in every LSH course repo: while an admin is signed in, **🏠 Main Portal** in the top bar and **← Back to Main Portal** on the Admin screen open the LSH Training Portal's Training Directory (`https://cm-training-activity.pages.dev/programs.html`). Change it in all the course repos. |
 
 ### The days
 
