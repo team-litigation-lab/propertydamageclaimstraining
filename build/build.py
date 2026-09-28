@@ -131,9 +131,9 @@ replace_block("const QUICK_PRACTICE_TOPIC_IDS = [", "];", 'const QUICK_PRACTICE_
 
 # ---------- 3. scripts: the PD pack (relative paths, so the page also works from a subfolder) ----------
 s = re.sub(r'<script src="/js/cm-mindset\.js[^"]*"></script>\n?', '', s)
-rep_re(r'<script src="/js/cm-updates\.js\?v=[^"]*"></script>', '<script src="js/pd-updates.js?v=1"></script>')
+rep_re(r'<script src="/js/cm-updates\.js\?v=[^"]*"></script>', '<script src="js/pd-updates.js?v=2"></script>')
 rep_re(r'<script src="/js/cm-documents\.js\?v=[^"]*"></script>', '<script src="js/pd-documents.js?v=1"></script>')
-rep_re(r'<script src="/js/cm-skillbuilders\.js\?v=[^"]*"></script>', '<script src="js/pd-skillbuilders.js?v=1"></script>')
+rep_re(r'<script src="/js/cm-skillbuilders\.js\?v=[^"]*"></script>', '<script src="js/pd-skillbuilders.js?v=2"></script>')
 rep_re(r'<script src="/js/cm-practice\.js\?v=[^"]*"></script>', '<script src="js/pd-practice.js?v=1"></script>')
 # The admins' "🏠 Main Portal" button (js/portal-link.js, the same file in every LSH course):
 # drop any copy inherited from the CM page and add ours after the last script.
