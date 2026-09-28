@@ -94,6 +94,6 @@ The smoke test needs Playwright.
 2. KV: the Worker binds the same `LSH_KV` namespace as EA/PA and CM. **All PD keys are stored under a `pd:` prefix**, so PD trainees, progress and settings never mix with EA/PA (no prefix) or CM (`cm:`). To use a separate namespace, change the `id` in `wrangler.json`.
 3. Secrets (the same as the CM course):
    - `ADMIN_PASSPHRASE`: admin sign-in; turns on secure mode.
-   - `GEMINI_API_KEY`: AI grading and roleplays.
+   - `GEMINI_API_KEY10`: the PD course's own Gemini key, for AI grading and roleplays. If it isn't set, the Worker falls back to `GEMINI_API_KEY`.
    - `SESSION_SECRET`: optional.
 4. To have the Training Portal's **Progress & Feedback** page list PD trainees, add the program to `PROGRAMS` in the portal's `functions/api/program-progress.js` with key prefix `pd:`, 5 days and the course address.

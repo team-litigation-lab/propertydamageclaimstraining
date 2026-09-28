@@ -6032,7 +6032,7 @@ function renderFacilitatorGuide(){
       <ul>
         <li><b>Secure mode:</b> once <code>ADMIN_PASSPHRASE</code> is set on the Worker, the passphrase is checked on the server, every request needs a signed session, trainees can only read and change their own records (never approval or attempt resets), and the AI can only be used by signed-in users. Admin shows a red warning while this is off.</li>
         <li><b>Which version is live?</b> The footer shows the build number. If a fix "doesn't work", check the build first — a renamed download (e.g. <i>index (1).html</i>) is the usual cause.</li>
-        <li><b>AI features failing?</b> Every AI button shows the real reason. "Key isn't set / invalid" means <code>GEMINI_API_KEY</code> needs setting on the Worker (Cloudflare → Workers &amp; Pages → ea-pa-training → Settings → Variables and Secrets).</li>
+        <li><b>AI features failing?</b> Every AI button shows the real reason. "Key isn't set / invalid" means <code>GEMINI_API_KEY10</code> needs setting on the Worker (Cloudflare → Workers &amp; Pages → ea-pa-training → Settings → Variables and Secrets).</li>
         <li><b>Revoke</b> deletes a trainee's record and saved progress; invalid names/batches are cleaned automatically.</li>
       </ul>
     </div>
@@ -9747,11 +9747,11 @@ function assessSubmissionQuality(text){
 /* Plain-English reason for an AI failure (shown instead of a generic "check your connection"). */
 function friendlyAiError(e){
   const m = String((e && e.message) || e || "");
-  if(/x-api-key|authentication_error|invalid api key|API key not valid/i.test(m)) return /gemini/i.test(m) ? "The Gemini API key on the server is invalid — replace GEMINI_API_KEY in Cloudflare (Workers & Pages → ea-pa-training → Settings → Variables and Secrets)." : "The AI key on the server is invalid — replace it in Cloudflare (Settings → Variables and Secrets).";
+  if(/x-api-key|authentication_error|invalid api key|API key not valid/i.test(m)) return /gemini/i.test(m) ? "The Gemini API key on the server is invalid — replace GEMINI_API_KEY10 in Cloudflare (Workers & Pages → pd-claims-training → Settings → Variables and Secrets)." : "The AI key on the server is invalid — replace it in Cloudflare (Settings → Variables and Secrets).";
   if(/quota|RESOURCE_EXHAUSTED|free tier/i.test(m)) return "AI generation limit reached. Try again in a minute.";
   if(/401|sign-in required|unauthor/i.test(m)) return (state.isAdmin || state.view==="admin") ? "Your admin sign-in has expired or was made before secure mode was switched on. Click 🛡 Admin → Sign out, then sign in again with the passphrase and retry." : "Your session needs refreshing — sign out and back in, then try again.";
   if(/403|not allowed/i.test(m)) return "The server refused this request for your account type. Sign out and back in, then try again.";
-  if(/GEMINI_API_KEY|not configured|No AI key/i.test(m)) return "No AI key is set on the server — add GEMINI_API_KEY (free, from Google AI Studio) as a Secret in Cloudflare (Workers & Pages → ea-pa-training → Settings → Variables and Secrets).";
+  if(/GEMINI_API_KEY|not configured|No AI key/i.test(m)) return "No AI key is set on the server — add GEMINI_API_KEY10 (free, from Google AI Studio) as a Secret in Cloudflare (Workers & Pages → pd-claims-training → Settings → Variables and Secrets).";
   if(/credit|billing|balance/i.test(m)) return "The Gemini account has hit its quota or billing limit — check Google AI Studio, then retry.";
   if(/429|rate limit/i.test(m)) return "AI generation limit reached. Try again in a minute.";
   if(/overloaded|529|503/i.test(m)) return "The AI service is busy right now. Try again in a minute.";
@@ -14675,8 +14675,8 @@ async function runPool(items, worker, limit, onProgress){
 function studioResultMessage(what, res){
   if(!res.failed) return `✅ ${res.ok} ${what} drafted — review them below, then publish.`;
   const why = String(res.errors[0] || "unknown error").replace(/[.\s]+$/,"");
-  const hint = /x-api-key|API key not valid/i.test(why) ? " The AI key on the server looks invalid — check GEMINI_API_KEY in Cloudflare."
-    : /GEMINI_API_KEY|No AI key|not configured/i.test(why) ? " No AI key is set on the server — add GEMINI_API_KEY in Cloudflare."
+  const hint = /x-api-key|API key not valid/i.test(why) ? " The AI key on the server looks invalid — check GEMINI_API_KEY10 in Cloudflare."
+    : /GEMINI_API_KEY|No AI key|not configured/i.test(why) ? " No AI key is set on the server — add GEMINI_API_KEY10 in Cloudflare."
     : /401|sign-in/i.test(why) ? " Your admin sign-in expired — sign in to Admin again."
     : /429|rate/i.test(why) ? " The AI service is rate-limiting — wait a minute and run it again; finished items are kept."
     : /timed out/i.test(why) ? " Some requests were slow — run it again to finish the rest; finished items are kept."
@@ -17425,8 +17425,8 @@ console.info("LSH EA/PA portal build", APP_BUILD);
 let busyDepth = 0;
 function showActionError(e, label){
   const msg = (e && e.message) || String(e||"Unknown error");
-  const friendly = /GEMINI_API_KEY|No AI key|not configured/i.test(msg) ? "No AI key is set on the server (add GEMINI_API_KEY in Cloudflare)."
-    : /x-api-key|API key not valid/i.test(msg) ? "The AI key on the server is invalid (GEMINI_API_KEY)."
+  const friendly = /GEMINI_API_KEY|No AI key|not configured/i.test(msg) ? "No AI key is set on the server (add GEMINI_API_KEY10 in Cloudflare)."
+    : /x-api-key|API key not valid/i.test(msg) ? "The AI key on the server is invalid (GEMINI_API_KEY10)."
     : /quota|RESOURCE_EXHAUSTED|free tier/i.test(msg) ? "AI generation limit reached. Try again in a minute."
     : /401|sign-in/i.test(msg) ? "Your admin sign-in expired — click 🛡 Admin and sign in again."
     : /429|rate/i.test(msg) ? "AI generation limit reached. Try again in a minute."

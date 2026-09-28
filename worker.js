@@ -6,7 +6,8 @@
  * use one KV namespace without their trainee/progress records colliding.
  *
  * Secrets (set once with `wrangler secret put <NAME>`):
- *   GEMINI_API_KEY     — the reviewer behind every AI feature (Google Gemini). Required.
+ *   GEMINI_API_KEY10   — the PD course's own Gemini key: the reviewer behind every AI feature.
+ *                        Required (GEMINI_API_KEY is used instead only if GEMINI_API_KEY10 isn't set).
  *   GEMINI_MODEL       — optional, default "gemini-3.8-flash" (falls back to gemini-3.5-flash-lite)
  *   ADMIN_PASSPHRASE   — trainer/admin sign-in. Setting this switches the portal
  *                        into SECURE MODE: every storage and AI request must carry
@@ -162,6 +163,8 @@ async function traineeWrite(env, tok, key, value) {
    {messages, system, max_tokens} request; this translates it to Gemini's
    generateContent and the reply back. Model: GEMINI_MODEL (default gemini-3.8-flash),
    falling back to gemini-3.5-flash-lite / gemini-3.5-flash if busy or unavailable. */
+// The PD course has its own Gemini key (GEMINI_API_KEY10); GEMINI_API_KEY is only a fallback.
+const geminiKey = (env) => env.GEMINI_API_KEY10 || env.GEMINI_API_KEY || "";
 async function callGemini(env, rawBody) {
   let req; try { req = JSON.parse(rawBody); } catch (e) { return json({ error: "Invalid request" }, 400); }
   const toText = (c) => typeof c === "string" ? c : (Array.isArray(c) ? c.map((p) => p && p.text ? p.text : "").join("\n") : "");
@@ -181,7 +184,7 @@ async function callGemini(env, rawBody) {
     else p.generationConfig.thinkingConfig = { thinkingLevel: "low" };                         // 3.x: think briefly → much faster replies
     const send = (body) => fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+      headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey(env) },
       body: JSON.stringify(body)
     });
     let r = await send(p);
@@ -231,7 +234,7 @@ export default {
         const page = await env.ASSETS.fetch(new Request(new URL("/", request.url)));
         const html = await page.text();
         const m = html.match(/APP_BUILD = "([^"]+)"/);
-        return new Response(`Portal build deployed: ${m ? m[1] : "unknown (old index.html — no build tag)"}\nWorker: secure-mode worker.js\nSecure mode: ${env.ADMIN_PASSPHRASE ? "ON" : "OFF"}\nAI provider: ${env.GEMINI_API_KEY ? "Google Gemini (" + (env.GEMINI_MODEL || "gemini-3.8-flash") + ")" : "none — add GEMINI_API_KEY"}\n`, { headers: { "Content-Type": "text/plain", "Cache-Control": "no-store" } });
+        return new Response(`Portal build deployed: ${m ? m[1] : "unknown (old index.html — no build tag)"}\nWorker: secure-mode worker.js\nSecure mode: ${env.ADMIN_PASSPHRASE ? "ON" : "OFF"}\nAI provider: ${geminiKey(env) ? (env.GEMINI_API_KEY10 ? "GEMINI_API_KEY10 · " : "GEMINI_API_KEY · ") + "Google Gemini (" + (env.GEMINI_MODEL || "gemini-3.8-flash") + ")" : "none — add GEMINI_API_KEY10"}\n`, { headers: { "Content-Type": "text/plain", "Cache-Control": "no-store" } });
       }
       if (!path.startsWith("/api/")) {
         const res = await env.ASSETS.fetch(request);
@@ -276,7 +279,7 @@ export default {
       /* ---------- AI proxy (signed-in users only, so strangers can't spend your credits) ---------- */
       // (the path keeps its old name so pages already open in browsers keep working)
       if (path === "/api/claude" || path === "/api/ai") {
-        if (!env.GEMINI_API_KEY) return json({ error: "No AI key is configured on this Worker. Add GEMINI_API_KEY as a Secret in Cloudflare." }, 500);
+        if (!geminiKey(env)) return json({ error: "No AI key is configured on this Worker. Add GEMINI_API_KEY10 as a Secret in Cloudflare." }, 500);
         return await callGemini(env, await request.text());
       }
 
