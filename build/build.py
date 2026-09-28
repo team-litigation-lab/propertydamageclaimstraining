@@ -43,6 +43,14 @@ def rep(old, new, min_count=1):
     s = s.replace(old, new)
 
 
+def rep_re(pattern, new):
+    """Like rep, for an anchor whose details change (e.g. a script's ?v= version)."""
+    global s
+    s, n = re.subn(pattern, lambda m: new, s, count=1)
+    if not n:
+        sys.exit(f"MISSING: {pattern[:100]!r}")
+
+
 # ---------- 1. wording: CM -> PD (before the PD content goes in, so it isn't touched) ----------
 rep("<title>LSH Case Management Training</title>", "<title>LSH Property Damage Claims Training</title>")
 rep("LSH Case Management — Platform Orientation", "LSH Property Damage Claims — Platform Orientation")
@@ -123,11 +131,14 @@ replace_block("const QUICK_PRACTICE_TOPIC_IDS = [", "];", 'const QUICK_PRACTICE_
 
 # ---------- 3. scripts: the PD pack (relative paths, so the page also works from a subfolder) ----------
 s = re.sub(r'<script src="/js/cm-mindset\.js[^"]*"></script>\n?', '', s)
-rep('<script src="/js/cm-updates.js?v=6"></script>', '<script src="js/pd-updates.js?v=1"></script>')
-rep('<script src="/js/cm-documents.js?v=1"></script>', '<script src="js/pd-documents.js?v=1"></script>')
-rep('<script src="/js/cm-skillbuilders.js?v=10"></script>', '<script src="js/pd-skillbuilders.js?v=1"></script>')
-rep('<script src="/js/cm-practice.js?v=1"></script>', '<script src="js/pd-practice.js?v=1"></script>')
-rep('<script src="/js/daily-activities.js?v=1"></script>', '<script src="js/daily-activities.js?v=1"></script>')
+rep_re(r'<script src="/js/cm-updates\.js\?v=[^"]*"></script>', '<script src="js/pd-updates.js?v=1"></script>')
+rep_re(r'<script src="/js/cm-documents\.js\?v=[^"]*"></script>', '<script src="js/pd-documents.js?v=1"></script>')
+rep_re(r'<script src="/js/cm-skillbuilders\.js\?v=[^"]*"></script>', '<script src="js/pd-skillbuilders.js?v=1"></script>')
+rep_re(r'<script src="/js/cm-practice\.js\?v=[^"]*"></script>', '<script src="js/pd-practice.js?v=1"></script>')
+# The admins' "🏠 Main Portal" button (js/portal-link.js, the same file in every LSH course):
+# drop any copy inherited from the CM page and add ours after the last script.
+s = re.sub(r'<script src="/?js/portal-link\.js[^"]*"></script>\n?', '', s)
+rep('<script src="/js/daily-activities.js?v=1"></script>', '<script src="js/daily-activities.js?v=1"></script>\n<script src="js/portal-link.js?v=1"></script>')
 s = re.sub(r'var APP_BUILD = "pd-[^"]*";', f'var APP_BUILD = "pd-{datetime.date.today().isoformat().replace("-", ".")}-a";', s, count=1)
 
 open(OUT, "w", encoding="utf8").write(s)
