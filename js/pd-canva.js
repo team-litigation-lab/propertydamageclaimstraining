@@ -16,8 +16,8 @@
 (function(){
 "use strict";
 const PD_CANVA_DECKS = {
-  1: { id: "DAGnZtsWZN4", token: "4A-sEPwlF7uJHoS3UFH4ag" },
-  2: { id: "DAGnZmzOT0I", token: "MaqvKhpoKoqL7iFAPVMDDQ" },
+  1: { id: "DAGnZmzOT0I", token: "MaqvKhpoKoqL7iFAPVMDDQ" },   // "Property Damage Claims DAY 1" (confirmed from the deck itself)
+  2: { id: "DAGnZtsWZN4", token: "4A-sEPwlF7uJHoS3UFH4ag" },   // Days 2-5: not yet confirmed from the decks
   3: { id: "DAGnZixNtaM", token: "wfl-hPUxCpERG2cz1UBM0w" },
   4: { id: "DAGna3Dh7Gs", token: "aToie10h2f6Wb-eNl2b03w" },
   5: { id: "DAGnZuCPxiU", token: "V_PGqt3U1OeYHrJY5M_x0w" }

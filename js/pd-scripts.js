@@ -8,10 +8,13 @@
      ③ Walk through it  the points in order: First, Next, Then, Finally
      ④ Ask the room     a question or a "Your turn" for the room
    plus the topic's scenario for the room (its discussion case).
-   The day's slides are its Canva deck, so on the deck step Presenter view
-   shows the scripts topic by topic: Next → / ← Previous (and the ← → keys in
-   the presenter tab) move through the topics, then on to the next step. The
-   deck itself moves in the slides window (click it, then its arrows or ← →).
+   The day's slides are its Canva deck. Where the deck's own pages have speaker
+   notes (js/deck-notes/dayN.js: window.DECK_NOTES[day] = [{page, title, notes,
+   scenario}], edited from the deck's notes, with a scenario for every page),
+   Presenter view follows the deck page by page; otherwise it shows the topic
+   scripts. Next → / ← Previous (and the ← → keys in the presenter tab) move
+   through the pages or topics, then on to the next step. The deck itself moves
+   in the slides window (click it, then its arrows or ← →).
    Nothing here is generated at run time.
    ============================================================ */
 (function(){
@@ -67,6 +70,19 @@ if(typeof DAYS!=="undefined") DAYS.forEach(d=>(d.lessons||[]).forEach(l=>{ if(sc
 /* Speaker Notes PDF, in the EA/PA layout. */
 const __buildDayScriptLines = window.buildDayScriptLines;
 window.buildDayScriptLines = function(d){
+  const pages = (window.pdDeckNotes && window.pdDeckNotes(d)) || null;
+  if(pages){
+    const lines = [`## Day ${d.id} — ${d.title}: Trainer Speaker Notes`,
+      `The day's slides are the Day ${d.id} Canva deck: speaker notes and a scenario for every page.`];
+    pages.forEach(pg=>{
+      lines.push(`## Page ${String(pg.page).padStart(2,"0")}. ${pg.title||""}`);
+      lines.push("SPEAKER NOTES:"); lines.push(pg.notes||"");
+      if(pg.scenario) lines.push(`SCENARIO: ${pg.scenario}`);
+      lines.push("---");
+    });
+    const orig = __buildDayScriptLines(d), at = orig.findIndex(x=>/^## End-of-Day Discussion/.test(x));
+    return at >= 0 ? lines.concat(orig.slice(at)) : lines;
+  }
   if(!(d.lessons||[]).some(l=>scriptFor(d, l))) return __buildDayScriptLines(d);
   const lines = [`## Day ${d.id} — ${d.title}: Trainer Speaker Notes`,
     `The day's slides are the Day ${d.id} Canva deck. One script per topic, in the order the deck covers them.`];
@@ -87,8 +103,26 @@ window.buildDayScriptLines = function(d){
 };
 
 /* ---------- Presenter view on the deck step ---------- */
+const deckNotes = (d)=>{ const n = (window.DECK_NOTES || {})[d.id]; return Array.isArray(n) && n.length ? n : null; };
+window.pdDeckNotes = deckNotes;
+function renderDeckPage(d, pg){
+  return `<div class="pn">
+    <div class="script-block"><div class="script-head"><span>🎙 Speaker notes — read aloud</span></div>
+      <div class="script-row"><p>${esc(pg.notes||"")}</p></div>
+    </div>
+    ${pg.scenario ? `<div class="pn-scen"><b>🎬 Scenario</b><p>${esc(pg.scenario)}</p></div>` : ""}
+  </div>`;
+}
+window.renderDeckPage = renderDeckPage;
+/* What the deck step steps through: the deck's pages when they have notes, else the day's topics. */
+function cueItems(d){
+  const pages = deckNotes(d);
+  if(pages) return {kind:"page", list: pages.map(pg=>({label:`Page ${pg.page}`, title: pg.title||"", html: ()=>renderDeckPage(d, pg)}))};
+  if(topics(d).some(l=>scriptFor(d, l))) return {kind:"topic", list: topics(d).map((l,k)=>({label:`Topic ${k+1}`, title: l.h, html: ()=>renderPdScript(d, l)}))};
+  return null;
+}
 const topics = (d)=> d.lessons || [];
-function topicIdx(d){ state.pvTopic = state.pvTopic || {}; const n = topics(d).length; return Math.max(0, Math.min(n-1, state.pvTopic[d.id]||0)); }
+function topicIdx(d){ state.pvTopic = state.pvTopic || {}; const it = cueItems(d), n = it ? it.list.length : 1; return Math.max(0, Math.min(n-1, state.pvTopic[d.id]||0)); }
 function repaintCues(d){
   const slide = buildDaySlides(d)[state.lessonSlide||0];
   const cu = document.getElementById("pvCues"); if(cu){ cu.innerHTML = presenterCues(d, slide); if(cu.parentElement) cu.parentElement.scrollTop = 0; }
@@ -96,51 +130,70 @@ function repaintCues(d){
 }
 function pdScriptTopic(dir, to){
   const d = DAYS.find(x=>x.id===state.dayId); if(!d) return;
-  const n = topics(d).length; state.pvTopic = state.pvTopic || {};
-  state.pvTopic[d.id] = Math.max(0, Math.min(n-1, to!=null ? +to : topicIdx(d) + dir));
+  const it = cueItems(d); if(!it) return;
+  state.pvTopic = state.pvTopic || {};
+  state.pvTopic[d.id] = Math.max(0, Math.min(it.list.length-1, to!=null ? +to : topicIdx(d) + dir));
   repaintCues(d);
 }
 window.pdScriptTopic = pdScriptTopic;
 
 const __presenterCues = window.presenterCues;
 window.presenterCues = function(d, slide){
-  if(!slide || slide.type!=="canva" || !topics(d).some(l=>scriptFor(d, l))) return __presenterCues(d, slide);
-  const ls = topics(d), i = topicIdx(d), l = ls[i];
+  const it = slide && slide.type==="canva" ? cueItems(d) : null;
+  if(!it) return __presenterCues(d, slide);
+  const ls = it.list, i = topicIdx(d), cur = ls[i], what = it.kind==="page" ? "page" : "topic";
   return `<h3>Day ${d.id} Slides (Canva)</h3>
-    <p class="pn-hint">Move the deck in the slides window: click it, then use its arrows or ← →. Move this script with <b>Next →</b> / <b>← Previous</b> (or ← → here); after the last topic, Next goes on to the Quick Checks.</p>
+    <p class="pn-hint">Move the deck in the slides window: click it, then use its arrows or ← →. Move these notes with <b>Next →</b> / <b>← Previous</b> (or ← → here), one ${what} at a time; after the last ${what}, Next goes on to the next step.</p>
     <div class="pv-topicnav">
-      <button class="btn btn-ghost btn-sm" onclick="pdScriptTopic(-1)" ${i===0?"disabled":""} title="Previous topic">‹</button>
-      <select onchange="pdScriptTopic(0, this.value)" title="Jump to a topic">${ls.map((x,k)=>`<option value="${k}" ${k===i?"selected":""}>${k+1}. ${esc(x.h)}</option>`).join("")}</select>
-      <button class="btn btn-ghost btn-sm" onclick="pdScriptTopic(1)" ${i===ls.length-1?"disabled":""} title="Next topic">›</button>
+      <button class="btn btn-ghost btn-sm" onclick="pdScriptTopic(-1)" ${i===0?"disabled":""} title="Previous ${what}">‹</button>
+      <select onchange="pdScriptTopic(0, this.value)" title="Jump to a ${what}">${ls.map((x,k)=>`<option value="${k}" ${k===i?"selected":""}>${esc(x.label)} · ${esc(x.title)}</option>`).join("")}</select>
+      <button class="btn btn-ghost btn-sm" onclick="pdScriptTopic(1)" ${i===ls.length-1?"disabled":""} title="Next ${what}">›</button>
     </div>
-    <div class="pv-topic-k">Topic ${i+1} of ${ls.length}</div>
-    <h3 class="pv-topic-h">${esc(l.h)}</h3>
-    ${renderPdScript(d, l)}`;
+    <div class="pv-topic-k">${esc(cur.label)} of ${ls.length}</div>
+    <h3 class="pv-topic-h">${esc(cur.title)}</h3>
+    ${cur.html()}`;
 };
 
-/* Next → / ← Previous (buttons, keys, the slides window) step through the topics on the deck, then move on. */
+/* Next → / ← Previous (buttons, keys, the slides window) step through the pages or topics on the deck, then move on. */
 const __presenterStep = window.presenterStep;
 window.presenterStep = function(dir){
   const d = DAYS.find(x=>x.id===state.dayId);
   if(!d) return __presenterStep(dir);
-  const slides = buildDaySlides(d), before = state.lessonSlide||0, cur = slides[before], n = topics(d).length;
-  if(state.presenting && cur && cur.type==="canva" && n && topics(d).some(l=>scriptFor(d, l))){
+  const slides = buildDaySlides(d), before = state.lessonSlide||0, cur = slides[before], it = cueItems(d), n = it ? it.list.length : 0;
+  if(state.presenting && cur && cur.type==="canva" && n){
     const i = topicIdx(d);
     if(dir>0 && i<n-1){ pdScriptTopic(1); return; }
     if(dir<0 && i>0){ pdScriptTopic(-1); return; }
   }
   const r = __presenterStep(dir);
   const after = state.lessonSlide||0, now = slides[after];
-  if(after!==before && now && now.type==="canva"){ state.pvTopic = state.pvTopic || {}; state.pvTopic[d.id] = dir>0 ? 0 : n-1; repaintCues(d); }
+  if(after!==before && now && now.type==="canva" && n){ state.pvTopic = state.pvTopic || {}; state.pvTopic[d.id] = dir>0 ? 0 : n-1; repaintCues(d); }
   return r;
 };
 const __presenterNextText = window.presenterNextText;
 window.presenterNextText = function(d){
-  const cur = buildDaySlides(d)[state.lessonSlide||0], ls = topics(d);
-  if(cur && cur.type==="canva" && ls.some(l=>scriptFor(d, l))){
+  const cur = buildDaySlides(d)[state.lessonSlide||0], it = cur && cur.type==="canva" ? cueItems(d) : null;
+  if(it){
     const i = topicIdx(d);
-    if(i < ls.length-1) return `Topic ${i+2} of ${ls.length}: ${esc(ls[i+1].h)}`;
+    if(i < it.list.length-1){ const nx = it.list[i+1]; return `${esc(nx.label)} of ${it.list.length}: ${esc(nx.title)}`; }
   }
   return __presenterNextText(d);
+};
+
+/* Admin → Trainer Cues: the deck's pages first (when the day has them), then the topic scripts for reference. */
+const __renderAdminTrainerCues = window.renderAdminTrainerCues;
+window.renderAdminTrainerCues = function(){
+  const html = __renderAdminTrainerCues.apply(this, arguments);
+  const d = DAYS.find(x=>x.id===(state.cuesDay||1)) || DAYS[0], pages = d && deckNotes(d);
+  const marker = '<div class="card" style="padding:6px 0;margin-bottom:18px;">';
+  if(!pages || html.indexOf(marker) < 0) return html;
+  const deck = `<h3 style="color:var(--navy);font-size:15px;margin:14px 0 8px;">🎨 Day ${d.id} deck: speaker notes and a scenario for every page (${pages.length} pages)</h3>
+    <div class="card" style="padding:6px 0;margin-bottom:18px;">${pages.map((pg,k)=>`
+      <details class="cue-item" ${k===0?"open":""}>
+        <summary><span class="cue-num">${String(pg.page).padStart(2,"0")}</span>${esc(pg.title||"")}<span class="cue-steps">Page ${pg.page} of ${pages.length}</span></summary>
+        <div class="cue-body">${renderDeckPage(d, pg)}</div>
+      </details>`).join("")}</div>
+    <h3 style="color:var(--navy);font-size:15px;margin:14px 0 8px;">📚 Topic scripts (the day's topics, for reference)</h3>`;
+  return html.replace(marker, deck + marker);
 };
 })();
