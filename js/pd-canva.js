@@ -8,8 +8,9 @@
    under 📋 Objectives), and positions saved under the old, longer slide list
    are moved to the deck once.
    The deck is embedded, never linked: there is no "Open in Canva" link
-   anywhere in the course, and the embed runs sandboxed without pop-ups or
-   top-level navigation, so Canva's own links inside it can't open either.
+   anywhere in the course. The embed uses Canva's own embed settings (no
+   sandbox): a sandboxed frame loads the first page but its player can't
+   turn the pages.
    To change a deck, paste the design's ID and view token from its share link
    (canva.com/design/<ID>/<TOKEN>/view) below.
    ============================================================ */
@@ -104,8 +105,7 @@ window.renderDaySlideContent = function(d, slide, idx){
       <div class="topic-separator">DAY ${d.id} &middot; SLIDES</div>
       <div class="pd-canva-frame" data-loading="Loading Day ${d.id} slides…">
         <iframe src="${esc(embedUrl(deck))}" title="Day ${d.id} slides — ${esc(d.title)}" loading="lazy"
-          sandbox="allow-scripts allow-same-origin allow-presentation" allow="fullscreen" allowfullscreen
-          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          allow="fullscreen" allowfullscreen></iframe>
       </div>
       <p class="pd-canva-hint">Click the slides and use the arrows (or ← →) to go through today's deck. When you've reached the end, press Next.</p>
     </div>`;
