@@ -4,11 +4,14 @@
     pip install pymupdf pillow
     python3 build/deck_pages.py            # every deck in decks/
     python3 build/deck_pages.py 1 3        # only Days 1 and 3
+    python3 build/deck_pages.py --src decks/capture    # pages captured by build/capture_canva.cjs
 
 Put the downloads in decks/ (the folder isn't published with the site). Each
 file's name says its day, e.g. "Property Damage Claims DAY 1.pdf":
   - a PDF (Canva: Share -> Download -> PDF Standard), or
-  - a ZIP of PNG/JPG pages (Canva: Share -> Download -> PNG, all pages).
+  - a ZIP of PNG/JPG pages (Canva: Share -> Download -> PNG, all pages), or
+  - a folder of page images named in order (01.png, 02.png, ...), e.g. from
+    build/capture_canva.cjs, which captures the decks from their view links.
 
 For each day this writes slides/dayN/01.webp, 02.webp, ... (1920 px wide) and
 lists the day in js/deck-pages.js. The course then shows the pages as the
@@ -23,9 +26,10 @@ import zipfile
 from pathlib import Path
 
 import pymupdf
-from PIL import Image
+from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
+REDACTIONS = ROOT / "build" / "deck_redactions.json"
 DECKS = ROOT / "decks"
 SLIDES = ROOT / "slides"
 MANIFEST = ROOT / "js" / "deck-pages.js"
@@ -58,6 +62,29 @@ def zip_pages(path):
             yield Image.open(io.BytesIO(z.read(n))).convert("RGB")
 
 
+def folder_pages(path):
+    for f in sorted((f for f in path.iterdir() if f.suffix.lower() in IMAGE_EXT), key=lambda f: natural_key(f.name)):
+        yield Image.open(f).convert("RGB")
+
+
+def load_redactions():
+    if not REDACTIONS.exists():
+        return {}
+    data = json.loads(REDACTIONS.read_text())
+    return {int(d): {int(p): boxes for p, boxes in pages.items()} for d, pages in data.items() if d.isdigit()}
+
+
+def redact(im, boxes):
+    """Blur each area beyond reading: pixelate to 1/14, then soften."""
+    sx, sy = im.width / 1920, im.height / 1080
+    for l, t, r, b in boxes:
+        box = (round(l * sx), round(t * sy), round(r * sx), round(b * sy))
+        part = im.crop(box)
+        small = part.resize((max(1, part.width // 14), max(1, part.height // 14)), Image.BILINEAR)
+        im.paste(small.resize(part.size, Image.BILINEAR).filter(ImageFilter.GaussianBlur(6)), box)
+    return im
+
+
 def load_manifest():
     if not MANIFEST.exists():
         return {}
@@ -67,23 +94,36 @@ def load_manifest():
 
 def write_manifest(data):
     body = json.dumps({str(k): data[k] for k in sorted(data)}, indent=2)
+    # a new ?v= on the script tag, so browsers don't keep the old list
+    ver = hashlib.sha1(body.encode()).hexdigest()[:8]
+    for page in (ROOT / "index.html", ROOT / "build" / "build.py"):
+        text = page.read_text()
+        page.write_text(re.sub(r"js/deck-pages\.js\?v=[0-9A-Za-z]+", f"js/deck-pages.js?v={ver}", text))
     MANIFEST.write_text(
         "/* Each day's Canva deck as one image per page (slides/dayN/NN.webp), written by build/deck_pages.py.\n"
-        "   Don't edit by hand: download the deck from Canva into decks/ and run the script again. */\n"
+        "   Don't edit by hand: capture the deck again (build/capture_canva.cjs) or download it from Canva into decks/,\n"
+        "   then run build/deck_pages.py. */\n"
         f"window.PD_DECK_PAGES = Object.assign(window.PD_DECK_PAGES || {{}}, {body});\n"
     )
 
 
-def convert(day, src):
+def convert(day, src, redactions):
     out = SLIDES / f"day{day}"
     out.mkdir(parents=True, exist_ok=True)
     for old in out.glob("*.webp"):
         old.unlink()
-    pages = pdf_pages(src) if src.suffix.lower() == ".pdf" else zip_pages(src)
+    if src.is_dir():
+        pages = folder_pages(src)
+    elif src.suffix.lower() == ".pdf":
+        pages = pdf_pages(src)
+    else:
+        pages = zip_pages(src)
     digest, size, n = hashlib.sha1(), None, 0
     for n, im in enumerate(pages, 1):
         if im.width != WIDTH:
             im = im.resize((WIDTH, round(im.height * WIDTH / im.width)), Image.LANCZOS)
+        if n in redactions:
+            im = redact(im, redactions[n])
         size = size or im.size
         buf = io.BytesIO()
         im.save(buf, "WEBP", quality=QUALITY, method=6)
@@ -92,15 +132,22 @@ def convert(day, src):
     if not n:
         raise SystemExit(f"{src.name}: no pages found")
     total = sum(p.stat().st_size for p in out.glob("*.webp"))
-    print(f"Day {day}: {n} pages from {src.name} -> slides/day{day}/ ({total / 1e6:.1f} MB)")
+    note = f", {len(redactions)} page(s) blurred in places" if redactions else ""
+    print(f"Day {day}: {n} pages from {src.name} -> slides/day{day}/ ({total / 1e6:.1f} MB{note})")
     return {"pages": n, "ext": "webp", "w": size[0], "h": size[1], "v": digest.hexdigest()[:10]}
 
 
 def main():
-    only = {int(a) for a in sys.argv[1:]}
+    args = sys.argv[1:]
+    src = DECKS
+    if "--src" in args:
+        i = args.index("--src")
+        src = Path(args[i + 1]).resolve()
+        del args[i:i + 2]
+    only = {int(a) for a in args}
     found = {}
-    for f in sorted(DECKS.glob("*")):
-        if f.suffix.lower() not in (".pdf", ".zip"):
+    for f in sorted(src.glob("*")):
+        if not (f.is_dir() or f.suffix.lower() in (".pdf", ".zip")):
             continue
         day = day_of(f.name)
         if day is None:
@@ -112,10 +159,10 @@ def main():
     if only:
         found = {d: f for d, f in found.items() if d in only}
     if not found:
-        raise SystemExit("No decks to convert in decks/")
-    manifest = load_manifest()
+        raise SystemExit(f"No decks to convert in {src}")
+    manifest, redactions = load_manifest(), load_redactions()
     for day, f in sorted(found.items()):
-        manifest[day] = convert(day, f)
+        manifest[day] = convert(day, f, redactions.get(day, {}))
     write_manifest(manifest)
     print(f"Updated {MANIFEST.relative_to(ROOT)}")
 

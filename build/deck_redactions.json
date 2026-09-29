@@ -1,0 +1,23 @@
+{
+  "_about": "Areas of a day's deck pages that build/deck_pages.py blurs before publishing: real people's names, addresses, phone numbers, emails, VINs, plates, policy and claim numbers on sample documents shown in the decks. Keyed by day, then page; each area is [left, top, right, bottom] on the 1920 x 1080 page. When a deck changes (pages added, removed or reordered), check these pages again before converting.",
+  "2": {
+    "12": [[36, 12, 1190, 1068]],
+    "13": [[170, 80, 1460, 430]],
+    "14": [[580, 56, 1545, 96], [1370, 330, 1560, 850]],
+    "15": [[560, 148, 1545, 196], [150, 100, 320, 130]],
+    "16": [[160, 400, 470, 600], [1240, 380, 1920, 520]]
+  },
+  "3": {
+    "9": [[740, 88, 1046, 310], [1080, 88, 1386, 310], [740, 654, 1046, 876]],
+    "10": [[40, 180, 1900, 1075]]
+  },
+  "4": {
+    "19": [[830, 20, 1872, 1075]],
+    "20": [[580, 180, 1512, 250], [500, 480, 1480, 640]],
+    "26": [[820, 580, 1700, 640], [820, 730, 1700, 910]],
+    "31": [[916, 20, 1640, 1080]],
+    "32": [[126, 12, 1020, 940]],
+    "33": [[672, 20, 1500, 1058]],
+    "34": [[880, 176, 1646, 1048]]
+  }
+}

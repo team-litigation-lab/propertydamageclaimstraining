@@ -14,7 +14,8 @@
    To change a deck, paste the design's ID and view token from its share link
    (canva.com/design/<ID>/<TOKEN>/view) below.
 
-   Deck pages: once a day's deck is downloaded from Canva (PDF or PNGs) and
+   Deck pages: once a day's deck is captured from its view link
+   (build/capture_canva.cjs) or downloaded from Canva (PDF or PNGs), and
    converted with build/deck_pages.py, its pages are images in slides/dayN/
    (listed in js/deck-pages.js) and each page is its own step in place of the
    embed. Next → / ← Previous, ← →, and a click on the slide turn the pages
@@ -25,11 +26,11 @@
 (function(){
 "use strict";
 const PD_CANVA_DECKS = {
-  1: { id: "DAGnZmzOT0I", token: "MaqvKhpoKoqL7iFAPVMDDQ" },   // "Property Damage Claims DAY 1" (confirmed from the deck itself)
-  2: { id: "DAGnZtsWZN4", token: "4A-sEPwlF7uJHoS3UFH4ag" },   // Days 2-5: not yet confirmed from the decks
-  3: { id: "DAGnZixNtaM", token: "wfl-hPUxCpERG2cz1UBM0w" },
-  4: { id: "DAGna3Dh7Gs", token: "aToie10h2f6Wb-eNl2b03w" },
-  5: { id: "DAGnZuCPxiU", token: "V_PGqt3U1OeYHrJY5M_x0w" }
+  1: { id: "DAGnZmzOT0I", token: "MaqvKhpoKoqL7iFAPVMDDQ" },   // "Property Damage Claims DAY 1" (50 pages)
+  2: { id: "DAGnZtsWZN4", token: "4A-sEPwlF7uJHoS3UFH4ag" },   // "Property Damage Claims Day 2" (59)
+  3: { id: "DAGnZixNtaM", token: "wfl-hPUxCpERG2cz1UBM0w" },   // "Property Damage Day 3" (34)
+  4: { id: "DAGna3Dh7Gs", token: "aToie10h2f6Wb-eNl2b03w" },   // "Property Damage Claims DAY 4" (46)
+  5: { id: "DAGnZuCPxiU", token: "V_PGqt3U1OeYHrJY5M_x0w" }    // "Property Damage Claims Day 5" (40)
 };
 window.PD_CANVA_DECKS = PD_CANVA_DECKS;
 const deckFor = (dayId)=> PD_CANVA_DECKS[dayId] || null;
