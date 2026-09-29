@@ -134,7 +134,7 @@ s = re.sub(r'<script src="/js/cm-mindset\.js[^"]*"></script>\n?', '', s)
 rep_re(r'<script src="/js/cm-updates\.js\?v=[^"]*"></script>', '<script src="js/pd-updates.js?v=2"></script>')
 rep_re(r'<script src="/js/cm-documents\.js\?v=[^"]*"></script>', '<script src="js/pd-documents.js?v=1"></script>')
 rep_re(r'<script src="/js/cm-skillbuilders\.js\?v=[^"]*"></script>', '<script src="js/pd-skillbuilders.js?v=3"></script>')
-rep_re(r'<script src="/js/cm-practice\.js\?v=[^"]*"></script>', '<script src="js/pd-practice.js?v=1"></script>\n<script src="js/pd-canva.js?v=2"></script>')
+rep_re(r'<script src="/js/cm-practice\.js\?v=[^"]*"></script>', '<script src="js/pd-practice.js?v=1"></script>\n<script src="js/pd-canva.js?v=3"></script>\n<script src="js/slide-scripts/day1.js?v=1"></script>\n<script src="js/slide-scripts/day2.js?v=1"></script>\n<script src="js/slide-scripts/day3.js?v=1"></script>\n<script src="js/slide-scripts/day4.js?v=1"></script>\n<script src="js/slide-scripts/day5.js?v=1"></script>\n<script src="js/pd-scripts.js?v=1"></script>')
 # The admins' "🏠 Main Portal" button (js/portal-link.js, the same file in every LSH course):
 # drop any copy inherited from the CM page and add ours after the last script.
 s = re.sub(r'<script src="/?js/portal-link\.js[^"]*"></script>\n?', '', s)

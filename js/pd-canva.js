@@ -111,6 +111,19 @@ window.renderDaySlideContent = function(d, slide, idx){
     </div>`;
 };
 
+/* The deck is one embed that sizes itself to the slide: never split it into "pages" (a split would
+   hide it, reload it, and make Presenter view spend Next presses on phantom pages). */
+const __paginate = window.paginateLessonSlide;
+window.paginateLessonSlide = function(){
+  const wrap = document.getElementById("lessonSlideWrap");
+  if(wrap && wrap.querySelector(".pd-canva")){
+    state.slidePages = 1; state.slidePage = 0;
+    try{ updateSlidePageUi(); }catch(e){}
+    return;
+  }
+  return __paginate.apply(this, arguments);
+};
+
 /* On the deck, ← → turn Canva's pages (they'd otherwise skip to the next course step): the keys go
    to the deck, and Next moves on. */
 const onDeck = ()=> state.view==="day" && state.dayViewMode==="slides" && !!document.querySelector("#lessonSlideWrap .pd-canva iframe");
