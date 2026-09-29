@@ -131,7 +131,7 @@ replace_block("const QUICK_PRACTICE_TOPIC_IDS = [", "];", 'const QUICK_PRACTICE_
 
 # ---------- 3. scripts: the PD pack (relative paths, so the page also works from a subfolder) ----------
 s = re.sub(r'<script src="/js/cm-mindset\.js[^"]*"></script>\n?', '', s)
-rep_re(r'<script src="/js/cm-updates\.js\?v=[^"]*"></script>', '<script src="js/pd-updates.js?v=2"></script>')
+rep_re(r'<script src="/js/cm-updates\.js\?v=[^"]*"></script>', '<script src="js/pd-updates.js?v=3"></script>')
 rep_re(r'<script src="/js/cm-documents\.js\?v=[^"]*"></script>', '<script src="js/pd-documents.js?v=1"></script>')
 rep_re(r'<script src="/js/cm-skillbuilders\.js\?v=[^"]*"></script>', '<script src="js/pd-skillbuilders.js?v=3"></script>')
 rep_re(r'<script src="/js/cm-practice\.js\?v=[^"]*"></script>', '<script src="js/pd-practice.js?v=1"></script>\n<script src="js/pd-canva.js?v=4"></script>\n<script src="js/slide-scripts/day1.js?v=1"></script>\n<script src="js/slide-scripts/day2.js?v=1"></script>\n<script src="js/slide-scripts/day3.js?v=1"></script>\n<script src="js/slide-scripts/day4.js?v=1"></script>\n<script src="js/slide-scripts/day5.js?v=1"></script>\n<script src="js/deck-notes/day1.js?v=1"></script>\n<script src="js/pd-scripts.js?v=2"></script>')
