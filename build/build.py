@@ -135,10 +135,10 @@ rep_re(r'<script src="/js/cm-updates\.js\?v=[^"]*"></script>', '<script src="js/
 rep_re(r'<script src="/js/cm-documents\.js\?v=[^"]*"></script>', '<script src="js/pd-documents.js?v=1"></script>')
 rep_re(r'<script src="/js/cm-skillbuilders\.js\?v=[^"]*"></script>', '<script src="js/pd-skillbuilders.js?v=3"></script>')
 rep_re(r'<script src="/js/cm-practice\.js\?v=[^"]*"></script>', '<script src="js/pd-practice.js?v=1"></script>\n<script src="js/deck-pages.js?v=c9e7caaf"></script>\n<script src="js/pd-canva.js?v=7"></script>\n<script src="js/slide-scripts/day1.js?v=1"></script>\n<script src="js/slide-scripts/day2.js?v=1"></script>\n<script src="js/slide-scripts/day3.js?v=1"></script>\n<script src="js/slide-scripts/day4.js?v=1"></script>\n<script src="js/slide-scripts/day5.js?v=1"></script>\n<script src="js/deck-notes/day1.js?v=1"></script>\n<script src="js/pd-scripts.js?v=2"></script>')
-# The admins' "🏠 Main Portal" button (js/portal-link.js, the same file in every LSH course):
-# drop any copy inherited from the CM page and add ours after the last script.
-s = re.sub(r'<script src="/?js/portal-link\.js[^"]*"></script>\n?', '', s)
-rep('<script src="/js/daily-activities.js?v=1"></script>', '<script src="js/daily-activities.js?v=1"></script>\n<script src="js/portal-link.js?v=1"></script>')
+# The admins' "🏠 Main Portal" button (js/portal-link.js) and 🕘 Attendance (js/attendance.js), the same files in
+# every LSH course: drop any copy inherited from the CM page and add ours after the last script.
+s = re.sub(r'<script src="/?js/(portal-link|attendance)\.js[^"]*"></script>\n?', '', s)
+rep('<script src="/js/daily-activities.js?v=1"></script>', '<script src="js/daily-activities.js?v=1"></script>\n<script src="js/attendance.js?v=2"></script>\n<script src="js/portal-link.js?v=1"></script>')
 s = re.sub(r'var APP_BUILD = "pd-[^"]*";', f'var APP_BUILD = "pd-{datetime.date.today().isoformat().replace("-", ".")}-a";', s, count=1)
 
 open(OUT, "w", encoding="utf8").write(s)
