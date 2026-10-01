@@ -53,3 +53,7 @@ jobs:
           node .github/scripts/server.mjs 8787 > "$RUNNER_TEMP/server.log" 2>&1 &
           sleep 2
           node .github/scripts/smoke.cjs http://localhost:8787/ || { echo "--- server log ---"; cat "$RUNNER_TEMP/server.log"; exit 1; }
+      - name: Server requests (sparing, batched, none in the background)
+        env:
+          NODE_PATH: ${{ runner.temp }}/pw/node_modules
+        run: node .github/scripts/requests.cjs http://localhost:8787/ || { echo "--- server log ---"; cat "$RUNNER_TEMP/server.log"; exit 1; }
