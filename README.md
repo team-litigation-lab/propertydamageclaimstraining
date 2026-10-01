@@ -72,6 +72,26 @@ Trainers take each day's attendance in **Admin → 🕘 Attendance** (`js/attend
 - **Google Sheet:** the LSH Training Portal keeps the attendance Google Sheet's **Platform Attendance** tab in step, both ways: everything here (automatic Time Ins included) goes to the sheet every 15 minutes, and edits made in the sheet to Training, Time In, Time Out, Status or Notes come back here straight away. See the Training Portal's README.
 - **Storage:** `attendance:<batch key>:<YYYY-MM-DD>` (`_none` for no batch) = `{batch, date, day, training, rows:{<trainee id>:{name, training, timeIn, timeOut, status, note, at, by}}}`, under the Worker's `pd:` prefix. The Worker's `/api/checkin` records the automatic Time In: `checkin:<YYYY-MM-DD>:<trainee id>` = `{timeIn, at, name, batch, training}` is the automatic Time In (each trainee's own key, so a room signing in at once never overwrites one another; its KV metadata carries the same for the portal; kept 40 days). Only admins can read or write these records.
 
+## 📉 Staying under Cloudflare's monthly request limit
+
+The Cloudflare account is on **Workers Paid**: **10 million requests a month** for every Worker and Pages Function on the account, shared by every LSH site (this course's Worker, meaning everything under `/api/` and `/version`, plus the other courses, the CMS and the Training Portal). Static files (the page, `js/`, images, documents) don't count. Before the account reaches the limit, the EA/PA course's **Request budget** workflow (EA-PA-TRAINING, `.github/workflows/request-budget.yml`) switches the sites' servers off, this one included, until the next billing month. Usage is under **Workers & Pages** in the Cloudflare dashboard.
+
+So an open page asks the server sparingly (`POLL` in `index.html`, the same as the EA/PA course), and not at all while its tab is in the background. When it's back, whatever came due runs then; a quick look at another tab (Google Meet) asks nothing:
+
+| What | How often | Before |
+|---|---|---|
+| A trainee's access and the day's task (`startApprovalPolling`) | every minute: their record, read once (and the day's task on the dashboard) | every 45 s, the record read twice, also in the background |
+| A Skill Builders attempt reset (`liveTick`) | every minute (the minute check above counts) | every 10 s |
+| Trainer feedback and Focus items | every 2 minutes | every 45 s |
+| Waiting for approval | every 15 s | every 8 s |
+| Admin: Trainee Audit, Rankings, Trainee Feedback | every minute, every record in one request | every 30 s, one request per trainee |
+| A new version (`/version`) | every 3 minutes (a new build is confirmed 20 s later) | every 45 s, also in the background |
+| The facilitator voice for AI feedback | every 10 minutes, only while the tab is in view | every 10 minutes |
+
+That's about 3 requests a minute for an open trainee page (it was about 12), and about 2 for an admin on the Trainee Audit, however many trainees there are (it was about 2 per trainee).
+
+Lists of records (the Trainee Audit, Trainee Feedback, attendance, and every day's add-on lessons and activities when the page opens) are read with `/api/storage/get-many` (up to 100 keys; for each key, the same rules and `pd:` prefix as `/api/storage/get`), not one request per record. A trainee is signed out as revoked only when the server answers that their record is gone or not approved: a server that doesn't answer (offline, or over a limit) no longer signs anyone out.
+
 ## Building
 
 `index.html` is generated from the **Case Management course's** `index.html` (Case-Management-Training, last built from its `main` at `f02d92c`). That page is itself generated from the EA/PA portal, so the chain is EA/PA → CM → PD. To pick up engine changes:
@@ -93,6 +113,7 @@ python3 build/build.py ../Case-Management-Training/index.html      # path to the
 - every claim document and handout exists, and every document packet points at a real document (`check-data.mjs`)
 - `wrangler deploy --dry-run`
 - a browser smoke test that signs in and renders every slide, Knowledge Check, page and Skill Builder part at desktop and phone width (`smoke.cjs`)
+- server requests (`requests.cjs`): `get-many` gives a trainee only their own and public records and an Admin every one, reads under the `pd:` prefix, and refuses more than 100 keys. With the checks sped up, a trainee's page loads every day's content in one request, reads their record and the day's task about once per check, checks for a new version rarely, and asks nothing while the tab is in the background (catching up when it's back) or on a quick switch to another tab and back. A server that doesn't answer doesn't sign the trainee out; a revoke does. The Trainee Audit and Trainee Feedback read every record in two requests.
 
 To run them locally:
 
@@ -101,9 +122,10 @@ node .github/scripts/check-site.mjs
 node .github/scripts/check-data.mjs
 node .github/scripts/server.mjs 8787 &
 node .github/scripts/smoke.cjs http://localhost:8787/
+node .github/scripts/requests.cjs http://localhost:8787/
 ```
 
-The smoke test needs Playwright.
+The smoke and requests tests need Playwright.
 
 ## Deploy (Cloudflare Workers)
 

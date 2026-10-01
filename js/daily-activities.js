@@ -64,8 +64,14 @@ async function daLoad(force){
   const s = daState();
   if(!force && s.loadedAt && Date.now() - s.loadedAt < 60000) return;
   s.loading = true;
-  await Promise.all(DAYS.map(async d => { try{ s.byDay[d.id] = (await sharedGet("activities:day" + d.id)) || {items:[]}; }catch(e){ /* keep the last copy */ } }));
-  if(state.traineeId && !state.isAdmin){ try{ s.subs = (await sharedGet("actsub:" + state.traineeId)) || {items:{}}; }catch(e){ s.subs = s.subs || {items:{}}; } }
+  // Every day's activities (and a trainee's own answers) in one request: every /api/ request counts.
+  const mine = state.traineeId && !state.isAdmin ? "actsub:" + state.traineeId : "";
+  const keys = DAYS.map(d => "activities:day" + d.id).concat(mine ? [mine] : []);
+  let got = null; try{ got = await sharedGetMany(keys); }catch(e){ /* keep the last copy */ }
+  if(got){
+    DAYS.forEach((d, i) => { s.byDay[d.id] = got[i] || {items:[]}; });
+    if(mine) s.subs = got[DAYS.length] || {items:{}};
+  }else if(mine) s.subs = s.subs || {items:{}};
   s.loadedAt = Date.now(); s.loading = false;
 }
 function daMySub(actId){ const s = daState(); return (s.subs && s.subs.items && s.subs.items[actId]) || null; }
@@ -468,7 +474,7 @@ if(typeof feedbackPrompt === "function"){
   window.feedbackPrompt = function(){ return __fbFeedbackPrompt.apply(this, arguments) + fbStyleBlock(); };
 }
 setTimeout(() => { if(state.traineeId || state.isAdmin) fbEnsureStyle(); }, 2500);
-setInterval(() => { if(state.traineeId || state.isAdmin) fbEnsureStyle(true); }, 10 * 60000);
+setInterval(() => { if((state.traineeId || state.isAdmin) && document.visibilityState !== "hidden") fbEnsureStyle(true); }, 10 * 60000);   // not while the tab is in the background: every /api/ request counts
 
 function fbSampleText(fb){
   const part = (h, arr) => (arr || []).length ? `${h}\n${arr.map(x => "- " + x).join("\n")}` : "";

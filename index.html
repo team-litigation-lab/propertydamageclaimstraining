@@ -5354,6 +5354,27 @@ async function sharedList(prefix){
   // one a given write happened to land in historically.
   return [...new Set([...fromWindowStorage, ...fromKv])];
 }
+// Several shared records in one request (/api/storage/get-many), in the order asked (null when
+// missing or not allowed). Every /api/ request counts toward Cloudflare's Worker requests for the
+// whole account (shared with the other LSH sites), so a list of records is fetched this way, not
+// one request per record. A server that doesn't know get-many yet gets them one at a time.
+async function sharedGetMany(keys){
+  keys = (keys||[]).map(k=>typeof k==="string" ? k : (k && k.key)).filter(Boolean);
+  if(!keys.length) return [];
+  if(window.storage) return Promise.all(keys.map(k=>sharedGet(k).catch(()=>null)));
+  const out = [];
+  for(let i = 0; i < keys.length; i += 100){
+    const part = keys.slice(i, i+100);
+    let values = null;
+    try{
+      const response = await authFetch("/api/storage/get-many", { keys: part });
+      if(response.status===404){ out.push(...await Promise.all(part.map(k=>sharedGet(k).catch(()=>null)))); continue; }
+      if(response.ok) values = (await response.json()).values || {};
+    }catch(e){ values = null; }
+    part.forEach(k=>{ let v = null; try{ v = values && values[k] ? JSON.parse(values[k]) : null; }catch(e){ v = null; } out.push(v); });
+  }
+  return out;
+}
 async function sharedDelete(key){
   let deletedAnywhere = false;
   try{
@@ -6960,7 +6981,7 @@ async function loadTraineeRanking(force){
     let recs;
     const rr = await authFetch("/api/ranking", {});
     if(rr.ok){ const j = await rr.json(); recs = (j.trainees||[]).map(x=>Object.assign({}, x, {id: x.me ? state.traineeId : ("other-"+Math.random().toString(36).slice(2))})); }
-    else{ const keys = await sharedList("trainee:"); recs = (await Promise.all(keys.map(k=>sharedGet(k).catch(()=>null)))).filter(Boolean); }
+    else{ const keys = await sharedList("trainee:"); recs = (await sharedGetMany(keys)).filter(Boolean); }
     const me = recs.find(x=>x.id===state.traineeId);
     const batch = cleanBatch((me && me.batch) || state.traineeBatch);
     const pool = recs.filter(x=>x.approved===true && !x.archived && (!batch || cleanBatch(x.batch)===batch));
@@ -8349,47 +8370,66 @@ async function forceRevokedLogout(){
   render();
   toast("Your access to this program has been revoked. Contact your trainer if you believe this is a mistake.");
 }
+// How often an open page asks the server. Every /api/ request counts toward the Cloudflare account's
+// Worker requests (Workers Paid: 10 million a month, shared by every LSH site), so checks pause while
+// the tab is in the background and catch up when it comes back. (window.EAPA_POLL lets the tests run
+// them faster; the name is shared with the EA/PA course's checks.)
+const POLL = Object.assign({ live: 15000, approval: 60000, labReset: 60000, feedback: 120000, admin: 60000, update: 180000, updateConfirm: 20000 }, window.EAPA_POLL || {});
 function startApprovalPolling(traineeId){
   // Catches a mid-session revoke: without this, an already-open, already-approved
   // session has no way to learn its access was pulled until the trainee happens
   // to refresh — this check runs in the background so revocation takes effect
   // even if they never do. Also doubles as the live-broadcast check for a
   // freshly-injected surprise task, so it appears without needing a refresh.
+  // Once a minute while the page is in view (and on coming back to it, when one is due).
   if(state.approvalPollInterval) clearInterval(state.approvalPollInterval);
-  state.approvalPollInterval = setInterval(async ()=>{
-    if(state.traineeId !== traineeId) return; // a different trainee logged in since this was scheduled
+  state.approvalPollId = traineeId;
+  state.approvalPolledAt = Date.now();   // signing in just read their record
+  state.approvalPollInterval = setInterval(()=>{ if(document.visibilityState!=="hidden") approvalPollTick(traineeId); }, POLL.approval);
+  if(!state.approvalPollWatch){
+    state.approvalPollWatch = true;
+    document.addEventListener("visibilitychange", ()=>{
+      if(document.visibilityState==="visible" && state.approvalPollInterval && Date.now()-(state.approvalPolledAt||0) >= POLL.approval) approvalPollTick(state.approvalPollId);
+    });
+  }
+}
+async function approvalPollTick(traineeId){
+  if(state.traineeId !== traineeId) return; // a different trainee logged in since this was scheduled
+  state.approvalPolledAt = Date.now();
+  // Only an answer from the server signs them out (record gone, or not approved): a server that
+  // doesn't answer (offline, or a Cloudflare limit: 429) throws here, and the next check tries again.
+  let me;
+  try{ me = await sharedGetStrict("trainee:"+traineeId); }catch(e){ return; }
+  if(state.traineeId !== traineeId) return;
+  if(!me || me.approved !== true){
+    await forceRevokedLogout();
+    return;
+  }
+  state.liveResetAt = Date.now();   // the record was just read: liveTick needn't read it again for a while
+  try{
+    if(await applyLabAttemptReset(me)) await showLabAttemptReset();
+  }catch(e){ /* best-effort */ }
+  if(state.view==="dashboard" && !state.surpriseGrading){
     try{
-      const status = await getApprovalStatus(traineeId);
-      if(status !== "approved"){
-        await forceRevokedLogout();
-        return;
-      }
-    }catch(e){ /* transient network issue — try again next interval, don't force a logout on a fetch failure */ }
-    try{
-      const me = await sharedGet("trainee:"+traineeId);
-      if(await applyLabAttemptReset(me)) await showLabAttemptReset();
+      const before = surpriseTaskSignature();
+      await checkSurpriseTask();
+      const ae = document.activeElement;
+      const typing = ae && (ae.tagName==="TEXTAREA" || ae.tagName==="INPUT");
+      if(before !== surpriseTaskSignature() && !typing && state.view==="dashboard") render();
     }catch(e){ /* best-effort */ }
-    if(state.view==="dashboard" && !state.surpriseGrading){
-      try{
-        const before = surpriseTaskSignature();
-        await checkSurpriseTask();
-        const ae = document.activeElement;
-        const typing = ae && (ae.tagName==="TEXTAREA" || ae.tagName==="INPUT");
-        if(before !== surpriseTaskSignature() && !typing && state.view==="dashboard") render();
-      }catch(e){ /* best-effort */ }
-    }
-  }, 45000);
+  }
 }
 
 
 /* ============================================================
    LIVE UPDATES — the page refreshes itself, no reload needed.
-   • Waiting for approval: checks every 8s; opens the portal the
+   • Waiting for approval: checks every 15s; opens the portal the
      moment an admin approves (or shows the decision if declined).
    • Trainees: new trainer feedback and Focus items appear within
-     ~45s; a Skill Builders attempt reset within ~10s.
+     ~2 min; a Skill Builders attempt reset within ~1 min.
    • Admins: Trainee Audit / Rankings / Trainee Feedback pick up new
-     registrations and progress every 30s (never while you're typing).
+     registrations and progress every minute (never while you're typing).
+   (POLL above: every /api/ request counts toward Cloudflare's limit.)
    Polling pauses while the tab is hidden and catches up on return.
    ============================================================ */
 let liveTimer = null;
@@ -8412,12 +8452,12 @@ async function liveTick(){
     // 2) signed-in trainee: trainer feedback + focus items
     if(state.traineeId && !state.isAdmin && state.view!=="login"){
       await renderLabResetIfSafe();
-      if(!state.liveResetAt || Date.now()-state.liveResetAt > 10000){
+      if(!state.liveResetAt || Date.now()-state.liveResetAt > POLL.labReset){
         state.liveResetAt = Date.now();
         const me = await sharedGet("trainee:"+state.traineeId);
         if(await applyLabAttemptReset(me)) await showLabAttemptReset();
       }
-      if(!state.liveFbAt || Date.now()-state.liveFbAt > 45000){
+      if(!state.liveFbAt || Date.now()-state.liveFbAt > POLL.feedback){
         state.liveFbAt = Date.now();
         const beforeFb = JSON.stringify(state.myFeedback||{}), beforeFo = JSON.stringify((state.myFocus||{}).items||[]);
         await loadMyFeedbackCore();
@@ -8435,7 +8475,7 @@ async function liveTick(){
     }
     // 3) admin screens
     if(state.isAdmin && state.view==="admin" && ["audit","rankings","tfeedback"].includes(state.adminTab||"audit")){
-      if(!state.liveAdminAt || Date.now()-state.liveAdminAt > 30000){
+      if(!state.liveAdminAt || Date.now()-state.liveAdminAt > POLL.admin){
         state.liveAdminAt = Date.now();
         if(isTyping() || document.querySelector(".overlay")) return;
         if((state.adminTab||"audit")==="tfeedback"){ const before = JSON.stringify((state.tfbAdmin||{}).items||[]); const keep = state.tfbAdmin; await loadTraineeFeedbackAdmin(); if(before===JSON.stringify((state.tfbAdmin||{}).items||[])) state.tfbAdmin = keep; return; }
@@ -8453,31 +8493,35 @@ async function liveTick(){
 }
 async function loadAdminLedgerQuiet(){
   const keys = await sharedList("trainee:");
-  const records = [];
-  for(const k of keys){ const rec = await sharedGet(typeof k==="string" ? k : k.key); if(rec) records.push(rec); }
-  state.adminData = records;
+  state.adminData = (await sharedGetMany(keys)).filter(Boolean);
 }
 function startLiveUpdates(){
   if(liveTimer) return;
-  liveTimer = setInterval(liveTick, 8000);
-  document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible"){ state.liveFbAt = 0; state.liveAdminAt = 0; state.liveResetAt = 0; liveTick(); } });
+  liveTimer = setInterval(liveTick, POLL.live);
+  // Back in view: whatever came due while the tab was in the background runs now (a quick look away doesn't re-read anything).
+  document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") liveTick(); });
 }
 
 /* ============================================================
-   AUTO-UPDATE — checks every 45 seconds (and when the tab comes back
-   into view) whether a newer build has been deployed. If so, it saves
+   AUTO-UPDATE — checks every 3 minutes while the tab is in view (and
+   when it comes back into view, if the last check was a minute or more
+   ago) whether a newer build has been deployed; a new build is confirmed
+   by a second look 20s later. If so, it saves
    everything and reloads by itself at a safe moment — never mid-call,
    mid-quiz, while typing or with a pop-up open. Until then a banner
    offers "Update now". After reloading, the user lands where they were.
    ============================================================ */
 let updateTimer = null, updatePendingBuild = null;
+let lastUpdateCheckAt = 0, candidateBuild = "";
 async function checkForUpdate(){
+  lastUpdateCheckAt = Date.now();
   try{
     const r = await fetch("/version?ts="+Date.now(), {cache:"no-store"});
     if(!r.ok) return;
     const txt = await r.text();
     const m = txt.match(/Portal build deployed:\s*([0-9.]+-[a-z0-9]+)/i);
-    if(!m || m[1]===APP_BUILD) return;
+    if(!m || m[1]===APP_BUILD){ candidateBuild = ""; return; }
+    if(m[1]!==candidateBuild){ candidateBuild = m[1]; setTimeout(checkForUpdate, POLL.updateConfirm); return; }   // seen once: confirmed by a second look shortly after
     updatePendingBuild = m[1];
     showUpdateBanner();
     tryAutoUpdate();
@@ -8528,9 +8572,9 @@ setInterval(()=>{ if(state.isAdmin && document.visibilityState==="visible" && !i
 setTimeout(()=>{ if(state.isAdmin) autoPublishBlueprint(); }, 15000);
 function startUpdateChecks(){
   if(updateTimer) return;
-  updateTimer = setInterval(()=>{ if(updatePendingBuild) tryAutoUpdate(); else checkForUpdate(); }, 45000);
+  updateTimer = setInterval(()=>{ if(updatePendingBuild) tryAutoUpdate(); else if(document.visibilityState!=="hidden") checkForUpdate(); }, POLL.update);
   setInterval(()=>{ if(updatePendingBuild) tryAutoUpdate(); }, 15000);
-  document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible"){ if(updatePendingBuild) tryAutoUpdate(); else checkForUpdate(); } });
+  document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible"){ if(updatePendingBuild) tryAutoUpdate(); else if(Date.now()-lastUpdateCheckAt >= 60000) checkForUpdate(); } });
   setTimeout(checkForUpdate, 20000);
 }
 window.applyUpdate = applyUpdate;
@@ -12863,11 +12907,12 @@ window.adminLogout = adminLogout;
 
 async function loadAdminLedger(){
   state.adminLoading = true;
-  const keys = await sharedList("trainee:");
+  const keys = (await sharedList("trainee:")).map(k=>typeof k === "string" ? k : k.key);
+  const all = await sharedGetMany(keys);
   const records = [];
-  for(const k of keys){
-    const key = typeof k === "string" ? k : k.key;
-    const rec = await sharedGet(key);
+  for(let i = 0; i < keys.length; i++){
+    const key = keys[i];
+    const rec = all[i];
     if(!rec) continue;
     const badName = rec.name && !cleanName(rec.name);
     const badBatch = rec.batch && !cleanBatch(rec.batch);
@@ -13102,7 +13147,7 @@ function renderQuickDayFeedback(dayId){
 async function loadTraineeFeedbackAdmin(){
   state.tfbAdmin = {loading:true, items:[]};
   const keys = await sharedList("tfeedback:");
-  const items = (await Promise.all(keys.map(k=>sharedGet(k).catch(()=>null)))).filter(Boolean).sort((a,b)=>(b.at||"").localeCompare(a.at||""));
+  const items = (await sharedGetMany(keys)).filter(Boolean).sort((a,b)=>(b.at||"").localeCompare(a.at||""));
   state.tfbAdmin = {items};
   if(state.view==="admin" && state.adminTab==="tfeedback") render();
 }
@@ -14609,13 +14654,17 @@ function mergeExtraLessons(d){
   (state.extraLessons[d.id]||[]).filter(l=>l.status==="published").forEach(l=>d.lessons.push(Object.assign({}, l, {__extra:true})));
 }
 async function loadPublishedContent(){
-  await Promise.all(DAYS.map(async d=>{
+  // Every day's add-on content in one request (every /api/ request counts), not three per day.
+  let got = [];
+  try{ got = await sharedGetMany(DAYS.flatMap(d=>["lessonx:day"+d.id, "extralessons:day"+d.id, "extraquiz:day"+d.id])); }catch(err){ got = []; }
+  DAYS.forEach((d, i)=>{
     try{
-      const e = await sharedGet("lessonx:day"+d.id); if(e && typeof e==="object") state.lessonExp[d.id] = e;
-      const x = await sharedGet("extralessons:day"+d.id); if(x && Array.isArray(x.lessons)){ state.extraLessons[d.id] = x.lessons; mergeExtraLessons(d); }
-      const q = await sharedGet("extraquiz:day"+d.id); if(q && Array.isArray(q.questions)){ state.extraQuiz = state.extraQuiz||{}; state.extraQuiz[d.id] = q.questions; mergeExtraQuiz(d); }
+      const e = got[3*i], x = got[3*i+1], q = got[3*i+2];
+      if(e && typeof e==="object") state.lessonExp[d.id] = e;
+      if(x && Array.isArray(x.lessons)){ state.extraLessons[d.id] = x.lessons; mergeExtraLessons(d); }
+      if(q && Array.isArray(q.questions)){ state.extraQuiz = state.extraQuiz||{}; state.extraQuiz[d.id] = q.questions; mergeExtraQuiz(d); }
     }catch(err){ /* add-on content is optional */ }
-  }));
+  });
   state.contentLoaded = true;
 }
 function lessonExpansion(d, l){
