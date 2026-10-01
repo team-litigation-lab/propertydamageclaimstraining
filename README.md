@@ -105,6 +105,16 @@ python3 build/build.py ../Case-Management-Training/index.html      # path to the
 
 **Content source:** the topics, Quick Checks and Knowledge Checks were written for this build from standard PI-firm PD claims practice; the slides trainees see are the Canva decks (Day 1 is the deck titled "Property Damage Claims DAY 1"; Days 2–5 are still to be confirmed from the decks). The decks couldn't be opened from the build environment, so before the first live batch, check that each day's deck is the right one and that the Quick Checks and Knowledge Check questions in `build/day1.js`–`day5.js` match what the deck teaches.
 
+## 📊 Server request meter
+
+Admins see how much of the month's server requests is used, on every LSH site's admin side: a small chip in the bottom-left corner once signed in to 🛡 Admin. 🟢 on track; 🟠 from 75%, or when this month's pace reaches the limit before the allowance resets; 🔴 from 90%; 🟥 paused (the limit was reached); ⚪ not set up yet, or no recent numbers. When it's amber or red, a note appears above the chip; click the chip for the total, the projection, each day and each site.
+
+- The numbers come from the Request budget workflow in EA-PA-TRAINING (README there → *Monthly request budget* and *Server request meter*), which saves them to KV (`_request-usage`, the same key for every LSH site, so it's read without this course's key prefix).
+- This site's server answers its admins with them: `POST /api/request-budget` (admins only, `worker.js`).
+- The meter is `js/request-budget.js`, **the same file in every LSH platform** (change it in EA-PA-TRAINING and copy it here). It asks once when an admin opens the page, then every 15 minutes while the tab is in view.
+- `index.html` loads it next to the other scripts at the end of the page. If `index.html` is rebuilt from a page that doesn't load it yet, carry those lines over again: `request-meter.cjs` fails until you do.
+- Tests: `.github/scripts/request-meter-widget.cjs` (the meter itself; the same test in every platform) and `.github/scripts/request-meter.cjs` (this site: admins only, one request).
+
 ## Checks
 
 `.github/workflows/checks.yml` runs on every pull request and every push to `main`:
@@ -114,6 +124,7 @@ python3 build/build.py ../Case-Management-Training/index.html      # path to the
 - `wrangler deploy --dry-run`
 - a browser smoke test that signs in and renders every slide, Knowledge Check, page and Skill Builder part at desktop and phone width (`smoke.cjs`)
 - server requests (`requests.cjs`): `get-many` gives a trainee only their own and public records and an Admin every one, reads under the `pd:` prefix, and refuses more than 100 keys. With the checks sped up, a trainee's page loads every day's content in one request, reads their record and the day's task about once per check, checks for a new version rarely, and asks nothing while the tab is in the background (catching up when it's back) or on a quick switch to another tab and back. A server that doesn't answer doesn't sign the trainee out; a revoke does. The Trainee Audit and Trainee Feedback read every record in two requests.
+- the server request meter (`.github/scripts/request-meter-widget.cjs`, `request-meter.cjs`): only admins see it and only their pages ask for it, once on opening; `/api/request-budget` refuses trainees; every level of the meter shows as it should; a background tab asks nothing.
 
 To run them locally:
 
@@ -123,6 +134,8 @@ node .github/scripts/check-data.mjs
 node .github/scripts/server.mjs 8787 &
 node .github/scripts/smoke.cjs http://localhost:8787/
 node .github/scripts/requests.cjs http://localhost:8787/
+node .github/scripts/request-meter-widget.cjs js/request-budget.js
+node .github/scripts/request-meter.cjs http://localhost:8787/
 ```
 
 The smoke and requests tests need Playwright.
