@@ -17539,5 +17539,6 @@ window.addEventListener("error", (ev)=>{ if(state.isAdmin && ev && ev.message &&
    (shared by every LSH site) is used. README → Server request meter. */
 RequestBudget.start({ load: () => authFetch("/api/request-budget", {}).then(r => r.json()), isAdmin: () => !!state.isAdmin });
 </script>
+<script src="/js/portal-link.js?v=2"></script>
 </body>
 </html>
