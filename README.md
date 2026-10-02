@@ -74,7 +74,7 @@ Trainers take each day's attendance in **Admin → 🕘 Attendance** (`js/attend
 
 ## 📉 Staying under Cloudflare's monthly request limit
 
-The Cloudflare account is on **Workers Paid**: **10 million requests a month** for every Worker and Pages Function on the account, shared by every LSH site (this course's Worker, meaning everything under `/api/` and `/version`, plus the other courses, the CMS and the Training Portal). Static files (the page, `js/`, images, documents) don't count. Before the account reaches the limit, the EA/PA course's **Request budget** workflow (EA-PA-TRAINING, `.github/workflows/request-budget.yml`) switches the sites' servers off, this one included, until the next billing month. Usage is under **Workers & Pages** in the Cloudflare dashboard.
+The Cloudflare account is on **Workers Paid**: **10 million requests a month** for every Worker and Pages Function on the account, shared by every LSH site (this course's Worker, meaning everything under `/api/` and `/version`, plus the other courses, the CMS and the Training Portal). Static files (the page, `js/`, images, documents) don't count. Past the limit, Cloudflare charges for every extra million requests. Usage is under **Workers & Pages** in the Cloudflare dashboard.
 
 So an open page asks the server sparingly (`POLL` in `index.html`, the same as the EA/PA course), and not at all while its tab is in the background. When it's back, whatever came due runs then; a quick look at another tab (Google Meet) asks nothing:
 
@@ -92,6 +92,17 @@ That's about 3 requests a minute for an open trainee page (it was about 12), and
 
 Lists of records (the Trainee Audit, Trainee Feedback, attendance, and every day's add-on lessons and activities when the page opens) are read with `/api/storage/get-many` (up to 100 keys; for each key, the same rules and `pd:` prefix as `/api/storage/get`), not one request per record. A trainee is signed out as revoked only when the server answers that their record is gone or not approved: a server that doesn't answer (offline, or over a limit) no longer signs anyone out.
 
+## 🧭 Orientation and the Blueprints
+
+Admins have **🧭 Orientation** in the top bar, with two tabs:
+- **🧭 Trainee blueprint:** the Orientation deck, to share on day one. It's also `/blueprint.pdf`, in trainees' Handouts.
+  - **It republishes itself after every deploy.** The published copy is matched against `APP_BUILD` and the Worker's deployment id (`/version`, from `version_metadata` in `wrangler.json`). The first admin page open after a deploy rebuilds it.
+  - Its opening, roadmap and dashboard slides say 5 days and describe this course. `js/blueprint-content.js` rewrites the shared engine's EA/PA wording when the slides are drawn, so a rebuild of `index.html` keeps it.
+- **🛠 Trainer blueprint** (admins only, never at a public address): a cover and 11 slides on running the course. It covers signing in, the Trainee Audit, day feedback, surprise tasks and roleplays, the Claim File and the documents' 🔑 audit keys, Practice and the Skill Builders, Presenter view and the decks, SOP Reference and Trainer Cues, Batch Folders, Rankings and Content Studio, Activities and the feedback style, Attendance and Trainee view.
+  - **⬇ Download PDF:** a landscape PDF, one page per slide, stamped with the build and the deployment.
+  - **Files:** the slides are in `js/blueprint-content.js`. `js/lsh-blueprint.js` is the same file on every LSH platform, and `js/lsh-blueprint-course.js` is the same on every LSH course: copy them from EA-PA-TRAINING when they change there.
+  - **Test:** `.github/scripts/blueprint.cjs`.
+
 ## Building
 
 `index.html` is generated from the **Case Management course's** `index.html` (Case-Management-Training, last built from its `main` at `f02d92c`). That page is itself generated from the EA/PA portal, so the chain is EA/PA → CM → PD. To pick up engine changes:
@@ -105,15 +116,6 @@ python3 build/build.py ../Case-Management-Training/index.html      # path to the
 
 **Content source:** the topics, Quick Checks and Knowledge Checks were written for this build from standard PI-firm PD claims practice; the slides trainees see are the Canva decks (Day 1 is the deck titled "Property Damage Claims DAY 1"; Days 2–5 are still to be confirmed from the decks). The decks couldn't be opened from the build environment, so before the first live batch, check that each day's deck is the right one and that the Quick Checks and Knowledge Check questions in `build/day1.js`–`day5.js` match what the deck teaches.
 
-## 📊 Server request meter
-
-Admins see how much of the month's server requests is used, on every LSH site's admin side: a small chip in the bottom-left corner once signed in to 🛡 Admin. 🟢 on track; 🟠 from 75%, or when this month's pace reaches the limit before the allowance resets; 🔴 from 90%; 🟥 paused (the limit was reached); ⚪ not set up yet, or no recent numbers. When it's amber or red, a note appears above the chip; click the chip for the total, the projection, each day and each site.
-
-- The numbers come from the Request budget workflow in EA-PA-TRAINING (README there → *Monthly request budget* and *Server request meter*), which saves them to KV (`_request-usage`, the same key for every LSH site, so it's read without this course's key prefix).
-- This site's server answers its admins with them: `POST /api/request-budget` (admins only, `worker.js`).
-- The meter is `js/request-budget.js`, **the same file in every LSH platform** (change it in EA-PA-TRAINING and copy it here). It asks once when an admin opens the page, then every 15 minutes while the tab is in view.
-- `index.html` loads it next to the other scripts at the end of the page. If `index.html` is rebuilt from a page that doesn't load it yet, carry those lines over again: `request-meter.cjs` fails until you do.
-- Tests: `.github/scripts/request-meter-widget.cjs` (the meter itself; the same test in every platform) and `.github/scripts/request-meter.cjs` (this site: admins only, one request).
 
 ## Checks
 
@@ -124,7 +126,6 @@ Admins see how much of the month's server requests is used, on every LSH site's 
 - `wrangler deploy --dry-run`
 - a browser smoke test that signs in and renders every slide, Knowledge Check, page and Skill Builder part at desktop and phone width (`smoke.cjs`)
 - server requests (`requests.cjs`): `get-many` gives a trainee only their own and public records and an Admin every one, reads under the `pd:` prefix, and refuses more than 100 keys. With the checks sped up, a trainee's page loads every day's content in one request, reads their record and the day's task about once per check, checks for a new version rarely, and asks nothing while the tab is in the background (catching up when it's back) or on a quick switch to another tab and back. A server that doesn't answer doesn't sign the trainee out; a revoke does. The Trainee Audit and Trainee Feedback read every record in two requests.
-- the server request meter (`.github/scripts/request-meter-widget.cjs`, `request-meter.cjs`): only admins see it and only their pages ask for it, once on opening; `/api/request-budget` refuses trainees; every level of the meter shows as it should; a background tab asks nothing.
 
 To run them locally:
 
@@ -133,9 +134,8 @@ node .github/scripts/check-site.mjs
 node .github/scripts/check-data.mjs
 node .github/scripts/server.mjs 8787 &
 node .github/scripts/smoke.cjs http://localhost:8787/
+node .github/scripts/blueprint.cjs http://localhost:8787/
 node .github/scripts/requests.cjs http://localhost:8787/
-node .github/scripts/request-meter-widget.cjs js/request-budget.js
-node .github/scripts/request-meter.cjs http://localhost:8787/
 ```
 
 The smoke and requests tests need Playwright.
