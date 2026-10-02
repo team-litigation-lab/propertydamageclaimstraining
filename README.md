@@ -1,5 +1,13 @@
 # LSH Property Damage Claims Training (5-Day)
 
+## 🔐 Sign in on the Main Portal only
+
+Trainees and admins sign in once, on the LSH Training Portal, and open this program from there. The Portal sends them here with a signed, short-lived ticket (`?ticket=…`); `js/portal-gate.js` posts it to `/api/auth/portal`, and the Worker signs a trainee in (same `trainee:<id>` records, so every current registration, progress and approval is kept) or an administrator in (their ticket is `{r: "a", exp}`: no passphrase again). Someone who opens this site's link directly sees a note with a **Go to the LSH Training Portal** button instead of the form, and the Worker refuses a name + batch typed here (403 `portal-required`), except to renew the session of a trainee already signed in on that device. The admin passphrase stays under *Sign in with your passphrase* for the direct link.
+
+- **Turning it on:** set `PORTAL_SSO_SECRET` (same value as the Portal) as a Worker secret. The admin password (`ADMIN_PASSPHRASE`, or `MASTER_ADMIN_PASSWORD`, the Portal's master admin password) must be set too. Until both are set, `/api/auth/status` reports `portalOnly: false` and the old name + batch form stays. A space or line break around the secret is ignored.
+- **If a Portal launch fails:** the message says why: `bad-signature` means the Portal's and this Worker's `PORTAL_SSO_SECRET` differ; "expired" means the link is old (open the program again from the Portal).
+- **Ticket format and engine hooks:** see EA-PA-TRAINING's README (*Sign in on the Main Portal only*). `js/portal-gate.js` is the same file in every LSH course repo; the page is built from the EA-PA-TRAINING engine, which carries the hooks.
+
 The Property Damage (PD) version of the LSH training portal, for PD Specialists at personal-injury law firms. It runs on the same engine as the EA/PA and Case Management portals (sign-in and approvals, lessons as slides, Knowledge Checks, the random Task simulator, AI-graded practice, Live Roleplay, Presenter view, SOP run of show, feedback, rankings, certificates and admin tools). All the content is property damage, built around one running claim.
 
 It is a separate training module with its own repository and its own Cloudflare Worker, like the Case Management course. Live at https://propertydamageclaimstraining.legalsupporthelp.workers.dev/ and listed on the LSH Training Portal's Training Index as **Property Damage Claims Training**. It started in a folder of EA-PA-TRAINING and moved here.
