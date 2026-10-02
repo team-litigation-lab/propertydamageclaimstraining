@@ -307,15 +307,6 @@ async function checkIn(kv, id, training) {
   return { ok: true, date: et.date, timeIn: v.timeIn };
 }
 
-/* The month's server requests for the admin pages' meter (js/request-budget.js), as the Request budget
-   workflow (EA-PA-TRAINING) saved them to KV under "_request-usage": the same key for every LSH site, so
-   it's read without this course's key prefix. null until the workflow has run. */
-async function requestMeter(kv) {
-  const raw = kv ? await kv.get("_request-usage") : null;
-  if (!raw) return null;
-  try { const u = JSON.parse(raw); delete u.cache; return u; } catch (e) { return null; }
-}
-
 export default {
   async fetch(request, env) {
     const kv = kvOf(env);
@@ -336,7 +327,8 @@ export default {
         const page = await env.ASSETS.fetch(new Request(new URL("/", request.url)));
         const html = await page.text();
         const m = html.match(/APP_BUILD = "([^"]+)"/);
-        return new Response(`Portal build deployed: ${m ? m[1] : "unknown (old index.html — no build tag)"}\nWorker: secure-mode worker.js\nSecure mode: ${adminPass(env) ? "ON" : "OFF"}\nAI provider: ${geminiKey(env) ? (env.GEMINI_API_KEY10 ? "GEMINI_API_KEY10 · " : "GEMINI_API_KEY · ") + "Google Gemini (" + (env.GEMINI_MODEL || "gemini-3.8-flash") + ")" : "none — add GEMINI_API_KEY10"}\n`, { headers: { "Content-Type": "text/plain", "Cache-Control": "no-store" } });
+        const deployment = (env.CF_VERSION_METADATA && env.CF_VERSION_METADATA.id) || "unknown";
+        return new Response(`Portal build deployed: ${m ? m[1] : "unknown (old index.html — no build tag)"}\nDeployment: ${deployment}\nWorker: secure-mode worker.js\nSecure mode: ${adminPass(env) ? "ON" : "OFF"}\nAI provider: ${geminiKey(env) ? (env.GEMINI_API_KEY10 ? "GEMINI_API_KEY10 · " : "GEMINI_API_KEY · ") + "Google Gemini (" + (env.GEMINI_MODEL || "gemini-3.8-flash") + ")" : "none — add GEMINI_API_KEY10"}\n`, { headers: { "Content-Type": "text/plain", "Cache-Control": "no-store" } });
       }
       if (!path.startsWith("/api/")) {
         const res = await env.ASSETS.fetch(request);
@@ -402,12 +394,6 @@ export default {
 
       const tok = secure ? await readToken(env, request) : { role: "a", id: "open-mode" };
       if (!tok) return json({ error: "Sign-in required" }, 401);
-
-      /* ---------- 📊 server request meter (admins; README → Server request meter) ---------- */
-      if (path === "/api/request-budget") {
-        if (tok.role !== "a") return json({ error: "Admins only" }, 403);
-        return json({ ok: true, usage: await requestMeter(env.LSH_KV) });
-      }
 
       /* ---------- 🕘 automatic Time In: a trainee's first visit today (see checkIn) ---------- */
       if (path === "/api/checkin") {
