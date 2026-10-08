@@ -87,7 +87,7 @@ Trainers take each day's attendance in **Admin → 🕘 Attendance** (`js/attend
 
 ## 📉 Staying under Cloudflare's monthly request limit
 
-The Cloudflare account is on **Workers Paid**: **10 million requests a month** for every Worker and Pages Function on the account, shared by every LSH site (this course's Worker, meaning everything under `/api/` and `/version`, plus the other courses, the CMS and the Training Portal). Static files (the page, `js/`, images, documents) don't count. Past the limit, Cloudflare charges for every extra million requests. Usage is under **Workers & Pages** in the Cloudflare dashboard.
+The Cloudflare account is on **Workers Paid**: **10 million requests a month** for every Worker and Pages Function on the account, shared by every LSH site (this course's Worker, meaning everything under `/api/` and `/version`, plus the other courses, the CMS and the Training Portal). Static files (the page, `js/`) don't count. `slides/` and `documents/` now come from R2 through the Worker, so each of those files a browser loads (or re-checks) counts too: see *Documents in R2*. Past the limit, Cloudflare charges for every extra million requests. Usage is under **Workers & Pages** in the Cloudflare dashboard.
 
 So an open page asks the server sparingly (`POLL` in `index.html`, the same as the EA/PA course), and not at all while its tab is in the background. When it's back, whatever came due runs then; a quick look at another tab (Google Meet) asks nothing:
 
@@ -130,6 +130,15 @@ python3 build/build.py ../Case-Management-Training/index.html      # path to the
 
 **Content source:** the topics, Quick Checks and Knowledge Checks were written for this build from standard PI-firm PD claims practice; the slides trainees see are the Canva decks (Day 1 is the deck titled "Property Damage Claims DAY 1"; Days 2–5 are still to be confirmed from the decks). The decks couldn't be opened from the build environment, so before the first live batch, check that each day's deck is the right one and that the Quick Checks and Knowledge Check questions in `build/day1.js`–`day5.js` match what the deck teaches.
 
+
+## 🗄 Documents in R2
+
+The document-heavy folders (`slides/`, `documents/`) are kept in **Cloudflare R2**, the `DOCUMENTS` binding (bucket `lshtraining`, the same bucket the EA/PA course and the CMS use), under `courses/pd/` (e.g. `courses/pd/slides/...`). `wrangler.json`'s `assets.run_worker_first` sends those paths to `worker.js`, and `docFromR2` answers from R2, with byte ranges (PDF viewers) and 304s for a file the browser already has.
+
+- **Uploading:** `.github/workflows/r2-docs.yml` runs on every push to `main` that changes those folders: it uploads the files that changed and removes deleted ones (`.github/scripts/r2-sync.mjs`). **Actions → R2 documents → Run workflow** uploads every file (do this once, after setting the secret). It needs the repository secret `CLOUDFLARE_API_TOKEN` (a Cloudflare API token with *Workers R2 Storage: Edit*); until it's set, the run only prints a notice.
+- **Fallback:** a file that isn't in R2 yet (the upload still running, or the token not set) comes from the Worker's static assets as before, and so does everything if the binding is missing or R2 fails. The files stay in the repository and in the deploy, so nothing breaks while R2 fills; once R2 has them all, the folders can be added to `.assetsignore` to leave them out of the deploy.
+- **Requests:** these files now go through the Worker, so each one a browser loads or re-checks counts toward the account's 10 million Worker requests a month (and is one R2 read; 10 million a month are free). A class of 30 opening a few hundred slide images a day is roughly 100–200 thousand a month.
+- **Checks:** `.github/scripts/r2-docs.mjs` (in *Checks*) serves a document from an in-memory R2: from R2 when it's there, byte ranges, 304s, HEAD, the static assets when it's missing or R2 fails, nothing else read from R2, and the `run_worker_first` list matching the folders.
 
 ## Checks
 
