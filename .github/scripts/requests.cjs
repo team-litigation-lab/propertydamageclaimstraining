@@ -11,6 +11,7 @@
 //    The Admin's Trainee Audit and Trainee Feedback read every record in two requests (the list, then get-many).
 // Usage: node .github/scripts/requests.cjs [baseUrl]   (with .github/scripts/server.mjs running; needs Playwright)
 const { chromium } = require('playwright');
+const signIn = require('./sign-in.cjs');   // the name + batch form is gone: trainees arrive from the Portal
 const path = require('path'); const { pathToFileURL } = require('url');
 const BASE = process.argv[2] || 'http://localhost:8787/';
 const failures = []; const fail = (m) => failures.push(m);
@@ -25,7 +26,9 @@ async function workerChecks() {
         ['surprise-task-day2', JSON.stringify({ title: 'Another course\'s task' })]
     ]);
     const env = {
-        MASTER_ADMIN_PASSWORD: 'ci-pass', SESSION_SECRET: 'ci-secret',
+        // PORTAL_ONLY=off so this test can mint a trainee token by name + batch; trainees really come in
+        // from the LSH Training Portal (sso.cjs). What's checked here isn't the sign-in.
+        MASTER_ADMIN_PASSWORD: 'ci-pass', SESSION_SECRET: 'ci-secret', PORTAL_ONLY: 'off',
         LSH_KV: { get: async (k) => store.has(k) ? store.get(k) : null, put: async (k, v) => store.set(k, v), delete: async (k) => store.delete(k), list: async ({ prefix = '' } = {}) => ({ keys: [...store.keys()].filter(k => k.startsWith(prefix)).map(name => ({ name })), list_complete: true }) }
     };
     const call = async (p, body, token) => {
@@ -67,8 +70,7 @@ async function workerChecks() {
     const since = (t, f) => log.filter(x => x.at >= t && (!f || f(x)));
     const show = (list) => JSON.stringify(list.map(x => x.path + ' ' + x.key.slice(0, 40)));
     await page.goto(BASE, { waitUntil: 'load' }); await page.waitForTimeout(800);
-    await page.fill('#loginFirstInput', 'Req'); await page.fill('#loginLastInput', 'Count'); await page.fill('#loginBatchInput', 'CIREQ');
-    await page.click('#loginSubmitBtn'); await page.waitForTimeout(1200);
+    await signIn(page, 'Req', 'Count', 'B100926');
     const setApproved = (on) => page.evaluate(async (on) => {
         const key = 'trainee:' + state.traineeId;
         const r = await fetch('/api/storage/get', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) }).then(r => r.json());
@@ -138,7 +140,12 @@ async function workerChecks() {
         for (let i = 0; i < 6; i++) await set('trainee:ci-' + i + '--x', { id: 'ci-' + i + '--x', name: 'Ci ' + i, batch: 'X', approved: true });
         for (let i = 0; i < 3; i++) await set('tfeedback:ci' + i, { at: new Date(Date.now() - i * 1000).toISOString(), text: 'Feedback ' + i });
         state.isAdmin = true;
+        // Open the Admin screen before measuring. The sign-in screen is the Portal gate now
+        // (js/portal-gate.js), which sends a signed-in admin on to the Admin screen by itself —
+        // that navigation, and the loads it brings, would otherwise land in the counts below.
+        goto('admin');
     });
+    await page.waitForTimeout(1200);
     t0 = Date.now();
     const n = await page.evaluate(async () => { await loadAdminLedgerQuiet(); return state.adminData.length; });
     const ledger = since(t0, x => x.path.startsWith('/api/storage/'));
