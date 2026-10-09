@@ -102,7 +102,16 @@ function safeEqual(a, b) {
 const PORTAL_TICKET_MAX_MS = 10 * 60 * 1000;
 // The Portal secret, without any space or line break pasted around it (the Portal does the same).
 function portalSecret(env) { return String(env.PORTAL_SSO_SECRET || "").trim(); }
-function portalOnly(env) { return !!(adminPass(env) && portalSecret(env)); }
+/* Single sign-on: the LSH Training Portal is the only way a trainee gets in, on every LSH platform. The same
+   rule as the CMS (portalOnly in its functions/_portal.js): on as soon as this program has an admin password,
+   whether or not the Portal secret is set yet. A name + batch typed at /api/auth/trainee is refused — the
+   sign-in screen hasn't offered that form since js/portal-gate.js took it over — and only a trainee already
+   signed in on this device can renew their session that way.
+   PORTAL_SSO_SECRET (the same value as the Portal's) is what lets a Portal ticket be checked, so until it is
+   set here no trainee can be signed in at all: /api/auth/portal says so plainly (portal-secret-missing) and
+   /api/auth/status reports portalSecret false, which the sign-in screen shows an administrator.
+   PORTAL_ONLY=off is the way back to the old name + batch sign-in; leave it unset in production. */
+function portalOnly(env) { return !!(adminPass(env) && String(env.PORTAL_ONLY || "").trim().toLowerCase() !== "off"); }
 // why (optional) gets why a ticket was refused: "format", "signature" (the Portal and this program don't share the same secret) or "expired".
 async function readPortalTicket(env, ticket, why = {}) {
   if (!portalSecret(env)) { why.r = "format"; return null; }
@@ -136,12 +145,33 @@ async function readTraineeTokenGrace(env, request) {
 function slugPart(t) {
   return String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
+/* A Batch ID is B + the date the batch started, as MMDDYY: B100926 for 9 October 2026. The same rule on every
+   LSH platform (canonicalBatch in the CMS's functions/_utils.js). Whatever is typed — any capitals, spaces or
+   dashes, the B left off, a four-digit year, or the older long forms B09102026 and B09102026-LSHTRAINEE-001 —
+   reads as that one form, so B100926, "b 10-09-26" and B10092026 are the same batch. A Batch ID given out
+   before as B + DDMMYY reads the same as before. "" when it isn't a real date. */
+const batchRealDay = (mm, dd, yy) => { const d = new Date(Date.UTC(2000 + yy, mm - 1, dd)); return mm >= 1 && mm <= 12 && dd >= 1 && d.getUTCMonth() === mm - 1; };
+function canonicalBatch(raw) {
+  const v = String(raw || "").toUpperCase().replace(/[\s\-]/g, "");
+  const m = /^B?(\d{2})(\d{2})(\d{4}|\d{2})(?:LSH[A-Z]*\d+)?$/.exec(v);
+  if (!m) return "";
+  const yy = m[3].slice(-2);
+  if (!batchRealDay(+m[1], +m[2], +yy) && !batchRealDay(+m[2], +m[1], +yy)) return "";
+  return `B${m[1]}${m[2]}${yy}`;
+}
+// The same Batch ID whatever its form. An older code that isn't a date (B1, a guest account's) compares as
+// typed, so a trainee registered under one still matches their own records.
+const batchKey = (s) => slugPart(canonicalBatch(s) || s);
+// A trainee's record id. newId uses the Batch ID in its one form, so the same batch typed differently is the
+// same record; rawId is the id a record made before this rule got from the batch exactly as it was typed, and
+// legacyId the older name-only id. traineeSession tries all three, so nobody's records are left behind.
 function candidateIds(name, batch) {
   let slug = slugPart(name).slice(0, 40);
   if (!slug) { let h = 0; for (const c of String(name || "")) h = (h * 31 + c.codePointAt(0)) >>> 0; slug = "trainee-" + h.toString(36); }
-  const b = slugPart(batch).slice(0, 20);
-  return { newId: b ? `${slug}--${b}` : slug, legacyId: slugPart(name).slice(0, 40) || "trainee" };
+  const b = slugPart(canonicalBatch(batch) || batch).slice(0, 20), raw = slugPart(batch).slice(0, 20);
+  return { newId: b ? `${slug}--${b}` : slug, rawId: raw ? `${slug}--${raw}` : slug, legacyId: slugPart(name).slice(0, 40) || "trainee" };
 }
+
 
 /* ---------- what a trainee may touch ---------- */
 // Daily Activities: activities:dayN and their attachments (actfile:*) are published by admins for everyone;
@@ -425,7 +455,7 @@ export default {
       if (!kv && path.startsWith("/api/storage")) return json({ error: "LSH_KV namespace is not bound on this Worker." }, 500);
 
       /* ---------- auth ---------- */
-      if (path === "/api/auth/status") return json({ secure, portalOnly: portalOnly(env) });
+      if (path === "/api/auth/status") return json({ secure, portalOnly: portalOnly(env), portalSecret: !!portalSecret(env) });
       if (path === "/api/auth/admin") {
         if (!secure) return json({ error: "not-configured" }, 501);
         const { passphrase } = await request.json();
@@ -436,33 +466,47 @@ export default {
       }
       // The trainee's session for a name + batch: their record id (new or legacy form) and token.
       const traineeSession = async (name, batch, id) => {
-        const { newId, legacyId } = candidateIds(name, batch);
+        const { newId, rawId, legacyId } = candidateIds(name, batch);
         let chosen = newId, existing = await kv.get(`trainee:${newId}`);
+        // a record made before Batch IDs were read in one form: keyed by the batch exactly as it was typed
+        if (!existing && rawId !== newId) {
+          const raw = await kv.get(`trainee:${rawId}`);
+          if (raw) { chosen = rawId; existing = raw; }
+        }
         if (!existing) {
           const legacy = await kv.get(`trainee:${legacyId}`);
           const lrec = legacy ? JSON.parse(legacy) : null;
-          if (lrec && (!lrec.batch || slugPart(lrec.batch) === slugPart(batch))) { chosen = legacyId; existing = legacy; }
+          if (lrec && (!lrec.batch || batchKey(lrec.batch) === batchKey(batch))) { chosen = legacyId; existing = legacy; }
         }
-        if (id && id !== chosen && id !== newId && id !== legacyId) return json({ error: "Name/batch don't match this session" }, 403);
-        if (id && (id === newId || id === legacyId)) chosen = id;
-        return json({ id: chosen, token: await makeToken(env, "t", chosen, 24 * 30), existing: existing ? JSON.parse(existing) : null });
+        if (id && id !== chosen && id !== newId && id !== rawId && id !== legacyId) return json({ error: "Name/batch don't match this session" }, 403);
+        if (id && (id === newId || id === rawId || id === legacyId)) chosen = id;
+        return json({ id: chosen, token: await makeToken(env, "t", chosen, 24 * 30), existing: existing ? JSON.parse(existing) : null, batch: canonicalBatch(batch) || String(batch || "").trim() });
       };
       if (path === "/api/auth/trainee") {
         if (!secure) return json({ error: "not-configured" }, 501);
         const { name, batch, id } = await request.json();
         if (!name || !batch) return json({ error: "Name and batch are required" }, 400);
+        const { newId, rawId, legacyId } = candidateIds(name, batch);
         if (portalOnly(env)) {
           // Trainees come in through the LSH Training Portal (/api/auth/portal). A name + batch typed here is
           // accepted only to renew the session of a trainee who is already signed in on this device.
           const own = await readTraineeTokenGrace(env, request);
-          const { newId, legacyId } = candidateIds(name, batch);
-          if (!own || (own.id !== newId && own.id !== legacyId)) return json({ error: "portal-required" }, 403);
+          if (!own || (own.id !== newId && own.id !== rawId && own.id !== legacyId)) return json({ error: "portal-required" }, 403);
+        }
+        // A new registration has to give the Batch ID in its one form: B + the date the batch started (MMDDYY).
+        // Someone whose records are already here keeps signing in with the Batch ID they registered under.
+        if (!canonicalBatch(batch)) {
+          const known = (await Promise.all([newId, rawId, legacyId].map(k => kv.get(`trainee:${k}`)))).some(Boolean);
+          if (!known) return json({ error: "batch-format" }, 400);
         }
         return traineeSession(name, batch, id);
       }
       if (path === "/api/auth/portal") {
         // The Main Portal's sign-in: a signed ticket carries who the trainee is (their name and batch as registered there).
         if (!portalOnly(env)) return json({ error: "not-configured" }, 501);
+        // Single sign-on is on, but this Worker has no PORTAL_SSO_SECRET, so no ticket can be checked and nobody
+        // can be signed in. Say which setting is missing rather than letting it read as an expired link.
+        if (!portalSecret(env)) return json({ error: "This program isn't connected to the LSH Training Portal yet. Please tell your administrator: PORTAL_SSO_SECRET needs to be set on this program's Worker, to the same value as the Portal's.", code: "portal-secret-missing" }, 503);
         const { ticket } = await request.json().catch(() => ({}));
         const why = {};
         const who = await readPortalTicket(env, ticket, why);
