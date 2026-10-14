@@ -85,21 +85,14 @@ body.pd-tf-open{overflow:hidden}
 .pd-lesson-visual{margin:12px 0 4px}
 .svg-diagram-card .pd-lesson-visual{text-align:left}
 /* Top-bar search: the input may shrink (the placeholder ends in "…" instead of spilling out of the box) */
-.topbar-search input{flex:1 1 auto;min-width:0;width:100%;text-overflow:ellipsis}
-.topbar-search{min-height:36px}
-.topbar-search .sicon{flex:0 0 auto;display:flex;align-items:center;color:#fff;cursor:text}
-.topbar-search .sicon svg{width:15px;height:15px;display:block}
 @media(min-width:761px) and (max-width:1600px){.nav button{padding:7px 7px;font-size:12.5px}}
 /* Top bar on laptops and desktops: nothing overlaps. The course title gives way first (down to the logo;
    the text hides when there's no room to read it), then the nav wraps its last buttons onto a second line. */
 @media(min-width:1181px){
-  .topbar .brand{flex:0 1000000 320px;min-width:40px;container-type:inline-size}  /* a huge shrink factor: the title takes all of the squeeze before the nav wraps */
+  .topbar .brand{flex:0 1 370px;min-width:40px;container-type:inline-size}  /* the page header keeps its width; the nav wraps its last buttons first */
   .topbar-right{min-width:auto}
   .topbar .nav{flex:0 1 auto;min-width:0;flex-wrap:wrap;column-gap:0;row-gap:4px}
   .topbar .nav>*+*{margin-left:2px}  /* margins, not column-gap: Chrome leaves the gap out of a wrapping row's width */
-  .topbar-search{flex-shrink:100000}  /* then the search box, down to its minimum */
-  .trainee-chip{flex-shrink:0}
-  .topbar-search .search-results{min-width:320px}
 }
 @container (max-width:170px){.topbar .brand-text{display:none !important}}
 /* The course has two more nav items than EA/PA: on laptop widths the search box is just its icon
@@ -107,12 +100,6 @@ body.pd-tf-open{overflow:hidden}
    Clicking it opens the box over the start of the nav (the nav doesn't move); it stays open while
    results are showing. Nothing is clipped, so the results list can drop down. */
 @media(min-width:1181px) and (max-width:1600px){
-  .topbar-search{flex:0 0 38px !important;min-width:38px !important;max-width:38px !important;padding:8px 0 !important;gap:0 !important;justify-content:center;transition:flex-basis .2s ease,max-width .2s ease,margin-right .2s ease}
-  .topbar-search input{flex:0 0 0;width:0;padding:0;opacity:0}
-  .topbar-search .sicon{position:absolute;inset:0;justify-content:center;cursor:pointer}
-  .topbar-search:focus-within,.topbar-search:has(.search-results){flex-basis:260px !important;max-width:260px !important;margin-right:-222px;padding:8px 14px !important;gap:8px !important;justify-content:flex-start;background:#3B4058;z-index:61;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-  .topbar-search:focus-within input,.topbar-search:has(.search-results) input{flex:1 1 auto;width:100%;opacity:1}
-  .topbar-search:focus-within .sicon,.topbar-search:has(.search-results) .sicon{position:static;cursor:text}
 }
 @media(max-width:700px){.pd-calc{grid-template-columns:1fr}.pd-doc-row{flex-wrap:wrap}}
 `; document.head.appendChild(st);
