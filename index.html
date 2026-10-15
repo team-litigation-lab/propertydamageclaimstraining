@@ -2285,7 +2285,10 @@ em.warn{font-style:normal;color:var(--danger);}
 @media(min-width:1181px) and (max-width:1420px){.brand-text b{font-size:12.5px;letter-spacing:.04em;}}
 @media(min-width:1421px) and (max-width:1700px){.brand-text b{font-size:14px;letter-spacing:.06em;}}
 @media(min-width:1561px){.topbar-inner{max-width:min(1760px, calc(100vw - 40px)) !important;}}
-.topbar .brand{flex:0 0 auto;min-width:0;} .topbar .brand-text{min-width:0;overflow:visible;} .topbar .brand-text b,.topbar .brand-text span{overflow:visible;text-overflow:clip;white-space:nowrap;display:block;}
+.topbar .brand{flex:0 1 auto;min-width:0;} .topbar .brand-text{min-width:0;overflow:hidden;} .topbar .brand-text b,.topbar .brand-text span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;}
+/* On a laptop or desktop the page's name is shown in full — never cut off with an ellipsis.
+   A phone keeps the ellipsis so the top bar can't push the page sideways. */
+@media(min-width:761px){.topbar .brand{flex:0 0 auto;} .topbar .brand-text{overflow:visible;} .topbar .brand-text b,.topbar .brand-text span{overflow:visible;text-overflow:clip;}}
 @media(min-width:761px) and (max-width:1180px){.topbar .nav{flex-wrap:wrap;row-gap:4px;max-width:100%;} .topbar .nav button{padding:7px 8px;}}
 
 /* ================= Lesson slides in the Orientation format =================
