@@ -108,9 +108,9 @@ Lists of records (the Trainee Audit, Trainee Feedback, attendance, and every day
 ## 🧭 Orientation and the Blueprints
 
 Admins have **🧭 Orientation** in the top bar, with two tabs:
-- **🧭 Trainee blueprint:** the Orientation deck, to share on day one. It's also `/blueprint.pdf`, in trainees' Handouts.
+- **🧭 Trainee blueprint:** the Orientation deck, to share on day one, on the same engine, cover and slide layout as the Trainer blueprint — one deck in two tabs. Its slides are `trainee` in `js/blueprint-content.js` (`js/pd-orientation.js` opens them from 🧭 Orientation), and `/blueprint.pdf` (in trainees' Handouts) is built from the same deck as real text.
   - **It republishes itself after every deploy.** The published copy is matched against `APP_BUILD` and the Worker's deployment id (`/version`, from `version_metadata` in `wrangler.json`). The first admin page open after a deploy rebuilds it.
-  - Its opening, roadmap and dashboard slides say 5 days and describe this course. `js/blueprint-content.js` rewrites the shared engine's EA/PA wording when the slides are drawn, so a rebuild of `index.html` keeps it.
+  - Its slides are written for this course — five days, this case — so the runtime rewrite of the shared engine's EA/PA wording no longer applies to them. `js/blueprint-content.js` still rewrites it for the Handouts card.
 - **🛠 Trainer blueprint** (admins only, never at a public address): a cover and 11 slides on running the course. It covers signing in, the Trainee Audit, day feedback, surprise tasks and roleplays, the Claim File and the documents' 🔑 audit keys, Practice and the Skill Builders, Presenter view and the decks, SOP Reference and Trainer Cues, Batch Folders, Rankings and Content Studio, Activities and the feedback style, Attendance and Trainee view.
   - **⬇ Download PDF:** a landscape PDF, one page per slide, stamped with the build and the deployment.
   - **Numbering:** the cover is the Cover (★), then the slides are 1 to N everywhere: the contents buttons, the counter under the slide (`Cover · 11 slides`, then `1 / 11` to `11 / 11`), each slide's header and footer, and the PDF's page footers. The cover isn't counted, so nothing says 12.
