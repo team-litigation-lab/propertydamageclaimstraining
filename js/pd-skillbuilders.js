@@ -130,9 +130,13 @@ const PD_TOOL_DEFAULTS = [
    evidence:"CMS Case ID", idHint:"CMS Case ID (e.g. LSH-2026-PI-000123)"},
   // Shared simulators on the LSH Training Portal (used by every program). The course
   // opens them with ?program=PD and the trainee's name and batch, so results carry them.
-  {id:"calls", icon:"📞", name:"Call Simulator (LSH Training Portal)", short:"Call Simulator", status:"live",
+  // The Call Simulator is ☎ LSH Ring Channel's (the training phone): this Portal address opens it signed in
+  // (→ /api/launch?tool=ringchannel&to=calls), with ?program=PD (the course the call counts in) and the step's
+  // ?line= and &mode=graded. It opens in its own tab, and a graded call is reported to the Portal's
+  // /api/call-results, so it still counts here.
+  {id:"calls", icon:"📞", name:"Call Simulator (☎ LSH Ring Channel)", short:"Call Simulator", status:"live",
    url:"https://cm-training-activity.pages.dev/simulators/call.html", portalSim:true,
-   desc:"Live practice calls, spoken aloud: the Property Damage pack has 16 calls on the Angela Carter file — opening the claims, verifying and spotting coverage, setting up and extending the rental, the tow yard and the shop, negotiating the total loss, the payoff, and the release. Each call ends with the note it requires, and both are scored.",
+   desc:"Live practice calls on the training phone, spoken aloud: the phone rings on the line the step names, you answer with a headset and use its own keys (mute, hold, transfer) and 🔎 Case lookup. Each call ends with the note it requires, and both are scored on the line's Mock Calls Metrics. Take a graded call, practice with an 🤖 AI caller, or answer a trainer-led mock call on the same phone.",
    evidence:"Score", idHint:"Score (e.g. 82%)"},
   {id:"email", icon:"✉️", name:"Email Workspace (LSH Training Portal)", short:"Email Workspace", status:"live",
    url:"https://cm-training-activity.pages.dev/simulators/email.html", portalSim:true,
@@ -194,7 +198,7 @@ function placeFrame(){
 }
 function paintShell(){
   const t = pdTool(currentFrame);
-  frameShell.querySelector(".pd-tf-name").textContent = t ? `${t.icon} ${t.name.replace(/ \(LSH Training Portal\)$/,"")}` : "";
+  frameShell.querySelector(".pd-tf-name").textContent = t ? `${t.icon} ${t.name.replace(/ \((LSH Training Portal|☎ LSH Ring Channel)\)$/,"")}` : "";
   Object.entries(frames).forEach(([id,f])=>{ f.style.display = id===currentFrame ? "block" : "none"; });
 }
 // extra: an optional query string for this opening, e.g. "mock=MC-04" opens that CMS Training Library case.
@@ -205,7 +209,8 @@ window.openTool = function(id, mode, extra){
   if(!t.live){ toast(`${t.icon} ${t.name} is coming soon. For now, log this step as a Task in the CMS.`); return; }
   let href = toolHref(t);
   if(extra) href += (href.includes("?") ? "&" : "?") + extra;
-  if(mode==="tab"){ window.open(href, "_blank", "noopener"); return; }
+  // The Call Simulator is ☎ LSH Ring Channel, opened through the Portal's sign-in cookie, which a frame doesn't send: its own tab.
+  if(mode==="tab" || id==="calls"){ window.open(href, "_blank", "noopener"); return; }
   ensureShell();
   if(!frames[id] || frames[id].dataset.src !== href){
     if(frames[id]) frames[id].remove();
