@@ -147,7 +147,7 @@
   main.main-dash{display:flex;flex-direction:column;padding-bottom:14px !important;}
   main.main-dash > .dash-layout{flex:1 1 auto;display:flex !important;flex-direction:column;}
   main.main-dash .dash-main{flex:1 1 auto;display:flex;flex-direction:column;}
-  main.main-dash .module-grid{flex:1 1 0;grid-auto-rows:1fr;align-items:stretch;}
+  main.main-dash .module-grid{flex:1 1 0;grid-auto-rows:minmax(300px,1fr);align-items:stretch;}
   .dash-main .module-card.mc-clean .module-head{padding:10px 10px;min-height:58px;justify-content:center;}
   .dash-main .module-card.mc-clean .mh-day{font-size:11px;}
   .dash-main .module-card.mc-clean .mh-title{font-size:14px;line-height:1.25;}
@@ -158,8 +158,11 @@
   .dash-main .module-card.mc-clean > :last-child{margin-bottom:10px;}
   body:has(main.main-dash) .footer-note{padding:6px 24px 8px;}
 }
-/* the middle of a day card shows as much as fits: icon and theme, then the icon alone (smaller), then nothing */
+/* the middle of a day card shows as much as fits: icon and theme, then the icon alone (smaller), then nothing.
+   The theme drops a line at a time so a line is never cut in half by the card edge. */
 @container (max-height:96px){ .module-card.mc-clean .module-theme{display:none;} }
+@container (max-height:150px){ .dash-main .module-card.mc-clean .module-theme{-webkit-line-clamp:2;} }
+@container (max-height:122px){ .dash-main .module-card.mc-clean .module-theme{-webkit-line-clamp:1;} }
 @media(min-width:1200px){
   .dash-hero h1{white-space:nowrap;font-size:29px !important;}
   .dash-hero p{white-space:nowrap;max-width:none !important;font-size:14px !important;}
@@ -170,6 +173,7 @@
 img[alt="Legal Support Help"]{border-radius:8px;}
 
 .module-card.mc-clean .module-body{flex:1 1 auto;min-height:12px;}
+.dash-main .module-card.mc-clean{min-height:296px;}
 /* a narrow search box keeps its text inside it (it ran under the Dashboard tab when the top bar was full) */
 /* a band with fewer boxes (e.g. no ranking) still spans the width */
 @media(min-width:1101px){
