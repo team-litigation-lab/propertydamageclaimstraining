@@ -77,16 +77,25 @@ Every line has Practice and Graded calls on the Call Simulator — ☎ LSH Ring 
 
 ## 🕘 Attendance
 
-Trainers take each day's attendance in **Admin → 🕘 Attendance** (`js/attendance.js`). Trainees don't see it. It's the same file in every LSH course repo (EA-PA-TRAINING, Case-Management-Training, propertydamageclaimstraining, Foundational-Training); change it in all of them. The LSH Training Portal's admin **🕘 Attendance** page shows and edits the same records, for every program.
+**Attendance is not taken in this course.** It is centralized on the LSH Training Portal: **Master
+Control → 🕘 Attendance** (`/attendance.html`), which takes and reviews attendance for every program,
+per program per batch. This course has no Admin → 🕘 Attendance tab (`js/attendance.js` is gone), so
+there is no second place to take it and no copy of that file to keep in step.
 
-- **By batch:** one section per batch (newest first), listing its approved, active trainees, with a count of each status.
-- **The day:** today's date in Eastern time (EST, or EDT in summer). ◀ ▶ step through the training days, and the date picker opens any day. The batch's **Day N** counts its days already logged; the trainer can change it.
-- **Each trainee's row:** Name; **Training** (the lesson, "Day N: title": for the batch it starts as the day most of the batch is on, from their progress, and it can be changed for the batch or one trainee); **Time In / Time Out** in Eastern time (typed, or ⏱ Now; **Time In fills in on its own** the first time a trainee opens the course each day, marked "auto" until a trainer sets one, and saved when a trainer tags that trainee; trainers always tag the status); **Status**, tagged from the attendance sheet's dropdown in its colors (Present, Late, Late with Notif, Early Out - POC Approved, Undertime - POC Approved, Undertime - No Approval, NCNS, Sick Leave, RL, EOP, Absent with Notif; **✓ Mark the rest Present** tags everyone not yet tagged); and Notes.
-- **Saving:** each change saves as you go. A save re-reads the day and writes only the rows changed on that screen, so two trainers can take one batch's attendance at the same time.
-- **📊 Summary** (per batch): each trainee's count of every status over the batch's logged days, with the last 10 days as colored squares. **⬇ CSV** downloads a day (every batch) or a batch's history.
-- **Google Sheet:** the LSH Training Portal keeps the attendance Google Sheet's **Platform Attendance** tab in step, both ways: everything here (automatic Time Ins included) goes to the sheet every 15 minutes, and edits made in the sheet to Training, Time In, Time Out, Status or Notes come back here straight away. See the Training Portal's README.
-- **Storage:** `attendance:<batch key>:<YYYY-MM-DD>` (`_none` for no batch) = `{batch, date, day, training, rows:{<trainee id>:{name, training, timeIn, timeOut, status, note, at, by}}}`, under the Worker's `pd:` prefix. The Worker's `/api/checkin` records the automatic Time In: `checkin:<YYYY-MM-DD>:<trainee id>` = `{timeIn, at, name, batch, training}` is the automatic Time In (each trainee's own key, so a room signing in at once never overwrites one another; its KV metadata carries the same for the portal; kept 40 days). Only admins can read or write these records.
+What this course still does for attendance:
 
+- **Automatic Time In.** The Worker's `/api/checkin` records a trainee's first visit each day (Eastern
+  time) as `checkin:<YYYY-MM-DD>:<trainee id>` = `{timeIn, at, name, batch, training}` — each trainee
+  their own key, so a room signing in at once never overwrites one another; the same values are in the
+  key's KV metadata for the portal; kept 40 days. The portal's page shows it marked "auto" until a
+  trainer sets a Time In.
+- **The records live in this course's KV**, under the Worker's `pd:` prefix: `attendance:<batch key>:<YYYY-MM-DD>` (`_none` for
+  no batch) = `{batch, date, day, training, rows:{<trainee id>:{name, training, timeIn, timeOut,
+  status, note, at, by}}}`. The portal reads and writes them directly, and keeps the attendance
+  Google Sheet's **Platform Attendance** tab in step both ways. Only admins can read or write them.
+
+The statuses, the per-batch summaries, the CSV downloads and the Google Sheet sync are all documented
+in the Training Portal's README.
 ## 📉 Staying under Cloudflare's monthly request limit
 
 The Cloudflare account is on **Workers Paid**: **10 million requests a month** for every Worker and Pages Function on the account, shared by every LSH site (this course's Worker, meaning everything under `/api/` and `/version`, plus the other courses, the CMS and the Training Portal). Static files (the page, `js/`) don't count. `slides/` and `documents/` now come from R2 through the Worker, so each of those files a browser loads (or re-checks) counts too: see *Documents in R2*. Past the limit, Cloudflare charges for every extra million requests. Usage is under **Workers & Pages** in the Cloudflare dashboard.
@@ -105,7 +114,7 @@ So an open page asks the server sparingly (`POLL` in `index.html`, the same as t
 
 That's about 3 requests a minute for an open trainee page (it was about 12), and about 2 for an admin on the Trainee Audit, however many trainees there are (it was about 2 per trainee).
 
-Lists of records (the Trainee Audit, Trainee Feedback, attendance, and every day's add-on lessons and activities when the page opens) are read with `/api/storage/get-many` (up to 100 keys; for each key, the same rules and `pd:` prefix as `/api/storage/get`), not one request per record. A trainee is signed out as revoked only when the server answers that their record is gone or not approved: a server that doesn't answer (offline, or over a limit) no longer signs anyone out.
+Lists of records (the Trainee Audit, Trainee Feedback, and every day's add-on lessons and activities when the page opens) are read with `/api/storage/get-many` (up to 100 keys; for each key, the same rules and `pd:` prefix as `/api/storage/get`), not one request per record. A trainee is signed out as revoked only when the server answers that their record is gone or not approved: a server that doesn't answer (offline, or over a limit) no longer signs anyone out.
 
 ## 🧭 Orientation and the Blueprints
 
@@ -113,7 +122,7 @@ Admins have **🧭 Orientation** in the top bar, with two tabs:
 - **No blueprint opens inside this portal.** Every blueprint is read on the **Main Portal's 🧭 Blueprint page**; the old `#/blueprint` and `#/orientation` addresses forward there, and the top bar carries neither. `/blueprint.pdf` (in trainees' Handouts) is still built here, from this course's trainee slides (`trainee` in `js/blueprint-content.js`) through `LSHBlueprint.doc('trainee')` — the standard navy cover, numbered contents and points / where / tip layout, as real text — for the Portal's Blueprint page to link to.
   - **It republishes itself after every deploy.** The published copy is matched against `APP_BUILD` and the Worker's deployment id (`/version`, from `version_metadata` in `wrangler.json`). The first admin page open after a deploy rebuilds it.
   - Its slides are written for this course — five days, this case — so the runtime rewrite of the shared engine's EA/PA wording no longer applies to them. `js/blueprint-content.js` still rewrites it for the Handouts card.
-- **🛠 Trainer blueprint** (admins only, never at a public address): a cover and 11 slides on running the course. It covers signing in, the Trainee Audit, day feedback, surprise tasks and roleplays, the Claim File and the documents' 🔑 audit keys, Practice and the Skill Builders, Presenter view and the decks, SOP Reference and Trainer Cues, Batch Folders, Rankings and Content Studio, Activities and the feedback style, Attendance and Trainee view.
+- **🛠 Trainer blueprint** (admins only, never at a public address): a cover and 11 slides on running the course. It covers signing in, the Trainee Audit, day feedback, surprise tasks and roleplays, the Claim File and the documents' 🔑 audit keys, Practice and the Skill Builders, Presenter view and the decks, SOP Reference and Trainer Cues, Batch Folders, Rankings and Content Studio, Activities and the feedback style, and Trainee view (attendance is taken on the Main Portal).
   - **⬇ Download PDF:** a landscape PDF, one page per slide, stamped with the build and the deployment.
   - **Numbering:** the cover is the Cover (★), then the slides are 1 to N everywhere: the contents buttons, the counter under the slide (`Cover · 11 slides`, then `1 / 11` to `11 / 11`), each slide's header and footer, and the PDF's page footers. The cover isn't counted, so nothing says 12.
   - **Files:** the slides are in `js/blueprint-content.js`. `js/lsh-blueprint.js` is the same file on every LSH platform, and `js/lsh-blueprint-course.js` is the same on every LSH course: copy them from EA-PA-TRAINING when they change there.
