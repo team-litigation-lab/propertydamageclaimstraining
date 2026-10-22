@@ -1,5 +1,9 @@
 # LSH Property Damage Claims Training (5-Day)
 
+**🖥 One screen fits all, no scrolling.** The window never scrolls: the top bar and the footer line keep their place, the page's body takes the height left between them, and a page with more in it than fits scrolls inside that body. A lesson is capped to the room the page has left, so the slide and its Previous / Next bar stay on the screen. Phones and tiny windows (under 1001 x 480) keep the ordinary page scroll. It's `js/lsh-one-screen.js`, loaded last after `js/lsh-topbar.js`, the same file in every LSH course repo; change it in all of them.
+
+**Everyone lands on the dashboard.** A trainee and a trainer both open the program on the dashboard, whether they arrive from the Portal or sign in here. Admin is one click away on the top bar (🛡 Admin). It's `js/portal-gate.js`, the same file in every LSH course repo.
+
 ## 🔐 Sign in on the Main Portal only
 
 Trainees sign in once, on the LSH Training Portal, and open this program from there. Admins always type the admin password on this site (`MASTER_ADMIN_PASSWORD`). The Portal sends them here with a signed, short-lived ticket (`?ticket=…`); `js/portal-gate.js` posts it to `/api/auth/portal`, and the Worker signs a trainee in (same `trainee:<id>` records, so every current registration, progress and approval is kept) (an administrator's ticket `{r: "a", exp}` never signs anyone in: the Worker answers 403 `admin-password`). Someone who opens this site's link directly sees a note with a **Go to the LSH Training Portal** button instead of the form, and the Worker refuses a name + batch typed here (403 `portal-required`), except to renew the session of a trainee already signed in on that device. Someone who opens the link directly gets the *Admin Portal* tab, where an admin types the admin password.
