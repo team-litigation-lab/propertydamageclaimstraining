@@ -18,8 +18,10 @@ const fail = (m) => failures.push(m);
 const SECRET = 'portal-secret-shared-with-the-portal';
 
 const b64url = (s) => Buffer.from(s, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+// A Portal ticket names the program it is for (p, its topic key: the Portal's makeTicket); p: undefined leaves it out.
+const PORTAL_TOPIC = 'PROPERTY DAMAGE';
 async function ticketFor(payloadObj, secret) {
-    const payload = b64url(JSON.stringify(payloadObj));
+    const payload = b64url(JSON.stringify(Object.assign({ p: PORTAL_TOPIC }, payloadObj)));
     const key = await crypto.subtle.importKey('raw', new TextEncoder().encode('portal-sso:' + secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload));
     const b = String.fromCharCode(...new Uint8Array(sig));
@@ -97,6 +99,41 @@ async function ticketFor(payloadObj, secret) {
     }
     const again = await call(env, '/api/auth/portal', { ticket: aTicket });
     if (again.status !== 401 || !again.body || again.body.code !== 'used') fail(`an administrator's ticket should work only once, got ${JSON.stringify(again)}`);
+
+    // 6. 🎯 a Portal ticket names the program it is for (p, this program's topic key) and works once, whoever it is for
+    //    (platform QA 2026-11-19, finding 1): a ticket made for another program or a tool is refused, so Program Access on
+    //    the Portal stays the one gate; and the trainee's full registered name (finding 8) is kept, the ID unchanged.
+    {
+        const soon = () => Date.now() + 60000;
+        const e6 = makeEnv({ PORTAL_SSO_SECRET: SECRET });
+        for (const [label, p] of [["another program's", 'SOME OTHER PROGRAM'], ["the Knowledge Base's", 'kb'], ["a course's tool link", 'tool'], ['an unnamed', undefined]]) {
+            for (const [kind, t] of [['trainee', { first: 'Pat', last: 'Lane', b: 'B100926' }], ['admin', { r: 'a', n: 'Coach Ana' }], ['system', { r: 's' }]]) {
+                const res = await call(e6, '/api/auth/portal', { ticket: await ticketFor(Object.assign({}, t, { p, exp: soon() }), SECRET) });
+                if (res.status !== 401 || !res.body || res.body.code !== 'audience' || res.body.token) fail(`${label} ${kind} ticket must be refused (401 audience), got ${JSON.stringify(res)}`);
+            }
+        }
+        if ([...e6.__store.keys()].some((k) => /pat-lane/.test(k))) fail('a refused ticket must not create or approve a trainee record');
+        // PORTAL_TICKET_AUDIENCE=optional (only while an older Portal is deployed) takes a ticket with no p, never another program's
+        const e7 = makeEnv({ PORTAL_SSO_SECRET: SECRET, PORTAL_TICKET_AUDIENCE: 'optional' });
+        const np = await call(e7, '/api/auth/portal', { ticket: await ticketFor({ first: 'Pat', last: 'Lane', b: 'B100926', p: undefined, exp: soon() }, SECRET) });
+        if (np.status !== 200 || !np.body || !np.body.token) fail(`with PORTAL_TICKET_AUDIENCE=optional a ticket with no p should still sign in: ${JSON.stringify(np)}`);
+        const op = await call(e7, '/api/auth/portal', { ticket: await ticketFor({ first: 'Pat', last: 'Lane', b: 'B100926', p: 'SOME OTHER PROGRAM', exp: soon() }, SECRET) });
+        if (op.status !== 401 || !op.body || op.body.code !== 'audience') fail(`PORTAL_TICKET_AUDIENCE=optional must still refuse another program's ticket: ${JSON.stringify(op)}`);
+        // a trainee's own ticket works once, like a trainer's
+        const tt = await ticketFor({ first: 'Pat', last: 'Lane', b: 'B100926', exp: soon() }, SECRET);
+        const first = await call(e6, '/api/auth/portal', { ticket: tt });
+        if (first.status !== 200 || !first.body || !first.body.token) fail(`this program's own trainee ticket should sign in: ${JSON.stringify(first)}`);
+        const second = await call(e6, '/api/auth/portal', { ticket: tt });
+        if (second.status !== 401 || !second.body || second.body.code !== 'used' || second.body.token) fail(`a trainee's ticket should work only once, got ${JSON.stringify(second)}`);
+        // the Sign-in check's system ticket works once too
+        const st = await ticketFor({ r: 's', exp: soon() }, SECRET);
+        const s1 = await call(e6, '/api/auth/portal', { ticket: st }), s2 = await call(e6, '/api/auth/portal', { ticket: st });
+        if (s1.status !== 200 || s2.status !== 401) fail(`the Sign-in check's ticket should work once: ${s1.status} then ${s2.status}`);
+        // the full registered name is kept as fullName, the ID stays first + last + batch
+        const fm = await call(e6, '/api/auth/portal', { ticket: await ticketFor({ first: 'Maria', last: 'Santos', b: 'B100926', full: 'Maria L. Santos', exp: soon() }, SECRET) });
+        const fullName = fm.body && (fm.body.fullName || (fm.body.existing && fm.body.existing.fullName));
+        if (fm.status !== 200 || fm.body.id !== 'maria-santos--b100926' || fullName !== 'Maria L. Santos') fail(`a ticket's full name should be kept as fullName with the same ID: ${JSON.stringify(fm.body && { id: fm.body.id, fullName })}`);
+    }
 
     if (failures.length) { console.log(`\n${failures.length} failure(s):`); failures.forEach((f, i) => console.log(`${i + 1}. ${f}`)); process.exit(1); }
     console.log('Single sign-on: the Portal is the only way a trainee gets in, a typed name + batch is refused, a missing PORTAL_SSO_SECRET says so, and a trainer signed in on the Portal gets in with no second password, once per ticket.');
