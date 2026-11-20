@@ -118,6 +118,14 @@ async function ticketFor(payloadObj, secret) {
         if (np.status !== 200 || !np.body || !np.body.token) fail(`a ticket with no p should still sign in: ${JSON.stringify(np)}`);
         const ap = await call(e6, '/api/auth/portal', { ticket: await ticketFor({ r: 'a', n: 'Coach Ana', p: undefined, exp: soon() }, SECRET) });
         if (ap.status !== 200 || !ap.body || !ap.body.admin) fail(`a trainer's ticket with no p should still sign in: ${JSON.stringify(ap)}`);
+        // SSO_REQUIRE_AUDIENCE=1 (once everything is deployed): a ticket with no p is refused too; this program's own still opens
+        {
+            const eR = makeEnv({ PORTAL_SSO_SECRET: SECRET, SSO_REQUIRE_AUDIENCE: '1' });
+            const noP = await call(eR, '/api/auth/portal', { ticket: await ticketFor({ first: 'Pat', last: 'Lane', b: 'B100926', p: undefined, exp: soon() }, SECRET) });
+            if (noP.status !== 401 || !noP.body || noP.body.code !== 'audience' || noP.body.token) fail(`with SSO_REQUIRE_AUDIENCE=1 a ticket with no p is refused: ${JSON.stringify(noP)}`);
+            const own = await call(eR, '/api/auth/portal', { ticket: await ticketFor({ first: 'Pat', last: 'Lane', b: 'B100926', exp: soon() }, SECRET) });
+            if (own.status !== 200 || !own.body || !own.body.token) fail(`with SSO_REQUIRE_AUDIENCE=1 this program's own ticket still opens: ${JSON.stringify(own)}`);
+        }
         // a trainee's own ticket works once, like a trainer's
         const tt = await ticketFor({ first: 'Pat', last: 'Lane', b: 'B100926', p: PORTAL_TOPIC, exp: soon() }, SECRET);
         const first = await call(e6, '/api/auth/portal', { ticket: tt });
