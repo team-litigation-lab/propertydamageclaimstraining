@@ -112,7 +112,25 @@ const PD_UI = {};                                  // key -> config for the curr
 window.__pdUI = PD_UI;                             // read-only hook for automated answer-key tests
 const toolOfKey = (key)=> key.split(":")[0];
 const dayOfTool = (id)=> { const t = PRACTICE_TOOLS.find(x=>x.id===id); return t ? parseInt(String(t.relates).replace(/\D/g,""),10) : null; };
-async function scorePart(key, score){ await bumpPracticeProgress(toolOfKey(key), score); if(score>=90 && typeof burstConfetti==="function") burstConfetti(); }
+/* 🏅 A Skill Builder's score is the whole exercise, not its best part (platform QA 2026-11-19, PD finding 2).
+   Each graded part keeps its FIRST check (a check shows the answers, so a later one is practice, not a score; the AI-graded
+   writing keeps its best review, since a review shows what to improve, not the answer), and the Skill Builder's score is the
+   average over all its graded parts, a part not checked yet counting 0. The answers show from a part's second check on. */
+const GRADED_PARTS = ["flags", "sort", "check", "calc", "ai"];
+function partsOf(tool){ const pp = (state.practiceProgress = state.practiceProgress || {}); const cur = pp[tool] = pp[tool] || {runs:0, bestScore:0, history:[]}; cur.parts = cur.parts || {}; return cur.parts; }
+const partScored = (key)=> key in partsOf(toolOfKey(key));   // (checked once already: this check may show the answers)
+async function scorePart(key, score, opts){
+  const tool = toolOfKey(key), parts = partsOf(tool), first = !(key in parts);
+  if(first) parts[key] = score;
+  else if(opts && opts.best) parts[key] = Math.max(parts[key] || 0, score);
+  const graded = Object.keys(PD_UI).filter(k=> toolOfKey(k)===tool && GRADED_PARTS.includes(PD_UI[k].type));
+  const whole = Math.round(graded.reduce((n, k)=> n + (parts[k] || 0), 0) / Math.max(1, graded.length));
+  // (the whole exercise's score replaces a best kept the old way, from one part's later check: it only grows from here)
+  state.practiceProgress[tool].bestScore = 0;
+  await bumpPracticeProgress(tool, whole);
+  if(!first && !(opts && opts.best) && typeof toast==="function") toast("Practice check: your first check of this part is the one that counts.");
+  if(score>=90 && typeof burstConfetti==="function") burstConfetti();
+}
 const part = (title, intro, inner)=> `<div class="pd-part"><h3>${E(title)}</h3>${intro?`<p class="pd-intro">${intro}</p>`:""}${inner}</div>`;
 const scenario = (html)=> `<div class="pd-scn">${html}</div>`;
 
@@ -291,10 +309,10 @@ window.pdSet = function(key, i, v){ const s = pdState()[key] = pdState()[key] ||
 window.pdCheckFlags = async function(key){
   const cfg = PD_UI[key], s = pdState()[key]||{}, k = key.replace(/\W/g,"_");
   if(cfg.rows.some((_,i)=>!s[i])){ toast("Make a call on every row first."); return; }
-  let ok = 0;
+  let ok = 0; const show = partScored(key);   // (the first check marks right and wrong; the answers show from the second)
   cfg.rows.forEach((r,i)=>{ const good = s[i]===r.answer; if(good) ok++;
     const tr = document.getElementById(`row_${k}_${i}`); if(tr){ tr.classList.toggle("ok",good); tr.classList.toggle("bad",!good); }
-    const w = document.getElementById(`why_${k}_${i}`); if(w) w.textContent = (good?"✓ ":"✗ Correct call: "+r.answer+" — ") + r.why; });
+    const w = document.getElementById(`why_${k}_${i}`); if(w) w.textContent = good ? "✓ " + r.why : show ? "✗ Correct call: "+r.answer+" — " + r.why : "✗ Not this one: look at the documents again (the answer shows after this check)."; });
   const score = Math.round(ok/cfg.rows.length*100);
   document.getElementById("res_"+k).innerHTML = `<b style="color:${score>=80?"var(--success)":"var(--danger)"}">${ok}/${cfg.rows.length} correct (${score}%)</b>`;
   await scorePart(key, score);
@@ -312,10 +330,10 @@ function sorter(key, items, zones, colLabel){
 window.pdCheckSort = async function(key){
   const cfg = PD_UI[key], s = pdState()[key]||{}, k = key.replace(/\W/g,"_");
   if(cfg.items.some((_,i)=>!s[i])){ toast("Place every item first."); return; }
-  let ok = 0;
+  let ok = 0; const show = partScored(key);   // (the first check marks right and wrong; the answers show from the second)
   cfg.items.forEach((it,i)=>{ const good = s[i]===it.z; if(good) ok++;
     const tr = document.getElementById(`row_${k}_${i}`); if(tr){ tr.classList.toggle("ok",good); tr.classList.toggle("bad",!good); }
-    const w = document.getElementById(`why_${k}_${i}`); if(w) w.textContent = (good?"✓ ":"✗ Goes to: "+it.z+" — ") + (it.why||""); });
+    const w = document.getElementById(`why_${k}_${i}`); if(w) w.textContent = good ? "✓ " + (it.why||"") : show ? "✗ Goes to: "+it.z+" — " + (it.why||"") : "✗ Not here: think about where it belongs (the answer shows after this check)."; });
   const score = Math.round(ok/cfg.items.length*100);
   document.getElementById("res_"+k).innerHTML = `<b style="color:${score>=80?"var(--success)":"var(--danger)"}">${ok}/${cfg.items.length} placed correctly (${score}%)</b>`;
   await scorePart(key, score);
@@ -330,10 +348,10 @@ function checklist(key, items, btnLabel){
 }
 window.pdCheckList = async function(key){
   const cfg = PD_UI[key], s = pdState()[key]||{}, k = key.replace(/\W/g,"_");
-  let ok = 0;
+  let ok = 0; const show = partScored(key);   // (the first check marks right and wrong; the answers show from the second)
   cfg.items.forEach((it,i)=>{ const picked = !!s[i], good = picked===!!it.ok; if(good) ok++;
     const row = document.getElementById(`row_${k}_${i}`); if(row){ row.classList.toggle("ok", good); row.classList.toggle("bad", !good); }
-    const w = document.getElementById(`why_${k}_${i}`); if(w) w.textContent = (it.ok?"Should be selected — ":"Should NOT be selected — ") + (it.why||""); });
+    const w = document.getElementById(`why_${k}_${i}`); if(w) w.textContent = good || show ? (it.ok?"Should be selected — ":"Should NOT be selected — ") + (it.why||"") : " ✗ (the answer shows after this check)"; });
   const score = Math.round(ok/cfg.items.length*100);
   document.getElementById("res_"+k).innerHTML = `<b style="color:${score>=80?"var(--success)":"var(--danger)"}">${ok}/${cfg.items.length} right (${score}%)</b>`;
   await scorePart(key, score);
@@ -349,18 +367,18 @@ function calc(key, fields, afterCheck){
 }
 window.pdCheckCalc = async function(key){
   const cfg = PD_UI[key], s = pdState()[key]||{}, k = key.replace(/\W/g,"_");
-  let ok = 0; const notes = [];
+  let ok = 0; const notes = []; const show = partScored(key);   // (the expected figures show from the second check)
   cfg.fields.forEach((f,i)=>{
     const el = document.getElementById(`calc_${k}_${i}`); const raw = el ? el.value : s[i];
     let good;
     if(f.type==="date") good = raw===f.answer;
     else { const v = parseFloat(String(raw).replace(/[$,\s]/g,"")); good = !isNaN(v) && Math.abs(v - f.answer) <= (f.tol==null?1:f.tol); }
     const shown = f.type==="date" ? f.answer : f.unit ? `${f.answer}${f.unit==="%"?"%":" "+f.unit}` : money(f.answer);
-    if(good) ok++; else notes.push(`<li><b>${f.label.replace(/<[^>]+>/g,"")}:</b> expected ${shown}${f.hint?` — ${f.hint}`:""}</li>`);
+    if(good) ok++; else notes.push(`<li><b>${f.label.replace(/<[^>]+>/g,"")}:</b> ${show ? `expected ${shown}` : "not right yet"}${f.hint?` — ${f.hint}`:""}</li>`);
     if(el){ el.classList.toggle("ok",good); el.classList.toggle("bad",!good); }
   });
   const score = Math.round(ok/cfg.fields.length*100);
-  document.getElementById("res_"+k).innerHTML = `<b style="color:${score>=80?"var(--success)":"var(--danger)"}">${ok}/${cfg.fields.length} correct (${score}%)</b>${notes.length?`<ul style="margin:6px 0 0;padding-left:18px">${notes.join("")}</ul>`:""}${cfg.afterCheck?`<div style="margin-top:8px">${cfg.afterCheck}</div>`:""}`;
+  document.getElementById("res_"+k).innerHTML = `<b style="color:${score>=80?"var(--success)":"var(--danger)"}">${ok}/${cfg.fields.length} correct (${score}%)</b>${notes.length?`<ul style="margin:6px 0 0;padding-left:18px">${notes.join("")}</ul>`:""}${cfg.afterCheck && (show || ok===cfg.fields.length)?`<div style="margin-top:8px">${cfg.afterCheck}</div>`:""}`;
   await scorePart(key, score);
 };
 
@@ -396,7 +414,7 @@ window.pdGrade = async function(key, btn){
       `PD CLAIM FILE (Angela Carter · PD-AC-2026-014):\n${CLIENT_DOSSIER_MD}\n\nEXERCISE CONTEXT:\n${cfg.context}${extra?`\n\nTRAINEE'S EARLIER SELECTIONS:\n${extra}`:""}`,
       text, cfg.criteria);
     out.innerHTML = renderEvaluationReport(report, day);
-    await bumpPracticeProgress(tool, report.totalScore);
+    await scorePart(key, report.totalScore, {best: true});   // (its best review: a review shows what to improve, not the answer)
   }catch(e){ out.innerHTML = renderAiErrorBlock(e, "Couldn't review this yet"); }
   if(btn){ btn.disabled = false; btn.textContent = "Get AI review"; }
 };

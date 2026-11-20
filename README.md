@@ -6,7 +6,7 @@
 
 ## 🔐 Sign in on the Main Portal only
 
-Trainees sign in once, on the LSH Training Portal, and open this program from there. Admins always type the admin password on this site (`MASTER_ADMIN_PASSWORD`). The Portal sends them here with a signed, short-lived ticket (`?ticket=…`); `js/portal-gate.js` posts it to `/api/auth/portal`, and the Worker signs a trainee in (same `trainee:<id>` records, so every current registration, progress and approval is kept) (an administrator's ticket `{r: "a", exp}` never signs anyone in: the Worker answers 403 `admin-password`). Someone who opens this site's link directly sees a note with a **Go to the LSH Training Portal** button instead of the form, and the Worker refuses a name + batch typed here (403 `portal-required`), except to renew the session of a trainee already signed in on that device. Someone who opens the link directly gets the *Admin Portal* tab, where an admin types the admin password.
+Trainees sign in once, on the LSH Training Portal, and open this program from there. An administrator signed in on the Portal opens it as a trainer from the Portal's ticket, with no second password; signed in some other way, they type the admin password (`MASTER_ADMIN_PASSWORD`). The Portal sends them here with a signed, short-lived ticket (`?ticket=…`); `js/portal-gate.js` posts it to `/api/auth/portal`, and the Worker signs a trainee in (same `trainee:<id>` records, so every current registration, progress and approval is kept) (an administrator's ticket `{r: "a", n, p, exp}` signs them in as a trainer, once per ticket; `p` must be `PROPERTY DAMAGE` or absent). Someone who opens this site's link directly sees a note with a **Go to the LSH Training Portal** button instead of the form, and the Worker refuses a name + batch typed here (403 `portal-required`), except to renew the session of a trainee already signed in on that device. Someone who opens the link directly gets the *Admin Portal* tab, where an admin types the admin password.
 
 - **Turning it on:** set `PORTAL_SSO_SECRET` (same value as the Portal) as a Worker secret. The admin password (`MASTER_ADMIN_PASSWORD`, the Portal's master admin password) must be set too. Until both are set, `/api/auth/status` reports `portalOnly: false` and the old name + batch form stays. A space or line break around the secret is ignored.
 - **Which tickets are taken (`p`, `SSO_REQUIRE_AUDIENCE`):** a Portal ticket names the program it is for (`p`, the topic key `PROPERTY DAMAGE`). A ticket whose `p` is another program, a tool, or a course's tool link (`p: "tool"`) is refused (`code: audience`), and every ticket, a trainee's, a trainer's or the Sign-in check's, works once. A ticket with no `p` is still taken while the rollout is under way. **Set `SSO_REQUIRE_AUDIENCE` to `1` on every program once the Portal and all programs are deployed**: from then on a ticket with no `p` is refused too.
@@ -72,7 +72,7 @@ There are 16 calls across five lines. Each one ends with the note that kind of c
 | 💵 Negotiation & Total Loss | Negotiate the total loss · "My rental ends Thursday" · the payoff call |
 | ✍️ Settlement & Close | The "standard release" · "Should I take it?" · the subrogation follow-up |
 
-The course opens it at `https://cm-training-activity.pages.dev/simulators/call.html?program=PD` (a step adds `&line=<line>` and `&mode=graded`). The Training Portal sends that on to the Call Simulator — ☎ **LSH Ring Channel**, the training phone — signed in through the Portal (nobody signs in again) and in its own tab: the phone rings, the trainee answers with a headset and works the call with the phone's own keys (mute, hold, transfer) and 🔎 Case lookup. Admins can change the address in **🧰 Tools → Admin: tool addresses**.
+The course opens it at `https://cm-training-activity.pages.dev/simulators/call.html?program=PD` (each day's Call Simulator step adds `&line=<its PD line>`; Ring Channel doesn't have the PD pack yet, so the card points the trainee at the day's 🔥 Live Roleplays until it does). The Training Portal sends that on to the Call Simulator — ☎ **LSH Ring Channel**, the training phone — signed in through the Portal (nobody signs in again) and in its own tab: the phone rings, the trainee answers with a headset and works the call with the phone's own keys (mute, hold, transfer) and 🔎 Case lookup. Admins can change the address in **🧰 Tools → Admin: tool addresses**.
 
 **Note on the call packs:** Ring Channel's scenario library is the Foundational pack on three lines (Reception and Calendar Management on the Main Line, Intake on the Intake Line), so a PD step naming one of the five PD lines lands the trainee on the phone's line picker until those calls are added on Ring Channel itself — a trainer writes them in its **📚 Scenarios**, or they are ported into its `src/scenarios.js`.
 
@@ -93,7 +93,14 @@ What this course still does for attendance:
   time) as `checkin:<YYYY-MM-DD>:<trainee id>` = `{timeIn, at, name, batch, training}` — each trainee
   their own key, so a room signing in at once never overwrites one another; the same values are in the
   key's KV metadata for the portal; kept 40 days. The portal's page shows it marked "auto" until a
-  trainer sets a Time In.
+  trainer sets a Time In. `js/checkin.js` sends it (when the page opens, when the trainee comes back to the tab, and on
+  their first click of the day) with the day they're on, "Day N: <title>", the Portal's own name for it.
+- **Portal simulator grades.** The Portal keeps a trainee's simulator grades for this course in `pd:simresults:<id>` (Day 4's
+  Email Workspace); the trainee may read their own: the dashboard band shows them as the **Simulators** card, and the Practice
+  page marks the Email Workspace card done with its best score (`js/sim-results.js`).
+- **Skill Builder scores.** Each graded part counts its first check (a check shows the answers from the second one on, so a
+  later check is practice); the AI-graded writing counts its best review; the Skill Builder's score is the average over all
+  its graded parts, a part not checked yet counting 0.
 - **The records live in this course's KV**, under the Worker's `pd:` prefix: `attendance:<batch key>:<YYYY-MM-DD>` (`_none` for
   no batch) = `{batch, date, day, training, rows:{<trainee id>:{name, training, timeIn, timeOut,
   status, note, at, by}}}`. The portal reads and writes them directly, and keeps the attendance
@@ -142,7 +149,7 @@ python3 build/make_documents.py                                     # only if th
 python3 build/build.py ../Case-Management-Training/index.html      # path to the CM course's index.html
 ```
 
-`build.py` rewords the CM page for PD, then inserts the PD content from `build/`. Every edit checks that its anchor exists, so the script stops with an error if the CM page changed that part. When that happens, update the anchor in `build.py` and run it again. Carry new features from the CM course's `js/cm-updates.js` and `js/cm-skillbuilders.js` into `js/pd-updates.js` and `js/pd-skillbuilders.js` by hand. `js/daily-activities.js` is the same file as in the CM course.
+`build.py` rewords the CM page for PD, then inserts the PD content from `build/`. **Its anchors were written against CM's page as it was before the Case Flow layout** (CM `f02d92c`), so against today's CM page it stops at its first anchor: refresh the anchors before using it again, or carry engine changes into `index.html` by hand (as the check-in, the simulator grades and the Portal sign-in changes were). Every edit checks that its anchor exists, so the script stops with an error if the CM page changed that part. When that happens, update the anchor in `build.py` and run it again. Carry new features from the CM course's `js/cm-updates.js` and `js/cm-skillbuilders.js` into `js/pd-updates.js` and `js/pd-skillbuilders.js` by hand. `js/daily-activities.js` is the same file as in the CM course.
 
 **Content source:** the topics, Quick Checks and Knowledge Checks were written for this build from standard PI-firm PD claims practice; the slides trainees see are the Canva decks (Day 1 is the deck titled "Property Damage Claims DAY 1"; Days 2–5 are still to be confirmed from the decks). The decks couldn't be opened from the build environment, so before the first live batch, check that each day's deck is the right one and that the Quick Checks and Knowledge Check questions in `build/day1.js`–`day5.js` match what the deck teaches.
 
@@ -190,7 +197,7 @@ The smoke and requests tests need Playwright.
   - `AI_GATEWAY_SECRET`: optional (a Secret; the same value as on the Portal). When set, every AI call goes to the Main Portal's shared AI gateway (`/api/ai-gateway`): one master key pool and one shared budget for every call flow, counted per program. Without it this Worker uses its own `GEMINI_API_KEY` pool.
    - `GEMINI_API_KEY10`: the PD course's own Gemini key, for AI grading and roleplays. If it isn't set, the Worker falls back to `GEMINI_API_KEY`.
    - `SESSION_SECRET`: optional.
-4. To have the Training Portal's **Progress & Feedback** page list PD trainees, add the program to `PROGRAMS` in the portal's `functions/api/program-progress.js` with key prefix `pd:`, 5 days and the course address.
+4. The Training Portal already lists PD (prefix `pd:`, 5 days) in `functions/api/program-progress.js` and `functions/_attendance.js`: change `days` there if the day count changes.
 
 ## 🎨 The standard page style
 

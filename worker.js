@@ -238,7 +238,8 @@ const PROTECTED_TRAINEE_FIELDS = ["approved", "rejected", "archived", "labAttemp
 // The trainee reads it (js/graded-calls.js), but never writes it (traineeWrite refuses keys it doesn't know).
 function canRead(tok, key) {
   if (tok.role === "a") return true;
-  return OWN(tok.id).includes(key) || key === `callsim:${tok.id}` || key.startsWith(`actup:${tok.id}:`) || PUBLIC_READ.some((re) => re.test(key));
+  // simresults:<id>: their Portal simulator grades (Day 4's Email Workspace), kept by the Portal (read only: traineeWrite refuses it)
+  return OWN(tok.id).includes(key) || key === `callsim:${tok.id}` || key === `simresults:${tok.id}` || key.startsWith(`actup:${tok.id}:`) || PUBLIC_READ.some((re) => re.test(key));
 }
 async function traineeWrite(env, tok, key, value) {
   const kv = kvOf(env);
@@ -514,7 +515,7 @@ export default {
         if (!raw) return new Response("The Platform Blueprint hasn't been generated yet — an admin opening the portal builds it automatically within a minute.", { status: 404, headers: { "Content-Type": "text/plain" } });
         const { b64, build } = JSON.parse(raw);
         const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-        return new Response(bin, { headers: { "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="LSH_CM_Platform_Blueprint_${build}.pdf"`, "Cache-Control": "no-cache" } });
+        return new Response(bin, { headers: { "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="LSH_PD_Platform_Blueprint_${build}.pdf"`, "Cache-Control": "no-cache" } });
       }
       if (path === "/version" || path === "/api/version") {
         // Diagnostic: shows which portal build is actually deployed.

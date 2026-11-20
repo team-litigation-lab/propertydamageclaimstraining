@@ -138,7 +138,9 @@ rep_re(r'<script src="/js/cm-practice\.js\?v=[^"]*"></script>', '<script src="js
 # The admins' "🏠 Main Portal" button (js/portal-link.js) and 🕘 Attendance (js/attendance.js), the same files in
 # every LSH course: drop any copy inherited from the CM page and add ours after the last script.
 s = re.sub(r'<script src="/?js/(portal-link|attendance)\.js[^"]*"></script>\n?', '', s)
-rep('<script src="/js/daily-activities.js?v=1"></script>', '<script src="js/daily-activities.js?v=1"></script>\n<script src="js/attendance.js?v=2"></script>\n<script src="js/portal-link.js?v=1"></script>')
+# (js/attendance.js is gone: attendance is the Portal's. js/checkin.js, the automatic Time In, and js/sim-results.js, the Portal's
+# simulator grades, are added with them: platform QA 2026-11-19, PD findings 4, 6 and 10.)
+rep('<script src="/js/daily-activities.js?v=1"></script>', '<script src="js/daily-activities.js?v=1"></script>\n<script src="js/portal-link.js?v=1"></script>\n<script src="js/checkin.js?v=1"></script>\n<script src="js/sim-results.js?v=1"></script>')
 s = re.sub(r'var APP_BUILD = "pd-[^"]*";', f'var APP_BUILD = "pd-{datetime.date.today().isoformat().replace("-", ".")}-a";', s, count=1)
 
 open(OUT, "w", encoding="utf8").write(s)

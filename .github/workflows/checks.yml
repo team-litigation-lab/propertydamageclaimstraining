@@ -71,3 +71,7 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/pw/node_modules
         run: node .github/scripts/graded-calls.cjs http://localhost:8787/ || { echo "--- server log ---"; cat "$RUNNER_TEMP/server.log"; exit 1; }
+      - name: Skill Builder scoring (a part's first check counts and gives no answers away; the score is the whole exercise)
+        env:
+          NODE_PATH: ${{ runner.temp }}/pw/node_modules
+        run: node .github/scripts/skillbuilder.cjs http://localhost:8787/ || { echo "--- server log ---"; cat "$RUNNER_TEMP/server.log"; exit 1; }
