@@ -12195,11 +12195,12 @@ function formatCertName(first, last, full){
   first = String(first||"").trim(); last = String(last||"").trim();
   if(!last) return first;
   let middle = "", suffix = "";
-  const f = String(full||"").replace(/\s+/g," ").trim(), lo = f.toLowerCase();
-  if(f && lo.startsWith(first.toLowerCase()+" ") && lo.includes(" "+last.toLowerCase())){
-    const at = lo.lastIndexOf(" "+last.toLowerCase());
-    middle = f.slice(first.length, at).trim();
-    suffix = f.slice(at + 1 + last.length).replace(/^,?\s*/, "").trim();
+  // (the first and last names are matched as whole words: last "Le" in "Ana Lee" is no match, so the name stays "Le, Ana")
+  const f = String(full||"").replace(/\s+/g," ").trim(), esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const m = f && new RegExp("^" + esc(first.replace(/\s+/g, " ")) + "((?: .*)?) " + esc(last.replace(/\s+/g, " ")) + "(?=$|[ ,])(.*)$", "i").exec(f);
+  if(m){
+    middle = m[1].trim();
+    suffix = m[2].replace(/^,?\s*/, "").trim();
   }
   const fmt = (state.certSettings && state.certSettings.nameFormat) || "lastFirst";
   return fmt==="firstLast" ? [first, middle, last].filter(Boolean).join(" ") + (suffix ? ", " + suffix : "")

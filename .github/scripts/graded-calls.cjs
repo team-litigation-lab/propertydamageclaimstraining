@@ -66,6 +66,10 @@ async function workerChecks() {
     if (!sim || !/84%/.test(sim.text) || !/1 graded/i.test(sim.text) || !/Email Workspace: best 84%/.test(sim.tip)) fail(`the dashboard band's Simulators card: ${JSON.stringify(sim)}`);
     const ews = await page.evaluate(() => { const v = window.__pdPracticeItem({ kind: 'sim', id: 'email' }); return v && { done: v.done, label: v.doneLabel }; });
     if (!ews || !ews.done || ews.label !== '✓ Best 84%') fail(`the Email Workspace card is done with its best score: ${JSON.stringify(ews)}`);
+    // (a Call Simulator step's PD line isn't sent on to Ring Channel until it has PD's pack: a line it doesn't know could leave
+    // the training phone with no calls)
+    const call = await page.evaluate(() => { const v = window.__pdPracticeItem({ kind: 'sim', id: 'calls', line: 'pd-intake' }); return v && v.act; });
+    if (!call || /line=/.test(call)) fail(`a Call Simulator step sends &line= to Ring Channel: ${call}`);
     await browser.close();
     if (failures.length) { console.log(`${failures.length} failure(s):`); failures.forEach((f, i) => console.log(`${i + 1}. ${f}`)); process.exit(1); }
     console.log('Graded calls test passed (a trainee reads only their own graded calls and can\'t write them; the dashboard band\'s Graded calls card).');

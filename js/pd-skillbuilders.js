@@ -153,8 +153,8 @@ const PD_TOOL_DEFAULTS = [
   // Shared simulators on the LSH Training Portal (used by every program). The course
   // opens them with ?program=PD and the trainee's name and batch, so results carry them.
   // The Call Simulator is ☎ LSH Ring Channel's (the training phone): this Portal address opens it signed in
-  // (→ /api/launch?tool=ringchannel&to=calls), with ?program=PD (the course the call counts in) and the step's
-  // ?line= and &mode=graded. It opens in its own tab, and a graded call is reported to the Portal's
+  // (→ /api/launch?tool=ringchannel&to=calls), with ?program=PD (the course the call counts in) and &mode=graded
+  // (a step's ?line= is sent once Ring Channel has PD's own pack: js/pd-practice.js). It opens in its own tab, and a graded call is reported to the Portal's
   // /api/call-results, so it still counts here.
   {id:"calls", icon:"📞", name:"Call Simulator (☎ LSH Ring Channel)", short:"Call Simulator", status:"live",
    url:"https://cm-training-activity.pages.dev/simulators/call.html", portalSim:true,
