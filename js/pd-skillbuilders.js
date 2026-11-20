@@ -117,7 +117,11 @@ const dayOfTool = (id)=> { const t = PRACTICE_TOOLS.find(x=>x.id===id); return t
    writing keeps its best review, since a review shows what to improve, not the answer), and the Skill Builder's score is the
    average over all its graded parts, a part not checked yet counting 0. The answers show from a part's second check on. */
 const GRADED_PARTS = ["flags", "sort", "check", "calc", "ai"];
-function partsOf(tool){ const pp = (state.practiceProgress = state.practiceProgress || {}); const cur = pp[tool] = pp[tool] || {runs:0, bestScore:0, history:[]}; cur.parts = cur.parts || {}; return cur.parts; }
+// (a record from before part scores were kept: its best, earned the old way, is kept as a floor (legacyBest) until the whole-exercise
+// score passes it, never wiped. Data-safety review 2026-11-19)
+function partsOf(tool){ const pp = (state.practiceProgress = state.practiceProgress || {}); const cur = pp[tool] = pp[tool] || {runs:0, bestScore:0, history:[]};
+  if(!cur.parts){ cur.parts = {}; if((cur.bestScore || 0) > 0 && cur.legacyBest == null) cur.legacyBest = cur.bestScore; }
+  return cur.parts; }
 const partScored = (key)=> key in partsOf(toolOfKey(key));   // (checked once already: this check may show the answers)
 async function scorePart(key, score, opts){
   const tool = toolOfKey(key), parts = partsOf(tool), first = !(key in parts);
@@ -125,8 +129,8 @@ async function scorePart(key, score, opts){
   else if(opts && opts.best) parts[key] = Math.max(parts[key] || 0, score);
   const graded = Object.keys(PD_UI).filter(k=> toolOfKey(k)===tool && GRADED_PARTS.includes(PD_UI[k].type));
   const whole = Math.round(graded.reduce((n, k)=> n + (parts[k] || 0), 0) / Math.max(1, graded.length));
-  // (the whole exercise's score replaces a best kept the old way, from one part's later check: it only grows from here)
-  state.practiceProgress[tool].bestScore = 0;
+  // (the best is the whole exercise's score, or the old way's best while that is higher: legacyBest)
+  state.practiceProgress[tool].bestScore = state.practiceProgress[tool].legacyBest || 0;
   await bumpPracticeProgress(tool, whole);
   if(!first && !(opts && opts.best) && typeof toast==="function") toast("Practice check: your first check of this part is the one that counts.");
   if(score>=90 && typeof burstConfetti==="function") burstConfetti();
