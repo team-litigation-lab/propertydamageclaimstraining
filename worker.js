@@ -194,6 +194,35 @@ function candidateIds(name, batch) {
   return { newId: b ? `${slug}--${b}` : slug, rawId: raw ? `${slug}--${raw}` : slug, legacyId: slugPart(name).slice(0, 40) || "trainee" };
 }
 
+/* 🔁 A trainee whose Batch ID the Portal changed (platform QA 2026-11-19, PD finding 3 / LN finding 5): their ID is name + batch,
+   so the new batch would find no record and start an empty one beside their real one. movedRecord finds the trainee's one other
+   active record by the same name under another batch and keeps using it: its batch becomes the new one (batchFrom keeps the old,
+   which the Portal's block list also matches), and trainee-alias:<new id> = <kept id> lets the session renewal here and the
+   Portal's graded results (call-results / sim-results) find it. Two such records (two people, or a duplicate), a blocked one, or
+   none: nothing moves. The same idea as Standard Training's movedBatch. */
+async function movedRecord(env, kv, who) {
+  const ids = candidateIds(who.name, who.batch);
+  for (const c of new Set([ids.newId, ids.rawId])) if (await kv.get(`trainee:${c}`)) return null;   // a record under this batch: nothing moved
+  const alias = await kv.get(`trainee-alias:${ids.newId}`);
+  if (alias && /^[a-z0-9-]{1,100}$/.test(alias) && await kv.get(`trainee:${alias}`)) return (await blockedIds(env, true))[alias] ? null : alias;
+  const slug = ids.newId.split("--")[0];
+  if (!slug || !ids.newId.includes("--")) return null;
+  const list = await kv.list({ prefix: `trainee:${slug}--` }).catch(() => null);
+  const keys = ((list && list.keys) || []).map((k) => k.name);
+  if (!keys.length || keys.length > 20) return null;
+  const hits = [];
+  for (const k of keys) {
+    let r = null; try { r = JSON.parse((await kv.get(k)) || "null"); } catch (e) { r = null; }
+    if (r && !r.archived && !r.rejected && slugPart(r.name || "") === slugPart(who.name) && batchKey(r.batch || "") !== batchKey(who.batch)) hits.push([k.slice("trainee:".length), r]);
+  }
+  if (hits.length !== 1) return null;
+  const [id, rec] = hits[0];
+  if ((await blockedIds(env, true))[id]) return null;
+  await kv.put(`trainee:${id}`, JSON.stringify(Object.assign({}, rec, { batchFrom: rec.batch || "", batch: canonicalBatch(who.batch) || String(who.batch).trim(), batchMovedAt: new Date().toISOString() })));
+  await kv.put(`trainee-alias:${ids.newId}`, id);
+  return id;
+}
+
 
 /* ---------- what a trainee may touch ---------- */
 // Daily Activities: activities:dayN and their attachments (actfile:*) are published by admins for everyone;
@@ -515,9 +544,11 @@ export default {
         return json({ token: await makeToken(env, "a", "admin", 12) });
       }
       // The trainee's session for a name + batch: their record id (new or legacy form) and token.
-      const traineeSession = async (name, batch, id) => {
+      // linked: the record movedRecord (or its alias) found for this trainee under an earlier Batch ID
+      const traineeSession = async (name, batch, id, linked) => {
         const { newId, rawId, legacyId } = candidateIds(name, batch);
         let chosen = newId, existing = await kv.get(`trainee:${newId}`);
+        if (linked) { const l = await kv.get(`trainee:${linked}`); if (l) { chosen = linked; existing = l; } }
         // a record made before Batch IDs were read in one form: keyed by the batch exactly as it was typed
         if (!existing && rawId !== newId) {
           const raw = await kv.get(`trainee:${rawId}`);
@@ -542,7 +573,9 @@ export default {
           // Trainees come in through the LSH Training Portal (/api/auth/portal). A name + batch typed here is
           // accepted only to renew the session of a trainee who is already signed in on this device.
           const own = await readTraineeTokenGrace(env, request);
-          if (!own || (own.id !== newId && own.id !== rawId && own.id !== legacyId)) return json({ error: "portal-required" }, 403);
+          // (or the record a Batch ID change kept: trainee-alias:<new id>, movedRecord)
+          const movedTo = await kv.get(`trainee-alias:${newId}`);
+          if (!own || (own.id !== newId && own.id !== rawId && own.id !== legacyId && own.id !== movedTo)) return json({ error: "portal-required" }, 403);
         }
         // A new registration has to give the Batch ID in its one form: B + the date the batch started (MMDDYY).
         // Someone whose records are already here keeps signing in with the Batch ID they registered under.
@@ -550,7 +583,8 @@ export default {
           const known = (await Promise.all([newId, rawId, legacyId].map(k => kv.get(`trainee:${k}`)))).some(Boolean);
           if (!known) return json({ error: "batch-format" }, 400);
         }
-        return traineeSession(name, batch, id);
+        const movedId = await kv.get(`trainee-alias:${newId}`);
+        return traineeSession(name, batch, id, movedId && id === movedId ? movedId : undefined);
       }
       if (path === "/api/auth/portal") {
         // The Main Portal's sign-in: a signed ticket carries who the trainee is (their name and batch as registered there).
@@ -574,7 +608,7 @@ export default {
           // trainer, with no second password here (the ticket was taken once, above).
           return json({ admin: true, name: who.name, token: await makeToken(env, "a", "admin", 12) });
         }
-        const res = await traineeSession(who.name, who.batch, "");
+        const res = await traineeSession(who.name, who.batch, "", (await movedRecord(env, kv, who)) || undefined);
         if (res.status !== 200) return res;   // 🚫 (blocked: access-offboarded)
         const out = await res.json();
         // The Portal's approval is the only trainee approval: a trainee it signs in is approved here too

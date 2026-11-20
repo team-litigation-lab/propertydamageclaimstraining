@@ -134,6 +134,28 @@ async function ticketFor(payloadObj, secret) {
         if (fm.status !== 200 || fm.body.id !== 'maria-santos--b100926' || fullName !== 'Maria L. Santos') fail(`a ticket's full name should be kept as fullName with the same ID: ${JSON.stringify(fm.body && { id: fm.body.id, fullName })}`);
     }
 
+    // 7. 🔁 a Batch ID changed on the Portal: the trainee keeps their record (platform QA 2026-11-19, PD finding 3)
+    {
+        const e8 = makeEnv({ PORTAL_SSO_SECRET: SECRET }), soon = () => Date.now() + 60000;
+        const first = await call(e8, '/api/auth/portal', { ticket: await ticketFor({ first: 'Mark', last: 'Lee', b: 'B100126', exp: soon() }, SECRET) });
+        const rec = JSON.parse(e8.__store.get('pd:trainee:mark-lee--b100126'));
+        rec.dayProgress = { 1: { done: true, score: 100 } };
+        e8.__store.set('pd:trainee:mark-lee--b100126', JSON.stringify(rec));
+        const moved = await call(e8, '/api/auth/portal', { ticket: await ticketFor({ first: 'Mark', last: 'Lee', b: 'B110226', exp: soon() }, SECRET) });
+        const kept = JSON.parse(e8.__store.get('pd:trainee:mark-lee--b100126') || 'null');
+        if (first.status !== 200 || moved.status !== 200 || moved.body.id !== 'mark-lee--b100126') fail(`a Batch ID change should keep the trainee's record: ${JSON.stringify(moved.body && moved.body.id)}`);
+        if (!kept || kept.batch !== 'B110226' || kept.batchFrom !== 'B100126' || !kept.dayProgress[1].done) fail(`the kept record should carry the new batch and its progress: ${JSON.stringify(kept)}`);
+        if (e8.__store.has('pd:trainee:mark-lee--b110226')) fail('no empty record is made under the new batch');
+        if (e8.__store.get('pd:trainee-alias:mark-lee--b110226') !== 'mark-lee--b100126') fail('the alias for the new id is kept (the Portal follows it)');
+        const renew = await call(e8, '/api/auth/trainee', { name: 'Mark Lee', batch: 'B110226', id: 'mark-lee--b100126' }, { Authorization: 'Bearer ' + moved.body.token });
+        if (renew.status !== 200 || renew.body.id !== 'mark-lee--b100126') fail(`the session renews on the kept record: ${JSON.stringify(renew)}`);
+        // two other records with the name (two people): nothing moves
+        const e9 = makeEnv({ PORTAL_SSO_SECRET: SECRET });
+        for (const b of ['B010126', 'B020126']) e9.__store.set(`pd:trainee:sam-ray--${b.toLowerCase()}`, JSON.stringify({ id: `sam-ray--${b.toLowerCase()}`, name: 'Sam Ray', batch: b, approved: true }));
+        const two = await call(e9, '/api/auth/portal', { ticket: await ticketFor({ first: 'Sam', last: 'Ray', b: 'B030126', exp: soon() }, SECRET) });
+        if (two.status !== 200 || two.body.id !== 'sam-ray--b030126') fail(`with two other same-named records nothing moves: ${JSON.stringify(two.body && two.body.id)}`);
+    }
+
     if (failures.length) { console.log(`\n${failures.length} failure(s):`); failures.forEach((f, i) => console.log(`${i + 1}. ${f}`)); process.exit(1); }
     console.log('Single sign-on: the Portal is the only way a trainee gets in, a typed name + batch is refused, a missing PORTAL_SSO_SECRET says so, and a trainer signed in on the Portal gets in with no second password, once per ticket.');
 })().catch(e => { console.error(e); process.exit(1); });
