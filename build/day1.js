@@ -292,7 +292,7 @@ const DAY1 = {
         ],
         discussionCase: "The claims rep says, “We'll need a recorded statement from your client before we can make a liability decision.” What do you say?"
       },
-      trainerCue: "Demo the call using the process boxes. Then send trainees to the Call Simulator's “Open the Third-Party Claim” call (PD pack) and the Day 1 Skill Builder."
+      trainerCue: "Demo the call using the process boxes. Then send trainees to the Call Sim's “Open the Third-Party Claim” call (PD pack) and the Day 1 Skill Builder."
     },
     { h: "The Letter of Representation (LOR)",
       layout: "THREEBOX",

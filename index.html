@@ -2759,7 +2759,7 @@ const DAY1 = {
         ],
         discussionCase: "The claims rep says, “We'll need a recorded statement from your client before we can make a liability decision.” What do you say?"
       },
-      trainerCue: "Demo the call using the process boxes. Then send trainees to the Call Simulator's “Open the Third-Party Claim” call (PD pack) and the Day 1 Skill Builder."
+      trainerCue: "Demo the call using the process boxes. Then send trainees to the Call Sim's “Open the Third-Party Claim” call (PD pack) and the Day 1 Skill Builder."
     },
     { h: "The Letter of Representation (LOR)",
       layout: "THREEBOX",
@@ -3215,7 +3215,7 @@ const DAY2 = {
         ],
         discussionCase: "The adjuster says, “There's coverage, but we're reviewing whether Kevin had permission to drive.” What does that mean, and who needs to know?"
       },
-      trainerCue: "Practice it in the Call Simulator's Coverage & Liability line (PD pack), then complete the Coverage Spotter Skill Builder."
+      trainerCue: "Practice it in the Call Sim's Coverage & Liability line (PD pack), then complete the Coverage Spotter Skill Builder."
     },
     { h: "Liability Decisions: Accepted, Split, Denied, Under Investigation",
       layout: "QUADRANT",
@@ -3431,7 +3431,7 @@ const DAY3 = {
         ],
         discussionCase: "The rental counter tells Angela, “Your insurance didn't authorize anything.” What do you check, and who do you call first?"
       },
-      trainerCue: "Practice the calls in the Call Simulator's Rental, Tow & Shop line (PD pack): the adjuster's rental authorization and the rental counter."
+      trainerCue: "Practice the calls in the Call Sim's Rental, Tow & Shop line (PD pack): the adjuster's rental authorization and the rental counter."
     },
     { h: "Like-Kind, Daily Rates & What the Client Pays",
       layout: "COMPARE",
@@ -4065,7 +4065,7 @@ const DAY4 = {
         ],
         discussionCase: "The adjuster offers to fix the trim but not the mileage. What do you say?"
       },
-      trainerCue: "Practice live: the Call Simulator's Negotiation & Total Loss line (PD pack) has Priya Shah on Angela's valuation."
+      trainerCue: "Practice live: the Call Sim's Negotiation & Total Loss line (PD pack) has Priya Shah on Angela's valuation."
     },
     { h: "Handling Adjuster Tactics",
       layout: "TABLE",
@@ -4186,7 +4186,7 @@ const DAY4 = {
         ],
         discussionCase: "After two calls, the adjuster fixes only the fees. When do you escalate, and what goes in your memo?"
       },
-      trainerCue: "Launch the Day 4 Skill Builder — Total Loss Valuation & Counter: audit VR-26-18840, pick the true comps, build the counter math, write the counter letter, then negotiate live in the Call Simulator."
+      trainerCue: "Launch the Day 4 Skill Builder — Total Loss Valuation & Counter: audit VR-26-18840, pick the true comps, build the counter math, write the counter letter, then negotiate live in the Call Sim."
     }
   ],
   quickChecks: [
@@ -5906,13 +5906,13 @@ function orientSlides(){
      </div>`},
    {k:"Navigation", h:"Getting around", body:`
      <div class="or-nav">
-       ${[["Dashboard","Your home: progress, days, stats."],["🎲 Tasks","Surprise tasks from your trainer — acknowledge, plan and resolve before the timer ends. Graded."],["Claim File","Angela Carter's PD claim — the working file. Read it first."],["📁 Documents","Every dec page, invoice, estimate, valuation and release — with its CMS upload category."],["🧪 Practice","Every practice tool, organized the same way for each day: 🧠 Skill Builders on the claim documents, 🗣 Communication (the Call Simulator's Property Damage calls and live roleplay) and 🗂 Systems (the CMS). Each day's tools open with that day."],["My Notes","Your private notes — download them as a PDF."],["Handouts","Printable checklists and Excel templates for each day."],["🎯 Focus","Your trainer's feedback and what to work on next."],["💬 Feedback","Tell us what's working and what isn't — anonymously if you like."]].map(([a,b])=>`<div><b>${a}</b><span>${b}</span></div>`).join("")}
+       ${[["Dashboard","Your home: progress, days, stats."],["🎲 Tasks","Surprise tasks from your trainer — acknowledge, plan and resolve before the timer ends. Graded."],["Claim File","Angela Carter's PD claim — the working file. Read it first."],["📁 Documents","Every dec page, invoice, estimate, valuation and release — with its LSH CaseWorks upload category."],["🧪 Practice","Every practice tool, organized the same way for each day: 🧠 Skill Builders on the claim documents, 🗣 Communication (the Call Sim's Property Damage calls and live roleplay) and 🗂 Systems (LSH CaseWorks). Each day's tools open with that day."],["My Notes","Your private notes — download them as a PDF."],["Handouts","Printable checklists and Excel templates for each day."],["🎯 Focus","Your trainer's feedback and what to work on next."],["💬 Feedback","Tell us what's working and what isn't — anonymously if you like."]].map(([a,b])=>`<div><b>${a}</b><span>${b}</span></div>`).join("")}
      </div>
      <p class="or-foot">On a phone, everything is under <b>☰ Menu</b>. Search (top bar) finds any topic or tool.</p>`},
    {k:"Client", h:"Meet the claim: Angela Carter — 2022 Toyota RAV4", body:`
       <div class="or-client">
         <div class="or-avatar">AC</div>
-        <div><p class="or-lead" style="margin-top:0">Stopped at a red light, rear-ended by a driver looking at his GPS in his mother's Explorer. Her RAV4 is at a tow yard at $65 a day, she has no car, and the other insurer wants a recorded statement. Every lesson, Skill Builder, call and CMS exercise works this one claim.</p>
+        <div><p class="or-lead" style="margin-top:0">Stopped at a red light, rear-ended by a driver looking at his GPS in his mother's Explorer. Her RAV4 is at a tow yard at $65 a day, she has no car, and the other insurer wants a recorded statement. Every lesson, Skill Builder, call and LSH CaseWorks exercise works this one claim.</p>
         <ul class="or-list"><li>Read the <b>Claim File</b> before Day 1, then open the documents in <b>📁 Documents</b>.</li><li>The documents contain real-world errors — a transposed VIN, an expired dec page, a wrong valuation — catching them is the job.</li><li>Treat everything as confidential, like a real client file.</li></ul></div>
       </div>`},
    {k:"Practice", h:"Skill Builders: how grading works", body:`
@@ -6175,7 +6175,7 @@ function renderClientProfile(){
 
 
 function renderTopbar(){
-  let views = [["dashboard","Dashboard"],["tasks","🎲 Tasks"],["clientprofile","Claim File"],["casedocs","📁 Documents"],["practice","Skill Builders"],["calls","🛠 Simulators"],["tools","🧰 Tools"],["crisisroleplay","🔥 Roleplay"],["notes","Notes"],["handouts","Handouts"]];
+  let views = [["dashboard","Dashboard"],["tasks","🎲 Tasks"],["clientprofile","Claim File"],["casedocs","📁 Documents"],["practice","Skill Builders"],["calls","🛠 LSH Sims"],["tools","🧰 Tools"],["crisisroleplay","🔥 Roleplay"],["notes","Notes"],["handouts","Handouts"]];
   if(state.isAdmin){
     // Admin is a trainer monitoring dashboard, not a trainee workspace — hide
     // the trainee-facing-only views that have no role here.
@@ -7994,7 +7994,7 @@ window.addEventListener("resize", ()=>{ clearTimeout(window.__heroFitT); window.
 if(document.fonts && document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", ()=>fitHeroText());
 
 /* ---------- Uniform page heroes: every page title gets the dashboard hero look ---------- */
-const PAGE_EYEBROWS = {clientprofile:"Claim File", casedocs:"Claim Documents", tools:"Training Tools", cms:"Training Tools", calls:"Simulators", practice:"Skill Builders", notes:"My Notes", handouts:"Reference Library", crisisroleplay:"Live Roleplay", facilitatorguide:"For Trainers", admin:"Admin Dashboard"};
+const PAGE_EYEBROWS = {clientprofile:"Claim File", casedocs:"Claim Documents", tools:"Training Tools", cms:"Training Tools", calls:"LSH Sims", practice:"Skill Builders", notes:"My Notes", handouts:"Reference Library", crisisroleplay:"Live Roleplay", facilitatorguide:"For Trainers", admin:"Admin Dashboard"};
 function applyPageHero(){
   if(["dashboard","day","login","pendingApproval","registrationDenied","orientation","tool"].includes(state.view)) return;
   const main = document.querySelector("#app > main"); if(!main) return;
@@ -9544,7 +9544,7 @@ function renderPracticeHub(){
   return `
     <p class="eyebrow">Skill Builders</p>
     <h1 style="color:var(--navy);font-size:26px;margin:6px 0 10px;">Skill Builders — Practice on the Real Claim File</h1>
-    <p style="color:var(--ink-soft);font-size:14.5px;max-width:70ch;margin:0 0 26px;">Every Skill Builder runs on Angela Carter's claim documents — then sends you into the Call Simulator and the CMS to do the work. Each day's Skill Builders open when you reach that day${state.isAdmin ? " — as an admin you can open all of them" : ""}.</p>
+    <p style="color:var(--ink-soft);font-size:14.5px;max-width:70ch;margin:0 0 26px;">Every Skill Builder runs on Angela Carter's claim documents — then sends you into the Call Sim and LSH CaseWorks to do the work. Each day's Skill Builders open when you reach that day${state.isAdmin ? " — as an admin you can open all of them" : ""}.</p>
     <div class="card" style="padding:14px 18px;margin-bottom:22px;background:#F8F9FC;border-left:4px solid var(--navy);">
       <b style="font-size:12px;color:var(--navy);text-transform:uppercase;letter-spacing:.03em;">A note before you begin</b>
       <p style="font-size:12.8px;color:#37394A;margin:8px 0 0;font-style:italic;">Utilization of AI in the legal industry depends entirely on the firm's or attorney's specific preferences — it is never a universal default. Different roles in this industry require human intervention regardless of how capable a tool is. Because this work touches attorney-client privilege, AI must be used with the utmost discretion, and only with actual approval.</p>
