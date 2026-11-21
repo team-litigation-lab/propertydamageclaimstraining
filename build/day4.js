@@ -284,7 +284,7 @@ const DAY4 = {
         ],
         discussionCase: "The adjuster offers to fix the trim but not the mileage. What do you say?"
       },
-      trainerCue: "Practice live: the Call Simulator's Negotiation & Total Loss line (PD pack) has Priya Shah on Angela's valuation."
+      trainerCue: "Practice live: the Call Sim's Negotiation & Total Loss line (PD pack) has Priya Shah on Angela's valuation."
     },
     { h: "Handling Adjuster Tactics",
       layout: "TABLE",
@@ -405,7 +405,7 @@ const DAY4 = {
         ],
         discussionCase: "After two calls, the adjuster fixes only the fees. When do you escalate, and what goes in your memo?"
       },
-      trainerCue: "Launch the Day 4 Skill Builder — Total Loss Valuation & Counter: audit VR-26-18840, pick the true comps, build the counter math, write the counter letter, then negotiate live in the Call Simulator."
+      trainerCue: "Launch the Day 4 Skill Builder — Total Loss Valuation & Counter: audit VR-26-18840, pick the true comps, build the counter math, write the counter letter, then negotiate live in the Call Sim."
     }
   ],
   quickChecks: [

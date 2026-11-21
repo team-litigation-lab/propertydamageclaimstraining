@@ -59,7 +59,7 @@ rep("Case Management Professional Development Workshop", "Property Damage Claims
 rep("<p>Run a personal-injury file from intake to disbursement: verify every document, keep treatment on the map, audit before demand, negotiate the net, and stay trial-ready.</p>",
     "<p>Run a property damage claim from the first call to the final payment: set it up right, spot every coverage, keep the client mobile, stop the storage clock, negotiate the value, and close it with a PD-only release.</p>")
 rep('["Case File","John Doe v. Apex — the working case. Read it first."],["📁 Case Documents","Every record, bill, lien letter and pleading — with its CMS upload category."],["🧪 Practice","Every practice tool, organized the same way for each day: 🧠 Skill Builders on the case documents, 🗣 Communication (live calls, roleplay, email) and 🗂 Systems (the CMS, docket, medical records, e-filing, calendar and trust ledger). Each day\'s tools open with that day."]',
-    '["Claim File","Angela Carter\'s PD claim — the working file. Read it first."],["📁 Documents","Every dec page, invoice, estimate, valuation and release — with its CMS upload category."],["🧪 Practice","Every practice tool, organized the same way for each day: 🧠 Skill Builders on the claim documents, 🗣 Communication (the Call Simulator\'s Property Damage calls and live roleplay) and 🗂 Systems (the CMS). Each day\'s tools open with that day."]')
+    '["Claim File","Angela Carter\'s PD claim — the working file. Read it first."],["📁 Documents","Every dec page, invoice, estimate, valuation and release — with its LSH CaseWorks upload category."],["🧪 Practice","Every practice tool, organized the same way for each day: 🧠 Skill Builders on the claim documents, 🗣 Communication (the Call Sim\'s Property Damage calls and live roleplay) and 🗂 Systems (LSH CaseWorks). Each day\'s tools open with that day."]')
 _i = s.index('{k:"Client", h:"Meet the case: John Doe v. Apex Delivery Services", body:`')
 _j = s.index('</div>`},', _i) + len('</div>`},')
 s = s[:_i] + ('{k:"Client", h:"Meet the claim: Angela Carter — 2022 Toyota RAV4", body:`\n'
@@ -84,7 +84,7 @@ rep("John Doe case scenarios are realistic.", "Angela Carter PD claim scenarios 
 rep('if(slide.type==="meetClient") return "Meet the Case — John Doe v. Apex";', 'if(slide.type==="meetClient") return "Meet the Claim — Angela Carter";')
 rep("Skill Builders — Practice on the Real Case File", "Skill Builders — Practice on the Real Claim File")
 rep("Every Skill Builder comes from the Skill Building slides and runs on the actual case documents — then sends you into the CMS to do the file work.",
-    "Every Skill Builder runs on Angela Carter's claim documents — then sends you into the Call Simulator and the CMS to do the work.", min_count=0)
+    "Every Skill Builder runs on Angela Carter's claim documents — then sends you into the Call Sim and LSH CaseWorks to do the work.", min_count=0)
 rep('certId:`LSH-CM-', 'certId:`LSH-PD-')
 rep('"Case Management Trainee"', '"PD Claims Trainee"')
 rep("of the 5-day LSH Case Management program.", "of the 5-day LSH Property Damage Claims program.")

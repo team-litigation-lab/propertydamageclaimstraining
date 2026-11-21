@@ -63,7 +63,7 @@ const DAY3 = {
         ],
         discussionCase: "The rental counter tells Angela, “Your insurance didn't authorize anything.” What do you check, and who do you call first?"
       },
-      trainerCue: "Practice the calls in the Call Simulator's Rental, Tow & Shop line (PD pack): the adjuster's rental authorization and the rental counter."
+      trainerCue: "Practice the calls in the Call Sim's Rental, Tow & Shop line (PD pack): the adjuster's rental authorization and the rental counter."
     },
     { h: "Like-Kind, Daily Rates & What the Client Pays",
       layout: "COMPARE",

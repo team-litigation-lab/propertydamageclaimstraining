@@ -111,7 +111,7 @@ window.SLIDE_SCRIPTS = Object.assign(window.SLIDE_SCRIPTS || {}, {
     "After that, ask: was the policy in force on the date of loss, is the vehicle listed, is the driver covered, and what's the liability status? Then ask how they handle rental and inspection, and when you'll hear on liability.",
     "Finally, confirm it all in writing the same day with the letter of representation. If they want a recorded statement from the client, don't agree, because that goes to the attorney."
    ],
-   "ask": "The claims rep says, \"We'll need a recorded statement from your client before we can make a liability decision.\" What do you say? Then try it in the Call Simulator: \"Open the Third-Party Claim.\""
+   "ask": "The claims rep says, \"We'll need a recorded statement from your client before we can make a liability decision.\" What do you say? Then try it in the Call Sim: \"Open the Third-Party Claim.\""
   }
  },
  "1::The Letter of Representation (LOR)": {

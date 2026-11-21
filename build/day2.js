@@ -272,7 +272,7 @@ const DAY2 = {
         ],
         discussionCase: "The adjuster says, “There's coverage, but we're reviewing whether Kevin had permission to drive.” What does that mean, and who needs to know?"
       },
-      trainerCue: "Practice it in the Call Simulator's Coverage & Liability line (PD pack), then complete the Coverage Spotter Skill Builder."
+      trainerCue: "Practice it in the Call Sim's Coverage & Liability line (PD pack), then complete the Coverage Spotter Skill Builder."
     },
     { h: "Liability Decisions: Accepted, Split, Denied, Under Investigation",
       layout: "QUADRANT",
