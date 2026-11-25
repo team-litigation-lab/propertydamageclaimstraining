@@ -4,7 +4,7 @@
    Directory, which opens it in a new tab. This adds a way back:
      • admins:    top bar 🏠 Main Portal, and on the Admin screen
                   ← Back to Main Portal (next to "Log out")
-     • trainees:  top bar ← Training Directory, and a link under the
+     • trainees:  top bar ← 🎓 LSH Academy Index, and a link under the
                   sign-in / approval notes (pending, not approved)
    Admins in 👁 Trainee view see the admin buttons.
    The same file is in every LSH course repo (EA-PA-TRAINING,
@@ -14,7 +14,7 @@
 (function(){
 "use strict";
 var PORTAL_URL = "https://cm-training-activity.pages.dev/programs.html";
-var TITLE = "Back to the LSH Training Portal (Training Directory)";
+var TITLE = "Back to the LSH Training Portal (🎓 LSH Academy Index)";
 
 var css = document.createElement("style");
 css.id = "portal-link-css";
@@ -36,12 +36,12 @@ function paint(){
   if(typeof state === "undefined" || !state) return;
   if(!state.isAdmin){
     if(!state.traineeId) return;
-    // A trainee: a way back to the Training Directory in the top bar, or under the approval notes.
+    // A trainee: a way back to LSH Academy Index in the top bar, or under the approval notes.
     var nav = document.querySelector(".topbar .nav");
     if(nav && !nav.querySelector(".nav-portal")){
       var b = document.createElement("button");
       b.type = "button"; b.className = "nav-portal"; b.title = TITLE;
-      b.textContent = "← Training Directory";
+      b.textContent = "← 🎓 LSH Academy Index";
       b.onclick = window.goToMainPortal;
       nav.insertBefore(b, beforeView(nav));
     }
@@ -49,7 +49,7 @@ function paint(){
     if(card && !card.querySelector(".trainee-portal-link")){
       var l = document.createElement("div");
       l.className = "trainee-portal-link"; l.style.cssText = "margin-top:14px;font-size:12.5px;";
-      l.innerHTML = '<a href="'+PORTAL_URL+'" style="color:var(--navy);font-weight:600;">← Back to the Training Directory</a>';
+      l.innerHTML = '<a href="'+PORTAL_URL+'" style="color:var(--navy);font-weight:600;">← Back to 🎓 LSH Academy Index</a>';
       card.appendChild(l);
     }
     return;

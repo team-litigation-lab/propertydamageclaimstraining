@@ -1,11 +1,11 @@
 /* ============================================================
-   LSH Property Damage Claims Training — 🧪 PRACTICE
+   LSH Property Damage Claims Track — 🧪 PRACTICE
    One page for every practice tool, organized the same way for
    every day into three categories:
      🧠 Skill Builders  — think it through on the claim documents
-     🗣 Communication   — say it: the Call Simulator's Property
+     🗣 Communication   — say it: the Call Sim's Property
                           Damage calls, live roleplay, email
-     🗂 Systems         — do it in the platform: the CMS
+     🗂 Systems         — do it in the platform: LSH CaseWorks
    Loaded after pd-skillbuilders.js (uses window.__pdKit).
    ============================================================ */
 (function(){
@@ -72,7 +72,7 @@ PRACTICE_TOOLS.forEach(t=>{ if(!t.cat) t.cat = "think"; });
 const CATS = {
   think:{icon:"🧠", label:"Skill Builders", short:"Skill Builder", blurb:"Think it through on the claim documents: audit, decide, calculate and write."},
   talk:{icon:"🗣", label:"Communication", short:"Communication", blurb:"Say it: live calls with adjusters, the client, the tow yard, the rental counter and the lender."},
-  do:{icon:"🗂", label:"Systems", short:"Systems", blurb:"Do it in the platform: build and update the PD file in the CMS."}
+  do:{icon:"🗂", label:"Systems", short:"Systems", blurb:"Do it in the platform: build and update the PD file in LSH CaseWorks."}
 };
 window.pdToolCategory = (id)=> { const t = PRACTICE_TOOLS.find(x=>x.id===id); return CATS[(t && t.cat) || "think"]; };
 
@@ -83,20 +83,20 @@ const SIM = (id, extra)=> Object.assign({kind:"sim", id}, extra||{});
 const RP = (categoryId, topicId)=> ({kind:"rp", categoryId, topicId});
 const PLAN = {
   1:{think:["pdSetup1"],
-     talk:[SIM("calls",{line:"Claim Setup", title:"Call Simulator — 📋 Claim Setup", note:"Open the third-party claim · open the first-party rental claim · Angela's intake call"}), RP("client","wheresmycar"), RP("adjuster","recordedstatement")],
-     do:[SIM("cms",{title:"Build Angela's PD file in the CMS", note:"Vehicle, parties, both carriers, documents under PD, day-one tasks", })]},
+     talk:[SIM("calls",{line:"Claim Setup", title:"Call Sim — 📋 Claim Setup", note:"Open the third-party claim · open the first-party rental claim · Angela's intake call"}), RP("client","wheresmycar"), RP("adjuster","recordedstatement")],
+     do:[SIM("cms",{title:"Build Angela's PD file in LSH CaseWorks", note:"Vehicle, parties, both carriers, documents under PD, day-one tasks", })]},
   2:{think:["pdCoverage2"],
-     talk:[SIM("calls",{line:"Coverage & Liability", title:"Call Simulator — 🛡 Coverage & Liability", note:"Verify the at-fault policy · spot the client's coverage · liability still under investigation"}), RP("adjuster","liabilitystall"), RP("client","deductible")],
-     do:[SIM("cms",{title:"Add the coverage summary to the CMS", note:"Every coverage, its limit, whether it applies, who handles it"})]},
+     talk:[SIM("calls",{line:"Coverage & Liability", title:"Call Sim — 🛡 Coverage & Liability", note:"Verify the at-fault policy · spot the client's coverage · liability still under investigation"}), RP("adjuster","liabilitystall"), RP("client","deductible")],
+     do:[SIM("cms",{title:"Add the coverage summary to LSH CaseWorks", note:"Every coverage, its limit, whether it applies, who handles it"})]},
   3:{think:["pdRental3"],
-     talk:[SIM("calls",{line:"Rental, Tow & Shop", title:"Call Simulator — 🚙 Rental, Tow & Shop", note:"Rental authorization · the rental counter · the tow-yard release · the supplement stall"}), RP("vendors","rentalcounter"), RP("vendors","storagedispute"), RP("adjuster","supplementdelay")],
-     do:[SIM("cms",{title:"Log the rental and the repair in the CMS", note:"Reservation #, rate, end date, estimate, supplement, tasks"})]},
+     talk:[SIM("calls",{line:"Rental, Tow & Shop", title:"Call Sim — 🚙 Rental, Tow & Shop", note:"Rental authorization · the rental counter · the tow-yard release · the supplement stall"}), RP("vendors","rentalcounter"), RP("vendors","storagedispute"), RP("adjuster","supplementdelay")],
+     do:[SIM("cms",{title:"Log the rental and the repair in LSH CaseWorks", note:"Reservation #, rate, end date, estimate, supplement, tasks"})]},
   4:{think:["pdTotal4"],
-     talk:[SIM("calls",{line:"Negotiation & Total Loss", title:"Call Simulator — 💵 Negotiation & Total Loss", note:"Negotiate the total loss · “my rental ends Thursday” · the payoff call"}), RP("adjuster","takeitorleaveit"), RP("client","shouldtakeit"), RP("client","upsidedown")],
-     do:[SIM("cms",{title:"Log the valuation audit and counter in the CMS", note:"Audit table, comparables, counter letter, rental extension request"}), SIM("email",{note:"Generate a Property Damage inbox and clear it"})]},
+     talk:[SIM("calls",{line:"Negotiation & Total Loss", title:"Call Sim — 💵 Negotiation & Total Loss", note:"Negotiate the total loss · “my rental ends Thursday” · the payoff call"}), RP("adjuster","takeitorleaveit"), RP("client","shouldtakeit"), RP("client","upsidedown")],
+     do:[SIM("cms",{title:"Log the valuation audit and counter in LSH CaseWorks", note:"Audit table, comparables, counter letter, rental extension request"}), SIM("email",{note:"Generate a Property Damage inbox and clear it"})]},
   5:{think:["pdClose5"],
-     talk:[SIM("calls",{line:"Settlement & Close", title:"Call Simulator — ✍️ Settlement & Close", note:"The “standard release” · “should I take it?” · the subrogation follow-up"}), RP("adjuster","releaseallclaims"), RP("vendors","lienholder")],
-     do:[SIM("cms",{title:"Close Angela's PD file in the CMS", note:"Release, payments, closing note, BI handoff, subrogation task"})]}
+     talk:[SIM("calls",{line:"Settlement & Close", title:"Call Sim — ✍️ Settlement & Close", note:"The “standard release” · “should I take it?” · the subrogation follow-up"}), RP("adjuster","releaseallclaims"), RP("vendors","lienholder")],
+     do:[SIM("cms",{title:"Close Angela's PD file in LSH CaseWorks", note:"Release, payments, closing note, BI handoff, subrogation task"})]}
 };
 
 function rpLabel(it){
@@ -122,11 +122,11 @@ function itemView(it){
     if(it.id==="email" && !state.simResults && window.pdSimResults) window.pdSimResults.load();
     const simBest = it.id==="email" && state.simResults && state.simResults.best && state.simResults.best["Email Workspace"];
     const name = it.title || t.name.replace(/ \(LSH Training Portal\)$/,"");
-    // (a Call Simulator step names its PD line (it.line), but it isn't sent on as &line= yet: Ring Channel has no PD pack, and a
+    // (a Call Sim step names its PD line (it.line), but it isn't sent on as &line= yet: LSH Voice has no PD pack, and a
     // line it doesn't know could leave the phone with no calls. Send it once the PD pack is on the training phone. Until then the
     // card says so and points at the day's Live Roleplays: platform QA 2026-11-19, PD finding 5, and the regressions review)
     const callNote = it.id==="calls" ? " · PD's own calls are being added to the training phone: until they are on it, practise this day's situations in the 🔥 Live Roleplay cards beside this one." : "";
-    return {icon:t.icon, title:name, desc:(it.note || t.desc) + callNote, where: it.id==="cms" ? "LSH CMS" : "LSH Training Portal",
+    return {icon:t.icon, title:name, desc:(it.note || t.desc) + callNote, where: it.id==="cms" ? "🗂 LSH CaseWorks" : "LSH Training Portal",
       done: (logged && it.id!=="cms") || !!simBest, doneLabel: simBest && typeof simBest.score==="number" ? `✓ Best ${simBest.score}%` : "✓ Work logged", live:t.live,
       act: it.go ? `goto('${it.go}')` : `openTool('${it.id}')`};
   }
@@ -162,15 +162,15 @@ window.renderPracticeHub = function(){
   }).join("");
   return `<p class="eyebrow">Practice</p>
     <h1 style="color:var(--navy);font-size:26px;margin:6px 0 8px">🧪 Practice</h1>
-    <p style="color:var(--ink-soft);font-size:14px;max-width:84ch;margin:0 0 14px">Every practice tool in one place, organized the same way for every day. Each day has all three kinds of practice: <b>think</b> it through on the claim documents, <b>say</b> it on a call, and <b>do</b> it in the CMS. Each day's tools open when you reach that day${state.isAdmin ? " (as an admin you can open all of them)" : ""}.</p>
+    <p style="color:var(--ink-soft);font-size:14px;max-width:84ch;margin:0 0 14px">Every practice tool in one place, organized the same way for every day. Each day has all three kinds of practice: <b>think</b> it through on the claim documents, <b>say</b> it on a call, and <b>do</b> it in LSH CaseWorks. Each day's tools open when you reach that day${state.isAdmin ? " (as an admin you can open all of them)" : ""}.</p>
     <div class="px-cats">${["think","talk","do"].map(c=>`<div class="px-cat ${c}"><span class="ic">${CATS[c].icon}</span><b>${CATS[c].label}</b><p>${CATS[c].blurb}</p></div>`).join("")}</div>
     <div class="px-bar">${chip("day","all","All days")}${[1,2,3,4,5].map(n=>chip("day",n,"Day "+n)).join("")}<span class="sep"></span>${chip("cat","all","All")}${["think","talk","do"].map(c=>chip("cat",c,CATS[c].icon+" "+CATS[c].label)).join("")}</div>
     ${blocks}
     <div class="card" style="padding:14px 18px;margin-bottom:14px"><b style="color:var(--navy)">Any day</b>
       <div class="px-grid" style="margin-top:10px">
         <div class="px-col think"><h3>${CATS.think.icon} Review</h3>${itemHTML({icon:"📁", title:"Claim Documents", desc:"Every Angela Carter document the tools use — dec pages, invoices, estimates, the valuation, the release.", where:"In this portal", act:"goto('casedocs')"})}${itemHTML({icon:"📂", title:"Claim File", desc:"The one-page summary of Angela's PD claim and its timeline.", where:"In this portal", act:"goto('clientprofile')"})}</div>
-        <div class="px-col talk"><h3>${CATS.talk.icon} Open practice</h3>${itemHTML({icon:"🎲", title:"Quick roleplay call", desc:"A random live PD call, no setup.", where:"Live roleplay", act:"rpLaunchQuickPractice()"})}${itemHTML({icon:"🔥", title:"All roleplay situations", desc:"Pick any category, situation, difficulty and persona.", where:"Live roleplay", act:"state.rpHub={step:'category'};goto('crisisroleplay')"})}${itemHTML({icon:"📞", title:"Call Simulator (the training phone)", desc:"A caller rings your phone: answer with a headset, handle the call and write its note. Graded on the line's Mock Calls Metrics.", where:"☎ LSH Ring Channel", act:"openTool('calls')"})}</div>
-        <div class="px-col do"><h3>${CATS.do.icon} Platforms</h3>${itemHTML({icon:"🗂", title:"LSH Case Management System", desc:"Build and update Angela's PD file.", where:"LSH CMS", act:"openTool('cms')"})}${itemHTML({icon:"🧰", title:"All tools, sign-in help & my work log", desc:"Every platform's address, how sign-in works inside the portal, and the IDs and scores you've logged.", where:"In this portal", act:"goto('tools')"})}</div>
+        <div class="px-col talk"><h3>${CATS.talk.icon} Open practice</h3>${itemHTML({icon:"🎲", title:"Quick roleplay call", desc:"A random live PD call, no setup.", where:"Live roleplay", act:"rpLaunchQuickPractice()"})}${itemHTML({icon:"🔥", title:"All roleplay situations", desc:"Pick any category, situation, difficulty and persona.", where:"Live roleplay", act:"state.rpHub={step:'category'};goto('crisisroleplay')"})}${itemHTML({icon:"📞", title:"Call Sim (the training phone)", desc:"A caller rings your phone: answer with a headset, handle the call and write its note. Graded on the line's Mock Calls Metrics.", where:"☎ LSH Voice", act:"openTool('calls')"})}</div>
+        <div class="px-col do"><h3>${CATS.do.icon} Platforms</h3>${itemHTML({icon:"🗂", title:"LSH CaseWorks", desc:"Build and update Angela's PD file.", where:"🗂 LSH CaseWorks", act:"openTool('cms')"})}${itemHTML({icon:"🧰", title:"All tools, sign-in help & my work log", desc:"Every platform's address, how sign-in works inside the portal, and the IDs and scores you've logged.", where:"In this portal", act:"goto('tools')"})}</div>
       </div></div>`;
 };
 window.pxSetFilter = function(group, val){

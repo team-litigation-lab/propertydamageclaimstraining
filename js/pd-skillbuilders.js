@@ -1,6 +1,6 @@
 /* ============================================================
-   LSH Property Damage Claims Training — Skill Builders, the Claim
-   Document Library, the Training Tools hub (CMS, Call Simulator, Email),
+   LSH Property Damage Claims Track — Skill Builders, the Claim
+   Document Library, the Training Tools hub (CMS, Call Sim, Email),
    Handouts and the Claim File. Built on the CM course's Skill Builder kit.
    Loaded after the main portal script: anything assigned to window
    here replaces the portal function of the same name.
@@ -146,17 +146,17 @@ const scenario = (html)=> `<div class="pd-scn">${html}</div>`;
    (shared key settings:tools).
    ================================================================ */
 const PD_TOOL_DEFAULTS = [
-  {id:"cms", icon:"🗂", name:"LSH Case Management System", short:"CMS", status:"live",
+  {id:"cms", icon:"🗂", name:"LSH CaseWorks", short:"LSH CaseWorks", status:"live",
    url:"https://lshcasemanagementtraining-trainingcrm.pages.dev",
    desc:"Where the claim work actually happens: start the PD file, key the vehicle and claim facts, add every party and carrier, upload each document under PD (or its category), and log Tasks and Notes for every follow-up.",
-   evidence:"CMS Case ID", idHint:"CMS Case ID (e.g. LSH-2026-PI-000123)"},
+   evidence:"LSH CaseWorks Case ID", idHint:"LSH CaseWorks Case ID (e.g. LSH-2026-PI-000123)"},
   // Shared simulators on the LSH Training Portal (used by every program). The course
   // opens them with ?program=PD and the trainee's name and batch, so results carry them.
-  // The Call Simulator is ☎ LSH Ring Channel's (the training phone): this Portal address opens it signed in
+  // The Call Sim is ☎ LSH Voice's (the training phone): this Portal address opens it signed in
   // (→ /api/launch?tool=ringchannel&to=calls), with ?program=PD (the course the call counts in) and &mode=graded
-  // (a step's ?line= is sent once Ring Channel has PD's own pack: js/pd-practice.js). It opens in its own tab, and a graded call is reported to the Portal's
+  // (a step's ?line= is sent once LSH Voice has PD's own pack: js/pd-practice.js). It opens in its own tab, and a graded call is reported to the Portal's
   // /api/call-results, so it still counts here.
-  {id:"calls", icon:"📞", name:"Call Simulator (☎ LSH Ring Channel)", short:"Call Simulator", status:"live",
+  {id:"calls", icon:"📞", name:"Call Sim (☎ LSH Voice)", short:"Call Sim", status:"live",
    url:"https://cm-training-activity.pages.dev/simulators/call.html", portalSim:true,
    desc:"Live practice calls on the training phone, spoken aloud: the phone rings on the line the step names, you answer with a headset and use its own keys (mute, hold, transfer) and 🔎 Case lookup. Each call ends with the note it requires, and both are scored on the line's Mock Calls Metrics. Take a graded call, practice with an 🤖 AI caller, or answer a trainer-led mock call on the same phone.",
    evidence:"Score", idHint:"Score (e.g. 82%)"},
@@ -220,7 +220,7 @@ function placeFrame(){
 }
 function paintShell(){
   const t = pdTool(currentFrame);
-  frameShell.querySelector(".pd-tf-name").textContent = t ? `${t.icon} ${t.name.replace(/ \((LSH Training Portal|☎ LSH Ring Channel)\)$/,"")}` : "";
+  frameShell.querySelector(".pd-tf-name").textContent = t ? `${t.icon} ${t.name.replace(/ \((LSH Training Portal|☎ LSH Voice)\)$/,"")}` : "";
   Object.entries(frames).forEach(([id,f])=>{ f.style.display = id===currentFrame ? "block" : "none"; });
 }
 // extra: an optional query string for this opening, e.g. "mock=MC-04" opens that CMS Training Library case.
@@ -228,17 +228,17 @@ window.openTool = function(id, mode, extra){
   id = id || currentFrame || "cms";
   const t = pdTool(id);
   if(!t){ return; }
-  if(!t.live){ toast(`${t.icon} ${t.name} is coming soon. For now, log this step as a Task in the CMS.`); return; }
+  if(!t.live){ toast(`${t.icon} ${t.name} is coming soon. For now, log this step as a Task in LSH CaseWorks.`); return; }
   let href = toolHref(t);
   if(extra) href += (href.includes("?") ? "&" : "?") + extra;
-  // The Call Simulator is ☎ LSH Ring Channel, opened through the Portal's sign-in cookie, which a frame doesn't send: its own tab.
+  // The Call Sim is ☎ LSH Voice, opened through the Portal's sign-in cookie, which a frame doesn't send: its own tab.
   if(mode==="tab" || id==="calls"){ window.open(href, "_blank", "noopener"); return; }
   ensureShell();
   if(!frames[id] || frames[id].dataset.src !== href){
     if(frames[id]) frames[id].remove();
     const f = document.createElement("iframe");
     f.src = href; f.dataset.src = href; f.title = t.name;
-    // microphone: the Call Simulator listens when trainees answer by voice
+    // microphone: the Call Sim listens when trainees answer by voice
     f.setAttribute("allow", "microphone; autoplay; clipboard-read; clipboard-write; fullscreen");
     f.setAttribute("referrerpolicy", "no-referrer-when-downgrade");
     frameShell.querySelector(".pd-tf-body").appendChild(f);
@@ -264,12 +264,12 @@ window.openCms = function(mode){ openTool("cms", mode); };
 function toolStep(toolId, key, what){
   const t = pdTool(toolId), saved = ((state.cmsLog||{})[key]||{}), k = key.replace(/\W/g,"_");
   const fallback = !t.live && toolId!=="cms";
-  return `<div class="pd-cms"><b>${t.icon} Do this in the ${E(t.name)}</b>${t.live?"":` <span class="pd-soon">coming soon</span>`}
+  return `<div class="pd-cms"><b>${t.icon} Do this in ${E(t.name)}</b>${t.live?"":` <span class="pd-soon">coming soon</span>`}
     <p style="font-size:12.8px;margin:6px 0 0;color:#37394A">${what}</p>
-    ${fallback?`<p style="font-size:12.3px;margin:6px 0 0;color:var(--ink-soft)">Until the ${E(t.short)} platform is live, add this as a <b>Task</b> in the CMS case and log your CMS Case ID below.</p>`:""}
+    ${fallback?`<p style="font-size:12.3px;margin:6px 0 0;color:var(--ink-soft)">Until the ${E(t.short)} platform is live, add this as a <b>Task</b> in the LSH CaseWorks case and log your LSH CaseWorks Case ID below.</p>`:""}
     <div class="row">
-      ${t.live?`<button class="btn btn-navy btn-sm" onclick="openTool('${toolId}')">Open ${E(t.short)}</button><button class="btn btn-ghost btn-sm" onclick="openTool('${toolId}','tab')" title="Open in a new tab">↗</button>`
-              :`<button class="btn btn-navy btn-sm" onclick="openTool('cms')">Open CMS</button>`}
+      ${t.live?`<button class="btn btn-navy btn-sm" onclick="openTool('${toolId}')">Open ${t.icon} ${E(t.short)}</button><button class="btn btn-ghost btn-sm" onclick="openTool('${toolId}','tab')" title="Open in a new tab">↗</button>`
+              :`<button class="btn btn-navy btn-sm" onclick="openTool('cms')">Open 🗂 LSH CaseWorks</button>`}
       <input id="cmsId_${k}" placeholder="${E(fallback?pdTool("cms").idHint:t.idHint)}" value="${E(saved.caseId||"")}">
       <button class="btn btn-ghost btn-sm" onclick="pdLogCms('${key}','${fallback?"cms":toolId}')">Log my work</button>
       <span id="cmsLogged_${k}" style="font-size:12px;color:var(--success)">${saved.at?`✓ Logged ${fmtDate(saved.at)}`:""}</span>
@@ -281,12 +281,12 @@ window.pdLogCms = async function(key, platform){
   const el = document.getElementById("cmsId_"+key.replace(/\W/g,"_"));
   const v = (el && el.value || "").trim();
   const t = pdTool(platform||"cms");
-  if(v.length < 3){ toast(`Enter the ${t.evidence} the ${t.short} gave you when you saved.`); return; }
+  if(v.length < 3){ toast(`Enter the ${t.evidence} ${t.short} gave you when you saved.`); return; }
   state.cmsLog = state.cmsLog || {};
   state.cmsLog[key] = {caseId:v, at:new Date().toISOString(), tool:toolOfKey(key), platform:t.id};
   await storeSet("cms-log", state.cmsLog);
   const s = document.getElementById("cmsLogged_"+key.replace(/\W/g,"_")); if(s) s.textContent = "✓ Logged just now";
-  toast(`Logged. Your trainer can check it in the ${t.short}.`);
+  toast(`Logged. Your trainer can check it in ${t.short}.`);
 };
 
 /* A document packet: the exact files a Skill Builder part is built on. */
@@ -295,7 +295,7 @@ function docPacket(ids, title){
   if(!docs.length) return "";
   return `<div class="pd-docs"><div class="pd-docs-h">📁 ${E(title||"Source documents for this part")}</div>
     ${docs.map(d=>`<div class="pd-doc-row"><div><span class="t">${E(d.title)}</span><div class="d">${E(d.desc)}</div>${state.isAdmin && d.key ? `<div class="pd-key">🔑 Trainer key: ${E(d.key)}</div>` : ""}</div>
-      <div style="display:flex;gap:6px;align-items:center"><span class="cms" title="CMS upload category">CMS: ${E(d.cms)}</span><a class="btn btn-ghost btn-sm" href="${pdDocUrl(d)}" target="_blank" rel="noopener">Open</a></div></div>`).join("")}
+      <div style="display:flex;gap:6px;align-items:center"><span class="cms" title="LSH CaseWorks upload category">LSH CaseWorks: ${E(d.cms)}</span><a class="btn btn-ghost btn-sm" href="${pdDocUrl(d)}" target="_blank" rel="noopener">Open</a></div></div>`).join("")}
   </div>`;
 }
 window.pdDocPacket = docPacket;
@@ -465,20 +465,20 @@ TOOLS.pdSetup1 = ()=>[
       {t:"Use the VIN on the tow invoice for both claims — it's the most recent document.", ok:false, why:"The tow invoice VIN is transposed; the registration is the source of truth."}
     ], "Check my plan"))},
   {label:"First Call & Claim Setup Note", html: part("C. The first carrier call and the claim setup note",
-    "Practice the call in the Call Simulator, then write the CMS note for the claim setup exactly as it goes in the file.",
+    "Practice the call in the Call Sim, then write the LSH CaseWorks note for the claim setup exactly as it goes in the file.",
     scenario(`<b>What the calls gave you (09/21):</b> Crestline claim <b>CMI-26-0918-4471</b>, PD adjuster <b>Derek Lawson</b>, (555) 640-2280 ext 418, dlawson@crestlinemutual.example. Policy CMI-PA-7730215 <b>renewed 09/01/2026–03/01/2027</b> (confirmed by phone; written confirmation requested). Kevin Hale is a listed driver. Liability <b>under investigation</b> — Kevin now says Angela “stopped short on a yellow”; decision expected within 3 business days of the police report. No rental until liability. Harbor Point first-party claim <b>HPI-26-55012</b> (adjuster Nicole Ferris) opened for rental: midsize SUV, Metro Car Rental, $40/day direct bill, pickup today 3:30 PM. A-1 will release the car to Riverside on 09/23 with Angela's signed authorization.`)
     + toolStep("calls", "pdSetup1:call", "Place the <b>Property Damage</b> pack's <b>“Open the Third-Party PD Claim”</b> call (📋 Claim Setup line): get the claim number, the adjuster, coverage on the date of loss and the liability status — and handle the recorded-statement request. Log your score here.")
     + aiTask("pdSetup1:note", {
-      label:"Your claim setup note (as it will read in the CMS)",
+      label:"Your claim setup note (as it will read in LSH CaseWorks)",
       exercise:"Claim Setup Challenge — day-one claim setup note",
       rows:190,
       context:"Day one (09/21/2026) of Angela Carter's PD claim. The trainee audited the intake (VIN mismatch: intake/tow invoice …22041 vs registration …22014; trim and mileage unknown; expired Crestline dec page 03/01–09/01/2026; car at A-1 at $65/day; recorded-statement requests; injuries; no rental) and made the first calls: Crestline claim CMI-26-0918-4471, adjuster Derek Lawson ext 418, renewal 09/01/2026–03/01/2027 confirmed by phone, Kevin a listed driver, liability under investigation (decision expected within 3 business days of the police report), no rental until liability; Harbor Point claim HPI-26-55012 for rental ($40/day, midsize SUV, Metro Car Rental direct bill, pickup 3:30 PM); A-1 releasing to Riverside 09/23.",
       criteria:"A strong note: (1) both claim numbers, adjusters and contact details; (2) coverage status — renewal confirmed for the date of loss, written confirmation requested; (3) liability status, what Crestline is waiting for, the evidence sent (police report, citation, witness) and the decision date; (4) the rental plan (Harbor Point $40/day now, switch to Crestline once accepted) and the pickup; (5) the vehicle move (A-1 → Riverside, 09/23) and the storage rate; (6) the corrected VIN …22014 and the request to fix the tow invoice; (7) LOR sent, recorded-statement request routed to the attorney, no direct contact; (8) injuries/MedPay/low BI limits flagged to Rachel Owens; (9) follow-up tasks with dates (liability decision, payoff letter, odometer/window-sticker photos, vehicle move). Penalize invented facts, value predictions, agreeing to a recorded statement, or no follow-up dates."
     }))},
-  {label:"Client Call & the CMS", html: part("D. The day-one client call — then build the file in the CMS",
-    "Call Angela with the plan. Then put the whole claim into the CMS so anyone on the team could pick it up tomorrow.",
+  {label:"Client Call & LSH CaseWorks", html: part("D. The day-one client call — then build the file in LSH CaseWorks",
+    "Call Angela with the plan. Then put the whole claim into LSH CaseWorks so anyone on the team could pick it up tomorrow.",
     `<div style="margin-top:4px">${renderCrisisRoleplaySection("pdSetup1", "Live call — the AI plays Angela (or the Crestline adjuster: pick the scenario at the top)")}</div>`
-    + cmsStep("pdSetup1:cms", "Create Angela Carter's PD file in the CMS: client and <b>vehicle</b> (2022 RAV4, VIN <b>…22014</b>, plate 8KTR512), both carriers with claim numbers and adjusters, the at-fault driver <b>and</b> owner, the lienholder, A-1, Riverside and Metro Car Rental. Upload the packet under <b>PD</b> (police report under <b>Police</b>). Add Tasks: liability decision (09/24), vehicle move (09/23), payoff letter, odometer and window-sticker photos, rental check. Add your claim setup note as a <b>Note</b>. Save and log the Case ID."))}
+    + cmsStep("pdSetup1:cms", "Create Angela Carter's PD file in LSH CaseWorks: client and <b>vehicle</b> (2022 RAV4, VIN <b>…22014</b>, plate 8KTR512), both carriers with claim numbers and adjusters, the at-fault driver <b>and</b> owner, the lienholder, A-1, Riverside and Metro Car Rental. Upload the packet under <b>PD</b> (police report under <b>Police</b>). Add Tasks: liability decision (09/24), vehicle move (09/23), payoff letter, odometer and window-sticker photos, rental check. Add your claim setup note as a <b>Note</b>. Save and log the Case ID."))}
 ];
 
 /* ---------- DAY 2 · Coverage Spotter ---------- */
@@ -695,7 +695,7 @@ TOOLS.pdClose5 = ()=>[
       context:"Angela Carter PD claim. Agreed 10/09: ACV $30,650.00 + tax $2,528.63 + fees $356.00 = $33,534.63 (client authority to Michael Grant 10/09). Crestline's draft release (10/12) was a Release of All Claims with BI language, indemnity, confidentiality, a joint check and no car seat — marked up to a PD-only release and approved by the attorney. Payment 10/20: Riverbank $19,865.92 (updated payoff); Angela $13,668.71 + car seat $289.99 = $13,958.70; A-1 $715 (paid 09/28); Metro Car Rental $675 (Crestline direct bill 09/24–10/08; Angela paid her $195 upgrade); Harbor Point $120 by subrogation. Evidence: photos, estimate $9,480.35, supplement $15,379.65 (frame rail, floor pan), valuation VR-26-18840 and the corrected valuation. Coverage facts for BI: Crestline BI $25,000/$50,000; Angela's UIM $50,000/$100,000 and MedPay $5,000.",
       criteria:"Closing note: totals and every payee with amounts and dates; the PD-only release and the attorney's approval; what was confirmed (lender, client, vendors) and any open item with an owner (Harbor Point's $120 subrogation). BI handoff: states the PD settled with a PD-only release and nothing about BI was discussed or released; lists the evidence sent (photos, estimate + supplement showing frame damage, valuation, total-loss decision) and why it matters (force of impact); flags the coverage facts (low Crestline BI limits, Angela's UIM and MedPay); any client statements or carrier contact the BI team should know. Penalize wrong numbers, BI language, or missing open items."
     })
-    + cmsStep("pdClose5:cms", "In Angela's PD file in the CMS: upload the signed PD-only release, the payoff confirmation and the final invoices under <b>PD</b>, add your closing note as a <b>Note</b>, add a <b>Task</b> for Harbor Point's $120 subrogation follow-up (30 days), and link your BI handoff. Save and log the Case ID."))}
+    + cmsStep("pdClose5:cms", "In Angela's PD file in LSH CaseWorks: upload the signed PD-only release, the payoff confirmation and the final invoices under <b>PD</b>, add your closing note as a <b>Note</b>, add a <b>Task</b> for Harbor Point's $120 subrogation follow-up (30 days), and link your BI handoff. Save and log the Case ID."))}
 ];
 /* ---------- tool dispatch ---------- */
 const _origInitTool = window.initTool;
@@ -759,8 +759,8 @@ window.renderLessonCard = function(l, i, d, unused, part){
   let extra = l.layout ? `<div class="pd-lesson-visual">${renderLessonVisual(l)}</div>` : "";
   if(l.skill){
     const t = PRACTICE_TOOLS.find(x=>x.id===l.skill.tool);
-    if(t) extra += `<div class="pd-skill-cta"><div><b>🧪 Skill Builder: ${E(t.title)}</b><p>Practice this on the Angela Carter claim file${l.skill.cms?" and log your work in the CMS":""}.</p></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-navy btn-sm" onclick="goto('tool','${t.id}')">Open Skill Builder</button>${l.skill.cms?`<button class="btn btn-ghost btn-sm" onclick="openCms()">Open CMS</button>`:""}</div></div>`;
+    if(t) extra += `<div class="pd-skill-cta"><div><b>🧪 Skill Builder: ${E(t.title)}</b><p>Practice this on the Angela Carter claim file${l.skill.cms?" and log your work in LSH CaseWorks":""}.</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-navy btn-sm" onclick="goto('tool','${t.id}')">Open Skill Builder</button>${l.skill.cms?`<button class="btn btn-ghost btn-sm" onclick="openCms()">Open 🗂 LSH CaseWorks</button>`:""}</div></div>`;
   }
   return _origLessonCard(Object.assign({}, l, {svgDiagram: extra}), i, d, unused, part);
 };
@@ -776,13 +776,13 @@ window.renderCaseDocuments = function(){
   const byFolder = PD_DOC_FOLDERS.filter(fo=>fo.id!=="handouts").map(fo=>({fo, items:docs.filter(d=>d.folder===fo.id)})).filter(x=>x.items.length);
   return `<p class="eyebrow">Claim Documents</p>
     <h1 style="color:var(--navy);font-size:26px;margin:6px 0 8px">📁 Claim Document Library</h1>
-    <p style="color:var(--ink-soft);font-size:14px;max-width:78ch;margin:0 0 14px">A PD claim runs on paperwork. These are the working files for <b>Angela Carter's property damage claim</b> (2022 RAV4, rear-ended 09/18/2026). Every Skill Builder points to the exact documents it uses. Each file shows the <b>CMS upload category</b> to use when you add it to the PD file in the CMS. They are simulated training documents — and some contain deliberate errors you are expected to catch.</p>
+    <p style="color:var(--ink-soft);font-size:14px;max-width:78ch;margin:0 0 14px">A PD claim runs on paperwork. These are the working files for <b>Angela Carter's property damage claim</b> (2022 RAV4, rear-ended 09/18/2026). Every Skill Builder points to the exact documents it uses. Each file shows the <b>LSH CaseWorks upload category</b> to use when you add it to the PD file in LSH CaseWorks. They are simulated training documents — and some contain deliberate errors you are expected to catch.</p>
     <div class="pd-filter">${DOC_FILTERS.map(([k,lab])=>`<button class="btn btn-sm ${f===k?"btn-navy":"btn-ghost"}" onclick="state.docFilter='${k}';render()">${lab}</button>`).join("")}
-      <button class="btn btn-sm btn-ghost" onclick="openCms()">🗂 Open CMS</button></div>
+      <button class="btn btn-sm btn-ghost" onclick="openCms()">🗂 Open LSH CaseWorks</button></div>
     ${state.isAdmin ? `<div class="card" style="padding:12px 16px;margin-bottom:16px;border-left:4px solid var(--danger);font-size:12.8px">🔑 <b>Trainer view:</b> the red notes under each document are the audit key — planted errors and what a strong trainee should catch. Trainees don't see them.</div>` : ""}
     ${byFolder.map(({fo,items})=>`<div class="card pd-lib-folder" style="padding:14px 18px"><h3>${fo.icon} ${E(fo.label)} <span style="font-weight:500;color:var(--ink-soft);font-size:12px">(${items.length})</span></h3>
       ${items.map(d=>`<div class="pd-doc-row"><div><span class="t">${E(d.title)}</span> <span style="font-size:11px;color:var(--ink-soft)">· Day ${d.day}</span><div class="d">${E(d.desc)}</div>${state.isAdmin && d.key ? `<div class="pd-key">🔑 ${E(d.key)}</div>` : ""}</div>
-        <div style="display:flex;gap:6px;align-items:center"><span class="cms">CMS: ${E(d.cms)}</span><a class="btn btn-ghost btn-sm" href="${pdDocUrl(d)}" target="_blank" rel="noopener">Open</a></div></div>`).join("")}</div>`).join("")}`;
+        <div style="display:flex;gap:6px;align-items:center"><span class="cms">LSH CaseWorks: ${E(d.cms)}</span><a class="btn btn-ghost btn-sm" href="${pdDocUrl(d)}" target="_blank" rel="noopener">Open</a></div></div>`).join("")}</div>`).join("")}`;
 };
 
 window.renderTrainingTools = function(){
@@ -797,13 +797,13 @@ window.renderTrainingTools = function(){
       <p>${E(t.desc)}</p>
       ${t.live?`<div class="pd-tool-act"><button class="btn btn-primary btn-sm" onclick="openTool('${t.id}')">Open in portal</button><button class="btn btn-ghost btn-sm" onclick="openTool('${t.id}','tab')">New tab ↗</button></div>
         <div class="pd-tool-url">${E(t.url.replace(/^https:\/\//,""))}</div>`
-      :`<p class="pd-tool-note">Until it's live, Skill Builder steps for this tool are logged as <b>Tasks</b> in the CMS.</p>`}
+      :`<p class="pd-tool-note">Until it's live, Skill Builder steps for this tool are logged as <b>Tasks</b> in LSH CaseWorks.</p>`}
     </div>`).join("")}</div>
     <div class="card" style="padding:16px 20px;margin-bottom:16px"><b style="color:var(--navy)">How the portal and the tools work together</b>
-      <ol style="font-size:13px;margin:8px 0 0;padding-left:20px"><li>Learn it in the day's lessons here.</li><li>Open the Skill Builder. It gives you the claim documents and the exercise.</li><li>Do the file work in the tool. In the CMS: <b>Start a New Case</b>, key the client, vehicle and claim facts, add every party and carrier (with claim numbers and adjusters), upload each document under the <b>CMS category</b> shown in 📁 Documents (usually <b>PD</b>), and add Tasks and Notes for every follow-up. Then <b>Save Case</b> to get your permanent Case ID.</li><li>Practice the calls in the <b>Call Simulator</b> (Property Damage pack) — it scores the call and the note you write after it.</li><li>Come back and log the Case ID or score in the Skill Builder. Your trainer reviews your work.</li></ol>
+      <ol style="font-size:13px;margin:8px 0 0;padding-left:20px"><li>Learn it in the day's lessons here.</li><li>Open the Skill Builder. It gives you the claim documents and the exercise.</li><li>Do the file work in the tool. In LSH CaseWorks: <b>Start a New Case</b>, key the client, vehicle and claim facts, add every party and carrier (with claim numbers and adjusters), upload each document under the <b>LSH CaseWorks category</b> shown in 📁 Documents (usually <b>PD</b>), and add Tasks and Notes for every follow-up. Then <b>Save Case</b> to get your permanent Case ID.</li><li>Practice the calls in the <b>Call Sim</b> (Property Damage pack) — it scores the call and the note you write after it.</li><li>Come back and log the Case ID or score in the Skill Builder. Your trainer reviews your work.</li></ol>
       <p style="font-size:12.3px;color:var(--ink-soft);margin:10px 0 0">Signed in, but the tool asks you to sign in again inside the portal? Some browsers block sign-in inside an embedded page. Use <b>New tab ↗</b>. Your training portal stays open here.</p></div>
     <div class="card" style="padding:16px 20px;margin-bottom:16px"><b style="color:var(--navy)">My tool work log</b>
-      ${log.length ? `<table class="pd-table"><thead><tr><th>Skill Builder</th><th>Tool</th><th>ID / score</th><th>Logged</th></tr></thead><tbody>${log.map(([k,v])=>`<tr><td>${E(toolTitle(v.tool||k.split(":")[0]))}</td><td>${E((pdTool(v.platform||"cms")||{}).short||"CMS")}</td><td><b>${E(v.caseId)}</b></td><td>${fmtDate(v.at)}</td></tr>`).join("")}</tbody></table>` : `<p style="font-size:13px;color:var(--ink-soft);margin:6px 0 0">Nothing logged yet. Skill Builders will ask for your Case ID or call score.</p>`}</div>
+      ${log.length ? `<table class="pd-table"><thead><tr><th>Skill Builder</th><th>Tool</th><th>ID / score</th><th>Logged</th></tr></thead><tbody>${log.map(([k,v])=>`<tr><td>${E(toolTitle(v.tool||k.split(":")[0]))}</td><td>${E((pdTool(v.platform||"cms")||{}).short||"LSH CaseWorks")}</td><td><b>${E(v.caseId)}</b></td><td>${fmtDate(v.at)}</td></tr>`).join("")}</tbody></table>` : `<p style="font-size:13px;color:var(--ink-soft);margin:6px 0 0">Nothing logged yet. Skill Builders will ask for your Case ID or call score.</p>`}</div>
     ${state.isAdmin ? `<div class="card" style="padding:16px 20px;border-left:4px solid var(--orange)"><b style="color:var(--navy)">Admin: tool addresses</b>
       <p style="font-size:12.8px;color:var(--ink-soft);margin:4px 0 10px">Saved for every trainee. Switch a tool to <b>Live</b> once its address works. Each tool also stays reachable on its own at its address.</p>
       ${tools.map(t=>`<div class="pd-tool-admin"><span>${t.icon} <b>${E(t.short)}</b></span>
@@ -813,10 +813,10 @@ window.renderTrainingTools = function(){
 };
 window.renderCmsSimulator = window.renderTrainingTools;
 
-/* The Call Simulator's Property Damage pack (Training-Portal: simulators/call-pack-pd.js), by line. */
+/* The Call Sim's Property Damage pack (Training-Portal: simulators/call-pack-pd.js), by line. */
 const PD_CALL_LINES = [["📋","Claim Setup","3 calls"],["🛡","Coverage & Liability","3 calls"],["🚙","Rental, Tow & Shop","4 calls"],["💵","Negotiation & Total Loss","3 calls"],["✍️","Settlement & Close","3 calls"]];
 window.PD_CALL_LINES = PD_CALL_LINES;
-/* 🛠 Simulators: the shared simulators on the LSH Training Portal, opened for PD. */
+/* 🛠 LSH Sims: the shared sims on the LSH Training Portal, opened for PD. */
 window.renderCallSimulator = function(){
   const calls = pdTool("calls"), mail = pdTool("email");
   const card = (t, extra)=> `<div class="card pd-tool${t.live?"":" soon"}">
@@ -824,11 +824,11 @@ window.renderCallSimulator = function(){
       <p>${E(t.desc)}</p>${extra||""}
       ${t.live?`<div class="pd-tool-act"><button class="btn btn-primary btn-sm" onclick="openTool('${t.id}')">Open here</button><button class="btn btn-ghost btn-sm" onclick="openTool('${t.id}','tab')">New tab ↗</button></div>`:""}
     </div>`;
-  return `<p class="eyebrow">Simulators</p>
-    <h1 style="color:var(--navy);font-size:26px;margin:6px 0 8px">🛠 Simulators</h1>
+  return `<p class="eyebrow">LSH Sims</p>
+    <h1 style="color:var(--navy);font-size:26px;margin:6px 0 8px">🛠 LSH Sims</h1>
     <p style="color:var(--ink-soft);font-size:14px;max-width:80ch;margin:0 0 16px">Phone and email practice live on the <b>LSH Training Portal</b>, shared by every program. They open here already set to <b>Property Damage</b> and carrying your name and batch, so your scores reach your trainer. On calls the caller speaks: answer by voice (Chrome or Edge, allow the microphone) or by typing. Every PD call ends with the note the call requires — the claim note, the rental confirmation, the negotiation log — graded with the call.</p>
     <div class="pd-tools">${card(calls, `<div class="cl-lines-mini">${PD_CALL_LINES.map(([i,l,n])=>`<span>${i} ${E(l)} · ${n}</span>`).join("")}</div>`)}${card(mail)}</div>
-    <div class="card" style="padding:14px 18px;font-size:12.8px;color:var(--ink-soft)">Want more? Live Roleplay (🔥) has the PD client, adjuster and vendor calls from the lessons, and every Skill Builder has a live call built in.${state.isAdmin?` <b>Admin:</b> results appear on the Training Portal's Simulators page when you're signed in there as admin. Addresses are set in 🧰 Tools.`:""}</div>`;
+    <div class="card" style="padding:14px 18px;font-size:12.8px;color:var(--ink-soft)">Want more? Live Roleplay (🔥) has the PD client, adjuster and vendor calls from the lessons, and every Skill Builder has a live call built in.${state.isAdmin?` <b>Admin:</b> results appear on the Training Portal's LSH Sims page when you're signed in there as admin. Addresses are set in 🧰 Tools.`:""}</div>`;
 };
 window.saveToolSettings = async function(){
   const out = {};
@@ -861,7 +861,7 @@ window.renderClientProfile = function(){
     <p>The working PD claim for all five days. Every fact below comes from the documents in 📁 Documents — when a Skill Builder asks you to verify something, verify it against the document, not this summary.</p>
     <div class="client-intro-banner"><div class="cib-tag">📌 Read This First</div><h2>One claim, from intake to the final payment</h2>
       <p>Like a real PD file, it moves fast: claim setup and the rental on Day 1, coverage on Day 2, storage, the estimate and the supplement on Day 3, the total loss and the negotiation on Day 4, and the release, payoff and closing on Day 5. The errors you catch on day one — the VIN, the expired dec page, the mileage — are the ones that decide the money later.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn btn-navy btn-sm" onclick="goto('casedocs')">📁 Open the Claim Documents</button><button class="btn btn-ghost btn-sm" onclick="openCms()">🗂 Open the CMS</button></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn btn-navy btn-sm" onclick="goto('casedocs')">📁 Open the Claim Documents</button><button class="btn btn-ghost btn-sm" onclick="openCms()">🗂 Open LSH CaseWorks</button></div></div>
     <div class="profile-grid">${CLIENT_PROFILE_DOC.map(sec=>`<div class="card profile-section"><h3>${E(sec.section)}</h3><ul>${sec.items.map(i=>`<li>${E(i)}</li>`).join("")}</ul></div>`).join("")}</div>`;
 };
 window.clientAvatarSvg = function(){ return `<div class="client-photo-img" style="display:flex;align-items:center;justify-content:center;font-size:42px;background:#EEF0F6">🚗</div>`; };

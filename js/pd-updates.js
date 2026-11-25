@@ -1,5 +1,5 @@
 /* ============================================================
-   LSH Property Damage Claims Training — portal features from the EA/PA update
+   LSH Property Damage Claims Track — portal features from the EA/PA update
    pack "z", as adapted for the CM course (js/cm-updates.js in Case-Management-
    Training) and reworded for PD (sections 6–8 are EA/PA-only labs and are left
    out; PD overrides at the end).
@@ -200,7 +200,7 @@ function narratorAfterRender(pageOnly){
   const key = state.dayId+":"+(state.lessonSlide||0)+":"+(state.slidePage||0)+":"+state.dayViewMode;
   if(key!==__lastNarrKey){ __lastNarrKey = key; Narrator.afterSlideChange(); } else Narrator.paint();
 }
-// Skill Builders, Simulators, Tools and Roleplay all live under 🧪 Practice (js/pd-practice.js).
+// Skill Builders, LSH Sims, Tools and Roleplay all live under 🧪 Practice (js/pd-practice.js).
 const PRACTICE_SUBVIEWS = ["tool","calls","tools","crisisroleplay"];
 window.EXTRA_ROUTE_VIEWS = ["casedocs"];   // course-only page gets its own address (#/casedocs)
 // Page names for the "← Back to …" button, matching this top bar.
@@ -220,7 +220,7 @@ function renderTopbar(){
     <div class="topbar-inner">
       <div class="brand" onclick="goto('dashboard')">
         ${brandMark()}
-        <div class="brand-text"><b>PROPERTY DAMAGE CLAIMS TRAINING</b></div>
+        <div class="brand-text"><b>PROPERTY DAMAGE CLAIMS TRACK</b></div>
       </div>
       <button type="button" class="mobile-menu-btn" aria-label="Menu" aria-expanded="${state.mobileNavOpen?'true':'false'}" onclick="toggleMobileNav()">${state.mobileNavOpen?'✕':'☰'}<span>Menu</span></button>
       <div class="topbar-right">
@@ -797,7 +797,7 @@ if(PV_IS_AUDIENCE){
   window.autoPublishBlueprint = async function(){};       // leave background jobs to the trainer's own tab
   const app = document.getElementById("app"); if(app) app.innerHTML = "";
   const root = document.createElement("div"); root.id = "audienceRoot";
-  root.innerHTML = `<div class="aud-wait"><b>LSH Property Damage Claims Training</b>Waiting for the presenter…</div>`;
+  root.innerHTML = `<div class="aud-wait"><b>LSH Property Damage Claims Track</b>Waiting for the presenter…</div>`;
   document.body.appendChild(root);
   // arrow keys pressed in the slides window (or while the live copy holds focus) drive the presentation
   document.addEventListener("keydown", (e)=>{
@@ -1014,7 +1014,7 @@ window.afterRender = function(){
    so it always matches what trainees see. Clock times follow a start time the
    trainer picks. Never shown in Present mode. */
 const SOP_LAB_ACTIVITIES = {
-  pdSetup1:["Intake Packet Audit","Claims & Actions Today","First Call & Claim Setup Note","Client Call & the CMS"],
+  pdSetup1:["Intake Packet Audit","Claims & Actions Today","First Call & Claim Setup Note","Client Call & LSH CaseWorks"],
   pdCoverage2:["Which Coverage Pays?","Verify the Coverage","What If?","Coverage Memo"],
   pdRental3:["Rental Math","Who Pays Which Charge?","Storage & the Estimate","Email the Adjuster"],
   pdTotal4:["Audit the Valuation","Pick the Comparables","Build the Counter","Counter & Negotiate"],
@@ -1097,7 +1097,7 @@ function sopRunOfShow(dRaw){
       parts.length ? `Parts (≈10 min each): ${parts.map((a,k)=>`<b>${k+1}. ${esc(a)}</b>`).join(" · ")}.` : "",
       ti>0 ? `If time is short, trainees finish this one after the session; debrief it at the start of tomorrow.` : "",
       /Roleplay|The Call|Transportation Wall|Break the Adjuster|Deposition Prep/i.test(parts.join(" ")) ? `The live roleplay part can be run by you, or trainees rehearse solo first.` : "",
-      `Steps marked <b>Do this in the CMS</b> are done in the LSH Case Management System (🧰 Tools); trainees log the Case ID.`,
+      `Steps marked <b>Do this in LSH CaseWorks</b> are done in 🗂 LSH CaseWorks (🧰 Tools); trainees log the Case ID.`,
       `First submission of each exercise is free; repeats use one of 3 program-wide attempts (reset in Trainee Audit if someone is blocked by a technical issue).`].filter(Boolean),
       watch:"Anyone stuck on the same part for more than 10 minutes — nudge them to submit and move on; the debrief is where the learning lands."});
   });
@@ -1134,7 +1134,7 @@ function sopRunOfShow(dRaw){
 function sopProgramFlow(){
   const days = DAYS.map(d=>{ const tl = relatedTools(d.id); return `<tr><td><b>Day ${d.id}</b></td><td>${esc(d.title)}</td><td>${d.lessons.length}</td><td>${tl.length?tl.map(t=>esc(t.title)).join("<br>"):"—"}</td><td><button class="btn btn-ghost btn-sm" onclick="setSopDay(${d.id})">Run of show →</button></td></tr>`; }).join("");
   return `
-    <section class="card sopf"><div class="sopx-kicker">Trainer reference · The whole program</div><h2 style="font-family:'Fraunces',Georgia,serif;color:var(--navy);font-size:26px;margin:4px 0 8px;">How to facilitate the LSH Property Damage Claims Training</h2>
+    <section class="card sopf"><div class="sopx-kicker">Trainer reference · The whole program</div><h2 style="font-family:'Fraunces',Georgia,serif;color:var(--navy);font-size:26px;margin:4px 0 8px;">How to facilitate the LSH Property Damage Claims Track</h2>
       <p style="font-size:14.5px;line-height:1.6;margin:0;max-width:85ch;">Five live sessions, one realistic PD claim file (Angela Carter's 2022 RAV4, rear-ended 09/18/2026), one rhythm every day: <b>teach → check → practise → debrief → assess → follow up</b>. This page is the big picture; open any day for its minute-by-minute run of show.</p></section>
     <div class="sopf-grid">
       <section class="card sopf-card"><h3>1 · Before the program</h3><ol>
@@ -1151,7 +1151,7 @@ function sopProgramFlow(){
         <li><b>Before:</b> approvals, unlocks, open Presenter view (≈15 min early).</li>
         <li><b>Open:</b> recap + today's objectives (5 min).</li>
         <li><b>Teach:</b> topics in ~45-minute blocks with breaks; Quick Checks where they fall; one random task mid-way.</li>
-        <li><b>Practise:</b> the day's Skill Builder (with its Call Simulator and CMS steps), then a live debrief.</li>
+        <li><b>Practise:</b> the day's Skill Builder (with its Call Sim and LSH CaseWorks steps), then a live debrief.</li>
         <li><b>Discuss:</b> the end-of-day question.</li>
         <li><b>Assess:</b> Knowledge Check (70% = day complete).</li>
         <li><b>Close:</b> feedback button, preview tomorrow.</li></ol></section>
@@ -1179,8 +1179,8 @@ function sopProgramFlow(){
         <tr><td>Read what trainees think of the program</td><td>Admin → <b>Trainee Feedback</b></td></tr>
         <tr><td>See the portal as a trainee does</td><td>Top bar → <b>👁 Trainee view</b></td></tr>
         <tr><td>See the planted errors in each claim document</td><td><b>📁 Documents</b> signed in as admin (red 🔑 trainer key under each file)</td></tr>
-        <tr><td>Check a trainee's file work in the CMS</td><td><b>🧰 Tools</b> → LSH Case Management System (trainees log their Case ID in each Skill Builder)</td></tr>
-        <tr><td>Run extra call or email practice</td><td><b>🧪 Practice</b> → Call Simulator (the LSH Training Portal's shared simulator, opened on the Property Damage calls)</td></tr>
+        <tr><td>Check a trainee's file work in LSH CaseWorks</td><td><b>🧰 Tools</b> → 🗂 LSH CaseWorks (trainees log their Case ID in each Skill Builder)</td></tr>
+        <tr><td>Run extra call or email practice</td><td><b>🧪 Practice</b> → Call Sim (one of the LSH Training Portal's 🛠 LSH Sims, opened on the Property Damage calls)</td></tr>
       </tbody></table></section>
     <section class="card sopf-card" style="margin-top:14px;"><h3>The ${DAYS.length} days</h3>
       <table class="log-table sopx-table sopf-map"><thead><tr><th>Day</th><th>Title</th><th>Topics</th><th>Skill Builders</th><th></th></tr></thead><tbody>${days}</tbody></table></section>`;

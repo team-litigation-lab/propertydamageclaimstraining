@@ -5,11 +5,11 @@
    A slide is { icon, title, points: [...], where, tip }. Change the wording here; the page and the PDF are made
    from it each time, stamped with the deployed build. README → Blueprints. */
 window.LSH_BLUEPRINT = {
-  product: 'Property Damage Claims Training',
-  site: 'LSH Property Damage Claims Training (5-Day)',
+  product: 'Property Damage Claims Track',
+  site: 'LSH Property Damage Claims Track (5-Day)',
   file: 'LSH_PD',
   trainee: {
-    sub: 'Your guide to the portal: the 5-day Property Damage Claims Training, day by day',
+    sub: 'Your guide to the portal: the 5-day Property Damage Claims Track, day by day',
     slides: [
       { icon: '👋', title: 'Welcome to the program', points: [
           "Five days to work like a confident Property Damage Specialist — built around one realistic claim, Angela Carter's rear-ended 2022 RAV4, from Day 1 to Day 5.",
@@ -51,8 +51,8 @@ window.LSH_BLUEPRINT = {
         tip: 'Check the day cards for 💬 at the end of each day: that is your trainer\'s feedback waiting.' },
       { icon: '🧭', title: 'Getting around', points: [
           '🎲 Tasks: surprise tasks from your trainer — acknowledge, plan and resolve before the timer ends. Graded.',
-          "Claim File: Angela Carter's PD claim, the working file. Read it first. 📁 Documents holds every dec page, invoice, estimate, valuation and release, with its CMS upload category.",
-          "🧪 Practice: every practice tool, the same way for each day — 🧠 Skill Builders on the claim documents, 🗣 Communication (the Call Simulator's Property Damage calls and live roleplay) and 🗂 Systems (the CMS).",
+          "Claim File: Angela Carter's PD claim, the working file. Read it first. 📁 Documents holds every dec page, invoice, estimate, valuation and release, with its LSH CaseWorks upload category.",
+          "🧪 Practice: every practice tool, the same way for each day — 🧠 Skill Builders on the claim documents, 🗣 Communication (the Call Sim's Property Damage calls and live roleplay) and 🗂 Systems (LSH CaseWorks).",
           'My Notes and Handouts: your private notes, downloadable as a PDF, and printable checklists and Excel templates for each day.',
           '🎯 Focus and 💬 Feedback: your trainer\'s priorities for you, and your say on what is working.'],
         where: 'The top bar. On a phone, everything is under ☰ Menu; Search finds any topic or tool.',
@@ -60,7 +60,7 @@ window.LSH_BLUEPRINT = {
       { icon: '🚗', title: 'The claim: Angela Carter — 2022 Toyota RAV4', points: [
           "Stopped at a red light, rear-ended by a driver looking at his GPS in his mother's Explorer.",
           'Her RAV4 is at a tow yard at $65 a day, she has no car, and the other insurer wants a recorded statement.',
-          'Every lesson, Skill Builder, call and CMS exercise works this one claim.',
+          'Every lesson, Skill Builder, call and LSH CaseWorks exercise works this one claim.',
           'Read the Claim File before Day 1, then open the documents in 📁 Documents.',
           'The documents contain real-world errors — a transposed VIN, an expired dec page, a wrong valuation. Catching them is the job.',
           'Treat everything as confidential, like a real client file.'],
@@ -116,7 +116,7 @@ window.LSH_BLUEPRINT = {
     slides: [
       { icon: '🔑', title: 'Signing in as a trainer', points: [
           'Admin sign-in with the admin password. The server checks it, and every request after it needs your signed session.',
-          'Your top bar adds 🧭 Orientation, the Facilitator Guide, 👁 Trainee view and 🏠 Main Portal (back to the Training Portal\'s Training Directory).',
+          'Your top bar adds 🧭 Orientation, the Facilitator Guide, 👁 Trainee view and 🏠 Main Portal (back to the Training Portal\'s LSH Academy Index).',
           'Admin is your trainer dashboard: Trainee Audit, 📁 Batch Folders, Rankings, SOP Reference, Trainer Cues, Content Studio, Trainee Feedback, 📋 Activities and 🗣 Feedback Style. Attendance is on the Main Portal.',
           'Every day is open to you, so you can preview it before you teach it.'],
         where: 'Admin sign-in · Admin in the top bar.',
@@ -146,9 +146,9 @@ window.LSH_BLUEPRINT = {
         where: 'Top bar → Claim File · 📁 Documents.',
         tip: 'Use the 🔑 keys to check what a trainee caught and what they missed.' },
       { icon: '🧪', title: 'Practice and the Skill Builders', points: [
-          '🧪 Practice: every day has a 🧠 Skill Builder, 🗣 Communication (a call and a roleplay) and 🗂 Systems (the CMS).',
+          '🧪 Practice: every day has a 🧠 Skill Builder, 🗣 Communication (a call and a roleplay) and 🗂 Systems (LSH CaseWorks).',
           'Skill Builders are auto-graded against keys taken from the documents; written parts use the 100-point AI rubric.',
-          'The Call Simulator\'s Property Damage pack: 16 calls across five lines, each ending with the note it needs.'],
+          'The Call Sim\'s Property Damage pack: 16 calls across five lines, each ending with the note it needs.'],
         where: 'Top bar → 🧪 Practice.',
         tip: 'Assign the day\'s Skill Builder right after its lesson, while it\'s fresh.' },
       { icon: '🖥', title: 'Presenter view and the decks', points: [

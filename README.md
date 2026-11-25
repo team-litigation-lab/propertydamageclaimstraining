@@ -1,4 +1,4 @@
-# LSH Property Damage Claims Training (5-Day)
+# LSH Property Damage Claims Track (5-Day)
 
 **🖥 One screen fits all, no scrolling.** The window never scrolls: the top bar and the footer line keep their place, the page's body takes the height left between them, and a page with more in it than fits scrolls inside that body. A lesson is capped to the room the page has left, so the slide and its Previous / Next bar stay on the screen. Phones and tiny windows (under 1001 x 480) keep the ordinary page scroll. It's `js/lsh-one-screen.js`, loaded last after `js/lsh-topbar.js`, the same file in every LSH course repo; change it in all of them.
 
@@ -15,7 +15,7 @@ Trainees sign in once, on the LSH Training Portal, and open this program from th
 
 The Property Damage (PD) version of the LSH training portal, for PD Specialists at personal-injury law firms. It runs on the same engine as the EA/PA and Case Management portals (sign-in and approvals, lessons as slides, Knowledge Checks, the random Task simulator, AI-graded practice, Live Roleplay, Presenter view, SOP run of show, feedback, rankings, certificates and admin tools). All the content is property damage, built around one running claim.
 
-It is a separate training module with its own repository and its own Cloudflare Worker, like the Case Management course. Live at https://propertydamageclaimstraining.legalsupporthelp.workers.dev/ and listed on the LSH Training Portal's Training Index as **Property Damage Claims Training**. It started in a folder of EA-PA-TRAINING and moved here.
+It is a separate training module with its own repository and its own Cloudflare Worker, like the Case Management course. Live at https://propertydamageclaimstraining.legalsupporthelp.workers.dev/ and listed on the LSH Training Portal's LSH Academy Index as **Property Damage Claims Track**. It started in a folder of EA-PA-TRAINING and moved here.
 
 ## The running claim: Angela Carter
 
@@ -39,20 +39,20 @@ The facts are in `build/pd_casefile.js` (the Claim File page). The AI grader rea
 | **Days 1–5 lessons** (65 topics, 15 Quick Checks, 75 Knowledge Check questions) | `build/day1.js` – `build/day5.js`. The topics no longer show as slides (the Canva decks do), but they still feed the Quick Checks, Knowledge Checks, the day's Objectives and the trainer's talking points in Presenter view |
 | **Skill Builders** (one per day, 4 parts each) | registry in `build/pd_practice_tools.js`; the exercises are in `js/pd-skillbuilders.js` |
 | **📁 Documents** (21 claim documents, 4 templates, 5 handouts — all mock PDFs) | generated into `documents/` by `build/make_documents.py`; every page is marked *TRAINING — MOCK DOCUMENT*. Metadata and trainer audit keys in `js/pd-documents.js` |
-| **🧪 Practice** | `js/pd-practice.js`: every day has three columns — 🧠 Skill Builder, 🗣 Communication (Call Simulator line + roleplay), 🗂 Systems (the CMS) |
+| **🧪 Practice** | `js/pd-practice.js`: every day has three columns — 🧠 Skill Builder, 🗣 Communication (Call Sim line + roleplay), 🗂 Systems (LSH CaseWorks) |
 | **🔥 Live Roleplay** | `build/pd_roleplay.js`: 14 situations with clients, adjusters, tow yards, rental counters and lenders, plus a live call inside each Skill Builder |
-| **📞 Call Simulator** | ☎ **LSH Ring Channel**, the training phone (the lshringchannel repo), opened through the Portal with `?program=PD` |
+| **📞 Call Sim** | ☎ **LSH Voice**, the training phone (the lshringchannel repo), opened through the Portal with `?program=PD` |
 | **Trainer scripts** (Presenter view, Admin → Trainer Cues, Speaker Notes PDF) | `js/slide-scripts/day1.js`–`day5.js`, hand-written in the EA/PA course's format: one script per topic with four beats — ① the why, ② talk it through, ③ walk through it (First, Next, Then, Finally), ④ ask the room — plus the topic's scenario. `js/pd-scripts.js` shows them: on the Canva deck step, Presenter view steps through the topics with Next → / ← Previous (then on to the Quick Checks), while the deck itself moves in the slides window. |
 | **Deck speaker notes** (per Canva page) | `js/deck-notes/dayN.js`: the speaker notes for every page of a day's Canva deck, edited from the deck's own notes, with a scenario for the room on every page (`window.DECK_NOTES[day] = [{page, title, notes, scenario}]`). When a day has them, Presenter view follows the deck page by page (Next → / ← Previous, a page picker), and Admin → Trainer Cues and the Speaker Notes PDF list them; days without them use the topic scripts. Day 1: all 50 pages. The `notes` text can be pasted back into Canva's notes panel as is. |
 | Portal features (Presenter view, SOP, top bar) | `js/pd-updates.js`, a PD copy of the CM course's `js/cm-updates.js`. In the slides window the Canva deck stays live: a resize, full screen or a reconnecting presenter doesn't reload it or send it back to page 1, and ← → pressed there turn its pages. The console's live copy shows a note instead of a second deck. |
-| 🏠 Main Portal (admins) | `js/portal-link.js`, the same file in every LSH course repo: while an admin is signed in, **🏠 Main Portal** in the top bar and **← Back to Main Portal** on the Admin screen open the LSH Training Portal's Training Directory (`https://cm-training-activity.pages.dev/programs.html`). Change it in all the course repos. |
+| 🏠 Main Portal (admins) | `js/portal-link.js`, the same file in every LSH course repo: while an admin is signed in, **🏠 Main Portal** in the top bar and **← Back to Main Portal** on the Admin screen open the LSH Training Portal's LSH Academy Index (`https://cm-training-activity.pages.dev/programs.html`). Change it in all the course repos. |
 | 🧭 The top bar, organized | `js/lsh-topbar.js`, the same file in every LSH course repo: buttons that do the same kind of thing share one menu. **📁 Case File** is one tab for the Case File (or Claim File), 📁 Documents and 🗂 Workspace, which share a row of tabs at the top of their pages; **📚 Guides ▾** holds Notes, Handouts, 🧭 Orientation, Facilitator Guide and the Platform Blueprint; **⛶ View ▾** holds ⧉ Open in a new tab and ⛶ Full screen. A menu is made only when two or more of its buttons are on the bar. Change it in all the course repos. |
 
 ### The days
 
 | Day | Topic | Skill Builder |
 |---|---|---|
-| 1 | PD claims foundations and setting up the claim | **Claim Setup Challenge**: audit the intake packet (a transposed VIN, an expired at-fault dec page, the storage clock), choose the claims and actions for today, make the first carrier call and write the claim setup note, then the day-one client call and the CMS file |
+| 1 | PD claims foundations and setting up the claim | **Claim Setup Challenge**: audit the intake packet (a transposed VIN, an expired at-fault dec page, the storage clock), choose the claims and actions for today, make the first carrier call and write the claim setup note, then the day-one client call and the LSH CaseWorks file |
 | 2 | Coverage: reading the policy and spotting coverages | **Coverage Spotter**: match each loss to the coverage that pays it, verify both dec pages, five "what if" files (hit-and-run, uninsured, excluded driver, limits too low), and a coverage memo to the attorney and the BI Case Manager |
 | 3 | Rental, storage, inspections and repairs | **Rental, Storage & Repair Desk**: rental math (who pays which days), who pays each charge, the storage bill, a line-by-line estimate review (aftermarket parts, labor rate, missing scans and radar calibration), and the email to the adjuster |
 | 4 | Total loss, valuation and negotiation | **Total Loss Valuation & Counter**: audit the valuation, pick the true comparables, build the counter (ACV, tax, fees, payoff, equity), write the counter letter, then negotiate live |
@@ -60,7 +60,7 @@ The facts are in `build/pd_casefile.js` (the Claim File page). The AI grader rea
 
 Auto-graded parts check against keys taken from the documents. Every key scores 100% when answered correctly; this was tested with `window.__pdUI`. Written parts use the portal's 100-point AI rubric with PD-specific criteria.
 
-### Call Simulator: Property Damage pack
+### Call Sim: Property Damage pack
 
 There are 16 calls across five lines. Each one ends with the note that kind of call requires, graded with the call:
 
@@ -72,13 +72,13 @@ There are 16 calls across five lines. Each one ends with the note that kind of c
 | 💵 Negotiation & Total Loss | Negotiate the total loss · "My rental ends Thursday" · the payoff call |
 | ✍️ Settlement & Close | The "standard release" · "Should I take it?" · the subrogation follow-up |
 
-The course opens it at `https://cm-training-activity.pages.dev/simulators/call.html?program=PD` (each day's Call Simulator step adds `&line=<its PD line>`; Ring Channel doesn't have the PD pack yet, so the card points the trainee at the day's 🔥 Live Roleplays until it does). The Training Portal sends that on to the Call Simulator — ☎ **LSH Ring Channel**, the training phone — signed in through the Portal (nobody signs in again) and in its own tab: the phone rings, the trainee answers with a headset and works the call with the phone's own keys (mute, hold, transfer) and 🔎 Case lookup. Admins can change the address in **🧰 Tools → Admin: tool addresses**.
+The course opens it at `https://cm-training-activity.pages.dev/simulators/call.html?program=PD` (a step adds `&mode=graded`; each day's Call Sim step names its PD line, but `&line=<its PD line>` isn't sent yet: LSH Voice doesn't have the PD pack, so the card points the trainee at the day's 🔥 Live Roleplays until it does). The Training Portal sends that on to the Call Sim — ☎ **LSH Voice**, the training phone — signed in through the Portal (nobody signs in again) and in its own tab: the phone rings, the trainee answers with a headset and works the call with the phone's own keys (mute, hold, transfer) and 🔎 Case lookup. Admins can change the address in **🧰 Tools → Admin: tool addresses**.
 
-**Note on the call packs:** Ring Channel's scenario library is the Foundational pack on three lines (Reception and Calendar Management on the Main Line, Intake on the Intake Line), so a PD step naming one of the five PD lines lands the trainee on the phone's line picker until those calls are added on Ring Channel itself — a trainer writes them in its **📚 Scenarios**, or they are ported into its `src/scenarios.js`.
+**Note on the call packs:** LSH Voice's scenario library is the Foundational pack on three lines (Reception and Calendar Management on the Main Line, Intake on the Intake Line), so a PD step naming one of the five PD lines lands the trainee on the phone's line picker until those calls are added on LSH Voice itself — a trainer writes them in its **📚 Scenarios**, or they are ported into its `src/scenarios.js`.
 
-## 📞 Graded calls (the Call Simulator on ☎ LSH Ring Channel)
+## 📞 Graded calls (the Call Sim on ☎ LSH Voice)
 
-Every line has Practice and Graded calls on the Call Simulator — ☎ LSH Ring Channel, the training phone. A **graded** call (Graded call 1, 2… on the line, the same for everyone; the caller is unknown until the debrief) counts here: the Training Portal (its `/api/call-results`) keeps the trainee's graded calls in this program's store as `pd:callsim:<trainee id>`, by line, and the Worker lets the trainee read it but never write it. The dashboard band's **Graded calls** card (`js/graded-calls.js`) shows the best graded call on each line, averaged, with the lines and calls taken; each line's best is in its tooltip. It's read once a page load and again when the trainee comes back to the tab (at most every two minutes).
+Every line has Practice and Graded calls on the Call Sim — ☎ LSH Voice, the training phone. A **graded** call (Graded call 1, 2… on the line, the same for everyone; the caller is unknown until the debrief) counts here: the Training Portal (its `/api/call-results`) keeps the trainee's graded calls in this program's store as `pd:callsim:<trainee id>`, by line, and the Worker lets the trainee read it but never write it. The dashboard band's **Graded calls** card (`js/graded-calls.js`) shows the best graded call on each line, averaged, with the lines and calls taken; each line's best is in its tooltip. It's read once a page load and again when the trainee comes back to the tab (at most every two minutes).
 
 ## 🕘 Attendance
 
@@ -111,7 +111,7 @@ The statuses, the per-batch summaries, the CSV downloads and the Google Sheet sy
 in the Training Portal's README.
 ## 📉 Staying under Cloudflare's monthly request limit
 
-The Cloudflare account is on **Workers Paid**: **10 million requests a month** for every Worker and Pages Function on the account, shared by every LSH site (this course's Worker, meaning everything under `/api/` and `/version`, plus the other courses, the CMS and the Training Portal). Static files (the page, `js/`) don't count. `slides/` and `documents/` now come from R2 through the Worker, so each of those files a browser loads (or re-checks) counts too: see *Documents in R2*. Past the limit, Cloudflare charges for every extra million requests. Usage is under **Workers & Pages** in the Cloudflare dashboard.
+The Cloudflare account is on **Workers Paid**: **10 million requests a month** for every Worker and Pages Function on the account, shared by every LSH site (this course's Worker, meaning everything under `/api/` and `/version`, plus the other courses, LSH CaseWorks and the Training Portal). Static files (the page, `js/`) don't count. `slides/` and `documents/` now come from R2 through the Worker, so each of those files a browser loads (or re-checks) counts too: see *Documents in R2*. Past the limit, Cloudflare charges for every extra million requests. Usage is under **Workers & Pages** in the Cloudflare dashboard.
 
 So an open page asks the server sparingly (`POLL` in `index.html`, the same as the EA/PA course), and not at all while its tab is in the background. When it's back, whatever came due runs then; a quick look at another tab (Google Meet) asks nothing:
 
@@ -157,7 +157,7 @@ python3 build/build.py ../Case-Management-Training/index.html      # path to the
 
 ## 🗄 Documents in R2
 
-The document-heavy folders (`slides/`, `documents/`) are kept in **Cloudflare R2**, the `DOCUMENTS` binding (bucket `lshtraining`, the same bucket the EA/PA course and the CMS use), under `courses/pd/` (e.g. `courses/pd/slides/...`). `wrangler.json`'s `assets.run_worker_first` sends those paths to `worker.js`, and `docFromR2` answers from R2, with byte ranges (PDF viewers) and 304s for a file the browser already has.
+The document-heavy folders (`slides/`, `documents/`) are kept in **Cloudflare R2**, the `DOCUMENTS` binding (bucket `lshtraining`, the same bucket the EA/PA course and LSH CaseWorks use), under `courses/pd/` (e.g. `courses/pd/slides/...`). `wrangler.json`'s `assets.run_worker_first` sends those paths to `worker.js`, and `docFromR2` answers from R2, with byte ranges (PDF viewers) and 304s for a file the browser already has.
 
 - **Uploading:** `.github/workflows/r2-docs.yml` runs on every push to `main` that changes those folders: it uploads the files that changed and removes deleted ones (`.github/scripts/r2-sync.mjs`). **Actions → R2 documents → Run workflow** uploads every file (do this once, after setting the secret). It needs the repository secret `CLOUDFLARE_API_TOKEN` (a Cloudflare API token with *Workers R2 Storage: Edit*); until it's set, the run only prints a notice.
 - **Fallback:** a file that isn't in R2 yet (the upload still running, or the token not set) comes from the Worker's static assets as before, and so does everything if the binding is missing or R2 fails. The files stay in the repository and in the deploy, so nothing breaks while R2 fills; once R2 has them all, the folders can be added to `.assetsignore` to leave them out of the deploy.
