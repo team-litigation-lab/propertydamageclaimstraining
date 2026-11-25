@@ -32,6 +32,8 @@ jobs:
         run: node .github/scripts/batch-id.cjs
       - name: Single sign-on (the Portal is the only way a trainee gets in; a missing PORTAL_SSO_SECRET says so)
         run: node .github/scripts/sso.cjs
+      - name: The certificate's name takes the middle name and suffix from the full registered name, matching names as whole words (index.html formatCertName)
+        run: node .github/scripts/cert-name.cjs
       - name: Claim documents and handouts exist, document references resolve
         run: node .github/scripts/check-data.mjs
       - name: Documents served from R2 (ranges, 304s, static assets as the fallback)
@@ -71,3 +73,7 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/pw/node_modules
         run: node .github/scripts/graded-calls.cjs http://localhost:8787/ || { echo "--- server log ---"; cat "$RUNNER_TEMP/server.log"; exit 1; }
+      - name: Skill Builder scoring (a part's first check counts and gives no answers away; the score is the whole exercise)
+        env:
+          NODE_PATH: ${{ runner.temp }}/pw/node_modules
+        run: node .github/scripts/skillbuilder.cjs http://localhost:8787/ || { echo "--- server log ---"; cat "$RUNNER_TEMP/server.log"; exit 1; }

@@ -18,8 +18,10 @@ const fail = (m) => failures.push(m);
 const SECRET = 'portal-secret-shared-with-the-portal';
 
 const b64url = (s) => Buffer.from(s, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+// A Portal ticket names the program it is for (p, its topic key: the Portal's makeTicket); p: undefined leaves it out.
+const PORTAL_TOPIC = 'PROPERTY DAMAGE';
 async function ticketFor(payloadObj, secret) {
-    const payload = b64url(JSON.stringify(payloadObj));
+    const payload = b64url(JSON.stringify(Object.assign({ p: PORTAL_TOPIC }, payloadObj)));
     const key = await crypto.subtle.importKey('raw', new TextEncoder().encode('portal-sso:' + secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload));
     const b = String.fromCharCode(...new Uint8Array(sig));
@@ -97,6 +99,81 @@ async function ticketFor(payloadObj, secret) {
     }
     const again = await call(env, '/api/auth/portal', { ticket: aTicket });
     if (again.status !== 401 || !again.body || again.body.code !== 'used') fail(`an administrator's ticket should work only once, got ${JSON.stringify(again)}`);
+
+    // 6. 🎯 a Portal ticket names the program it is for (p, this program's topic key) and works once, whoever it is for
+    //    (platform QA 2026-11-19, finding 1): a ticket made for another program or a tool is refused, so Program Access on
+    //    the Portal stays the one gate (one with no p is still taken: the rollout); and the trainee's full registered name (finding 8) is kept, the ID unchanged.
+    {
+        const soon = () => Date.now() + 60000;
+        const e6 = makeEnv({ PORTAL_SSO_SECRET: SECRET });
+        for (const [label, p] of [["another program's", 'SOME OTHER PROGRAM'], ["the Knowledge Base's", 'kb'], ["a course's tool link", 'tool'], ['a blank-audience', '']]) {
+            for (const [kind, t] of [['trainee', { first: 'Pat', last: 'Lane', b: 'B100926' }], ['admin', { r: 'a', n: 'Coach Ana' }], ['system', { r: 's' }]]) {
+                const res = await call(e6, '/api/auth/portal', { ticket: await ticketFor(Object.assign({}, t, { p, exp: soon() }), SECRET) });
+                if (res.status !== 401 || !res.body || res.body.code !== 'audience' || res.body.token) fail(`${label} ${kind} ticket must be refused (401 audience), got ${JSON.stringify(res)}`);
+            }
+        }
+        if ([...e6.__store.keys()].some((k) => /pat-lane/.test(k) && !/^(\w+:)?sso-used:/.test(k))) fail('a refused ticket must not create or approve a trainee record');
+        // a ticket with no p (made before the Portal named the program) is still taken, so nobody is locked out mid-rollout
+        const np = await call(e6, '/api/auth/portal', { ticket: await ticketFor({ first: 'Pat', last: 'Lane', b: 'B100926', p: undefined, exp: soon() }, SECRET) });
+        if (np.status !== 200 || !np.body || !np.body.token) fail(`a ticket with no p should still sign in: ${JSON.stringify(np)}`);
+        const ap = await call(e6, '/api/auth/portal', { ticket: await ticketFor({ r: 'a', n: 'Coach Ana', p: undefined, exp: soon() }, SECRET) });
+        if (ap.status !== 200 || !ap.body || !ap.body.admin) fail(`a trainer's ticket with no p should still sign in: ${JSON.stringify(ap)}`);
+        // SSO_REQUIRE_AUDIENCE=1 (once everything is deployed): a ticket with no p is refused too; this program's own still opens
+        {
+            const eR = makeEnv({ PORTAL_SSO_SECRET: SECRET, SSO_REQUIRE_AUDIENCE: '1' });
+            const noP = await call(eR, '/api/auth/portal', { ticket: await ticketFor({ first: 'Pat', last: 'Lane', b: 'B100926', p: undefined, exp: soon() }, SECRET) });
+            if (noP.status !== 401 || !noP.body || noP.body.code !== 'audience' || noP.body.token) fail(`with SSO_REQUIRE_AUDIENCE=1 a ticket with no p is refused: ${JSON.stringify(noP)}`);
+            const own = await call(eR, '/api/auth/portal', { ticket: await ticketFor({ first: 'Pat', last: 'Lane', b: 'B100926', exp: soon() }, SECRET) });
+            if (own.status !== 200 || !own.body || !own.body.token) fail(`with SSO_REQUIRE_AUDIENCE=1 this program's own ticket still opens: ${JSON.stringify(own)}`);
+        }
+        // a trainee's own ticket works once, like a trainer's
+        const tt = await ticketFor({ first: 'Pat', last: 'Lane', b: 'B100926', p: PORTAL_TOPIC, exp: soon() }, SECRET);
+        const first = await call(e6, '/api/auth/portal', { ticket: tt });
+        if (first.status !== 200 || !first.body || !first.body.token) fail(`this program's own trainee ticket should sign in: ${JSON.stringify(first)}`);
+        const second = await call(e6, '/api/auth/portal', { ticket: tt });
+        if (second.status !== 401 || !second.body || second.body.code !== 'used' || second.body.token) fail(`a trainee's ticket should work only once, got ${JSON.stringify(second)}`);
+        // the Sign-in check's system ticket works once too
+        const st = await ticketFor({ r: 's', exp: soon() }, SECRET);
+        const s1 = await call(e6, '/api/auth/portal', { ticket: st }), s2 = await call(e6, '/api/auth/portal', { ticket: st });
+        if (s1.status !== 200 || s2.status !== 401) fail(`the Sign-in check's ticket should work once: ${s1.status} then ${s2.status}`);
+        // the full registered name is kept as fullName, the ID stays first + last + batch
+        const fm = await call(e6, '/api/auth/portal', { ticket: await ticketFor({ first: 'Maria', last: 'Santos', b: 'B100926', full: 'Maria L. Santos', exp: soon() }, SECRET) });
+        const fullName = fm.body && (fm.body.fullName || (fm.body.existing && fm.body.existing.fullName));
+        if (fm.status !== 200 || fm.body.id !== 'maria-santos--b100926' || fullName !== 'Maria L. Santos') fail(`a ticket's full name should be kept as fullName with the same ID: ${JSON.stringify(fm.body && { id: fm.body.id, fullName })}`);
+    }
+
+    // 7. 🔁 a Batch ID changed on the Portal: the trainee keeps their record (platform QA 2026-11-19, PD finding 3)
+    {
+        const e8 = makeEnv({ PORTAL_SSO_SECRET: SECRET }), soon = () => Date.now() + 60000;
+        const first = await call(e8, '/api/auth/portal', { ticket: await ticketFor({ first: 'Mark', last: 'Lee', b: 'B100126', u: 'ML1', exp: soon() }, SECRET) });
+        const rec = JSON.parse(e8.__store.get('pd:trainee:mark-lee--b100126'));
+        rec.dayProgress = { 1: { done: true, score: 100 } };
+        e8.__store.set('pd:trainee:mark-lee--b100126', JSON.stringify(rec));
+        const moved = await call(e8, '/api/auth/portal', { ticket: await ticketFor({ first: 'Mark', last: 'Lee', b: 'B110226', u: 'ML1', exp: soon() }, SECRET) });
+        const kept = JSON.parse(e8.__store.get('pd:trainee:mark-lee--b100126') || 'null');
+        if (first.status !== 200 || moved.status !== 200 || moved.body.id !== 'mark-lee--b100126') fail(`a Batch ID change should keep the trainee's record: ${JSON.stringify(moved.body && moved.body.id)}`);
+        if (!kept || kept.batch !== 'B110226' || kept.batchFrom !== 'B100126' || !kept.dayProgress[1].done) fail(`the kept record should carry the new batch and its progress: ${JSON.stringify(kept)}`);
+        if (e8.__store.has('pd:trainee:mark-lee--b110226')) fail('no empty record is made under the new batch');
+        if (e8.__store.get('pd:trainee-alias:mark-lee--b110226') !== 'mark-lee--b100126') fail('the alias for the new id is kept (the Portal follows it)');
+        const renew = await call(e8, '/api/auth/trainee', { name: 'Mark Lee', batch: 'B110226', id: 'mark-lee--b100126' }, { Authorization: 'Bearer ' + moved.body.token });
+        if (renew.status !== 200 || renew.body.id !== 'mark-lee--b100126') fail(`the session renews on the kept record: ${JSON.stringify(renew)}`);
+        // two other records with the name (two people): nothing moves
+        const e9 = makeEnv({ PORTAL_SSO_SECRET: SECRET });
+        for (const b of ['B010126', 'B020126']) e9.__store.set(`pd:trainee:sam-ray--${b.toLowerCase()}`, JSON.stringify({ id: `sam-ray--${b.toLowerCase()}`, name: 'Sam Ray', batch: b, approved: true }));
+        const two = await call(e9, '/api/auth/portal', { ticket: await ticketFor({ first: 'Sam', last: 'Ray', b: 'B030126', exp: soon() }, SECRET) });
+        if (two.status !== 200 || two.body.id !== 'sam-ray--b030126') fail(`with two other same-named records nothing moves: ${JSON.stringify(two.body && two.body.id)}`);
+        // (data-safety review 2026-11-19) another person with the same name (another Portal account) never takes the record
+        const e10 = makeEnv({ PORTAL_SSO_SECRET: SECRET });
+        await call(e10, '/api/auth/portal', { ticket: await ticketFor({ first: 'Maria', last: 'Santos', b: 'B100126', u: 'M1', exp: soon() }, SECRET) });
+        const m2 = await call(e10, '/api/auth/portal', { ticket: await ticketFor({ first: 'Maria', last: 'Santos', b: 'B110226', u: 'M2', exp: soon() }, SECRET) });
+        if (m2.body.id !== 'maria-santos--b110226' || JSON.parse(e10.__store.get('pd:trainee:maria-santos--b100126')).batch !== 'B100126' || e10.__store.has('pd:trainee-alias:maria-santos--b110226')) fail(`a namesake gets her own record: ${m2.body.id}`);
+        // a trainee can't rewrite who their record is
+        const recM = JSON.parse(e10.__store.get('pd:trainee:maria-santos--b110226'));
+        if (recM.portalUid !== 'M2') fail(`the Portal account id is kept on the record: ${recM.portalUid}`);
+        await call(e10, '/api/storage/set', { key: 'trainee:maria-santos--b110226', value: JSON.stringify(Object.assign({}, recM, { name: 'Bob Victim', batch: 'B200000', portalUid: 'X' })) }, { Authorization: 'Bearer ' + m2.body.token });
+        const afterM = JSON.parse(e10.__store.get('pd:trainee:maria-santos--b110226'));
+        if (afterM.name !== 'Maria Santos' || afterM.batch !== 'B110226' || afterM.portalUid !== 'M2') fail(`who the record is can't be rewritten by the trainee: ${JSON.stringify(afterM)}`);
+    }
 
     if (failures.length) { console.log(`\n${failures.length} failure(s):`); failures.forEach((f, i) => console.log(`${i + 1}. ${f}`)); process.exit(1); }
     console.log('Single sign-on: the Portal is the only way a trainee gets in, a typed name + batch is refused, a missing PORTAL_SSO_SECRET says so, and a trainer signed in on the Portal gets in with no second password, once per ticket.');

@@ -83,19 +83,19 @@ const SIM = (id, extra)=> Object.assign({kind:"sim", id}, extra||{});
 const RP = (categoryId, topicId)=> ({kind:"rp", categoryId, topicId});
 const PLAN = {
   1:{think:["pdSetup1"],
-     talk:[SIM("calls",{title:"Call Sim — 📋 Claim Setup", note:"Open the third-party claim · open the first-party rental claim · Angela's intake call"}), RP("client","wheresmycar"), RP("adjuster","recordedstatement")],
+     talk:[SIM("calls",{line:"Claim Setup", title:"Call Sim — 📋 Claim Setup", note:"Open the third-party claim · open the first-party rental claim · Angela's intake call"}), RP("client","wheresmycar"), RP("adjuster","recordedstatement")],
      do:[SIM("cms",{title:"Build Angela's PD file in LSH CaseWorks", note:"Vehicle, parties, both carriers, documents under PD, day-one tasks", })]},
   2:{think:["pdCoverage2"],
-     talk:[SIM("calls",{title:"Call Sim — 🛡 Coverage & Liability", note:"Verify the at-fault policy · spot the client's coverage · liability still under investigation"}), RP("adjuster","liabilitystall"), RP("client","deductible")],
+     talk:[SIM("calls",{line:"Coverage & Liability", title:"Call Sim — 🛡 Coverage & Liability", note:"Verify the at-fault policy · spot the client's coverage · liability still under investigation"}), RP("adjuster","liabilitystall"), RP("client","deductible")],
      do:[SIM("cms",{title:"Add the coverage summary to LSH CaseWorks", note:"Every coverage, its limit, whether it applies, who handles it"})]},
   3:{think:["pdRental3"],
-     talk:[SIM("calls",{title:"Call Sim — 🚙 Rental, Tow & Shop", note:"Rental authorization · the rental counter · the tow-yard release · the supplement stall"}), RP("vendors","rentalcounter"), RP("vendors","storagedispute"), RP("adjuster","supplementdelay")],
+     talk:[SIM("calls",{line:"Rental, Tow & Shop", title:"Call Sim — 🚙 Rental, Tow & Shop", note:"Rental authorization · the rental counter · the tow-yard release · the supplement stall"}), RP("vendors","rentalcounter"), RP("vendors","storagedispute"), RP("adjuster","supplementdelay")],
      do:[SIM("cms",{title:"Log the rental and the repair in LSH CaseWorks", note:"Reservation #, rate, end date, estimate, supplement, tasks"})]},
   4:{think:["pdTotal4"],
-     talk:[SIM("calls",{title:"Call Sim — 💵 Negotiation & Total Loss", note:"Negotiate the total loss · “my rental ends Thursday” · the payoff call"}), RP("adjuster","takeitorleaveit"), RP("client","shouldtakeit"), RP("client","upsidedown")],
+     talk:[SIM("calls",{line:"Negotiation & Total Loss", title:"Call Sim — 💵 Negotiation & Total Loss", note:"Negotiate the total loss · “my rental ends Thursday” · the payoff call"}), RP("adjuster","takeitorleaveit"), RP("client","shouldtakeit"), RP("client","upsidedown")],
      do:[SIM("cms",{title:"Log the valuation audit and counter in LSH CaseWorks", note:"Audit table, comparables, counter letter, rental extension request"}), SIM("email",{note:"Generate a Property Damage inbox and clear it"})]},
   5:{think:["pdClose5"],
-     talk:[SIM("calls",{title:"Call Sim — ✍️ Settlement & Close", note:"The “standard release” · “should I take it?” · the subrogation follow-up"}), RP("adjuster","releaseallclaims"), RP("vendors","lienholder")],
+     talk:[SIM("calls",{line:"Settlement & Close", title:"Call Sim — ✍️ Settlement & Close", note:"The “standard release” · “should I take it?” · the subrogation follow-up"}), RP("adjuster","releaseallclaims"), RP("vendors","lienholder")],
      do:[SIM("cms",{title:"Close Angela's PD file in LSH CaseWorks", note:"Release, payments, closing note, BI handoff, subrogation task"})]}
 };
 
@@ -118,13 +118,21 @@ function itemView(it){
   if(it.kind==="sim"){
     const t = pdTool(it.id); if(!t) return null;
     const logged = Object.values(state.cmsLog||{}).some(v=>(v.platform||"cms")===it.id);
+    // (the Email Workspace's score comes back from the Portal: simresults:<id>, js/sim-results.js)
+    if(it.id==="email" && !state.simResults && window.pdSimResults) window.pdSimResults.load();
+    const simBest = it.id==="email" && state.simResults && state.simResults.best && state.simResults.best["Email Workspace"];
     const name = it.title || t.name.replace(/ \(LSH Training Portal\)$/,"");
-    return {icon:t.icon, title:name, desc:it.note || t.desc, where: it.id==="cms" ? "🗂 LSH CaseWorks" : "LSH Training Portal",
-      done: logged && it.id!=="cms", doneLabel:"✓ Work logged", live:t.live,
+    // (a Call Sim step names its PD line (it.line), but it isn't sent on as &line= yet: LSH Voice has no PD pack, and a
+    // line it doesn't know could leave the phone with no calls. Send it once the PD pack is on the training phone. Until then the
+    // card says so and points at the day's Live Roleplays: platform QA 2026-11-19, PD finding 5, and the regressions review)
+    const callNote = it.id==="calls" ? " · PD's own calls are being added to the training phone: until they are on it, practise this day's situations in the 🔥 Live Roleplay cards beside this one." : "";
+    return {icon:t.icon, title:name, desc:(it.note || t.desc) + callNote, where: it.id==="cms" ? "🗂 LSH CaseWorks" : "LSH Training Portal",
+      done: (logged && it.id!=="cms") || !!simBest, doneLabel: simBest && typeof simBest.score==="number" ? `✓ Best ${simBest.score}%` : "✓ Work logged", live:t.live,
       act: it.go ? `goto('${it.go}')` : `openTool('${it.id}')`};
   }
   return null;
 }
+window.__pdPracticeItem = itemView;   // (read-only hook for the browser checks: a Practice card's state)
 window.pxRoleplay = function(categoryId, topicId){
   state.rpHub = {step:"mode", categoryId, topicId};
   goto("crisisroleplay");
