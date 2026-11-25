@@ -1,5 +1,5 @@
 /* ============================================================
-   LSH Property Damage Claims Training — Skill Builders, the Claim
+   LSH Property Damage Claims Track — Skill Builders, the Claim
    Document Library, the Training Tools hub (CMS, Call Sim, Email),
    Handouts and the Claim File. Built on the CM course's Skill Builder kit.
    Loaded after the main portal script: anything assigned to window

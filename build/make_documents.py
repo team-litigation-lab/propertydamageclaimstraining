@@ -41,7 +41,7 @@ def page(path, title, body, kind="Claim file"):
 <link rel="stylesheet" href="{css}">
 </head>
 <body>
-<div class="sim">TRAINING — MOCK DOCUMENT · LSH Property Damage Claims Training · {kind}</div>
+<div class="sim">TRAINING — MOCK DOCUMENT · LSH Property Damage Claims Track · {kind}</div>
 <main class="doc">
 {body.strip()}
 </main>

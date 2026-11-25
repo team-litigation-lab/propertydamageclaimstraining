@@ -1,5 +1,5 @@
 /**
- * LSH Property Damage Claims Training — Cloudflare Worker (secured)
+ * LSH Property Damage Claims Track — Cloudflare Worker (secured)
  *
  * Same engine as the EA/PA portal worker. All storage lives in the shared
  * LSH_KV namespace under a "pd:" key prefix, so the PD, CM and EA/PA portals can
