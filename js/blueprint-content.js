@@ -5,11 +5,11 @@
    A slide is { icon, title, points: [...], where, tip }. Change the wording here; the page and the PDF are made
    from it each time, stamped with the deployed build. README → Blueprints. */
 window.LSH_BLUEPRINT = {
-  product: 'Property Damage Claims Training',
-  site: 'LSH Property Damage Claims Training (5-Day)',
+  product: 'Property Damage Claims Track',
+  site: 'LSH Property Damage Claims Track (5-Day)',
   file: 'LSH_PD',
   trainee: {
-    sub: 'Your guide to the portal: the 5-day Property Damage Claims Training, day by day',
+    sub: 'Your guide to the portal: the 5-day Property Damage Claims Track, day by day',
     slides: [
       { icon: '👋', title: 'Welcome to the program', points: [
           "Five days to work like a confident Property Damage Specialist — built around one realistic claim, Angela Carter's rear-ended 2022 RAV4, from Day 1 to Day 5.",

@@ -1,4 +1,4 @@
-# LSH Property Damage Claims Training (5-Day)
+# LSH Property Damage Claims Track (5-Day)
 
 **🖥 One screen fits all, no scrolling.** The window never scrolls: the top bar and the footer line keep their place, the page's body takes the height left between them, and a page with more in it than fits scrolls inside that body. A lesson is capped to the room the page has left, so the slide and its Previous / Next bar stay on the screen. Phones and tiny windows (under 1001 x 480) keep the ordinary page scroll. It's `js/lsh-one-screen.js`, loaded last after `js/lsh-topbar.js`, the same file in every LSH course repo; change it in all of them.
 
@@ -14,7 +14,7 @@ Trainees sign in once, on the LSH Training Portal, and open this program from th
 
 The Property Damage (PD) version of the LSH training portal, for PD Specialists at personal-injury law firms. It runs on the same engine as the EA/PA and Case Management portals (sign-in and approvals, lessons as slides, Knowledge Checks, the random Task simulator, AI-graded practice, Live Roleplay, Presenter view, SOP run of show, feedback, rankings, certificates and admin tools). All the content is property damage, built around one running claim.
 
-It is a separate training module with its own repository and its own Cloudflare Worker, like the Case Management course. Live at https://propertydamageclaimstraining.legalsupporthelp.workers.dev/ and listed on the LSH Training Portal's LSH Academy Index as **Property Damage Claims Training**. It started in a folder of EA-PA-TRAINING and moved here.
+It is a separate training module with its own repository and its own Cloudflare Worker, like the Case Management course. Live at https://propertydamageclaimstraining.legalsupporthelp.workers.dev/ and listed on the LSH Training Portal's LSH Academy Index as **Property Damage Claims Track**. It started in a folder of EA-PA-TRAINING and moved here.
 
 ## The running claim: Angela Carter
 

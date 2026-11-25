@@ -52,10 +52,11 @@ def rep_re(pattern, new):
 
 
 # ---------- 1. wording: CM -> PD (before the PD content goes in, so it isn't touched) ----------
-rep("<title>LSH Case Management Training</title>", "<title>LSH Property Damage Claims Training</title>")
+rep("<title>LSH Case Management Training</title>", "<title>LSH Property Damage Claims Track</title>")
 rep("LSH Case Management — Platform Orientation", "LSH Property Damage Claims — Platform Orientation")
 rep("5-Day Legal Case Management Professional Development Training", "5-Day Legal Property Damage Claims Professional Development Training")
 rep("Case Management Professional Development Workshop", "Property Damage Claims Professional Development Workshop")
+rep("LEGAL CASE MANAGEMENT ACCELERATOR", "PROPERTY DAMAGE CLAIMS TRACK", min_count=0)   # the hero eyebrow names this course
 rep("<p>Run a personal-injury file from intake to disbursement: verify every document, keep treatment on the map, audit before demand, negotiate the net, and stay trial-ready.</p>",
     "<p>Run a property damage claim from the first call to the final payment: set it up right, spot every coverage, keep the client mobile, stop the storage clock, negotiate the value, and close it with a PD-only release.</p>")
 rep('["Case File","John Doe v. Apex — the working case. Read it first."],["📁 Case Documents","Every record, bill, lien letter and pleading — with its CMS upload category."],["🧪 Practice","Every practice tool, organized the same way for each day: 🧠 Skill Builders on the case documents, 🗣 Communication (live calls, roleplay, email) and 🗂 Systems (the CMS, docket, medical records, e-filing, calendar and trust ledger). Each day\'s tools open with that day."]',
@@ -75,7 +76,7 @@ rep('"John Doe\'s wife Jane calls asking whether she needs her own claim for her
 rep('"The attorney needs the updated lien totals for the Doe file in the next 10 minutes.",', '"The attorney needs Angela Carter\'s total-loss numbers (offer, counter, payoff, equity) in the next 10 minutes.",')
 rep('"A court clerk leaves a voicemail: the Answer in another matter was rejected for a missing signature page."', '"Riverside Collision Center leaves a voicemail: the supplement has sat with Crestline for 3 days and the car is blocking a bay."')
 rep("Program: LSH (Legal Support Help) 5-day Case Management Training for personal-injury Case Managers (many are remote VAs supporting US law firms). Running case: John Doe v. Apex Delivery Services (commercial T-bone, facial scarring, L4-L5 microdiscectomy).",
-    "Program: LSH (Legal Support Help) 5-day Property Damage Claims Training for PD Specialists at personal-injury law firms (many are remote VAs supporting US law firms). Running claim: Angela Carter's 2022 Toyota RAV4, rear-ended 09/18/2026 (Crestline Mutual third-party claim, rental, storage, supplement, total loss, PD-only release).")
+    "Program: LSH (Legal Support Help) 5-day Property Damage Claims Track for PD Specialists at personal-injury law firms (many are remote VAs supporting US law firms). Running claim: Angela Carter's 2022 Toyota RAV4, rear-ended 09/18/2026 (Crestline Mutual third-party claim, rental, storage, supplement, total loss, PD-only release).")
 rep("Apply the Day ${id} concepts to the John Doe v. Apex case file.", "Apply the Day ${id} concepts to Angela Carter's PD claim file.")
 rep("ppt:`Revised CM Training Day ${id}`, canvaLabel:`CM Day ${id}`", "ppt:`PD Claims Training Day ${id}`, canvaLabel:`PD Day ${id}`")
 rep('"If this landed on your John Doe file today, what would your first move be?"', '"If this landed on Angela Carter\'s PD file today, what would your first move be?"')
@@ -98,8 +99,8 @@ rep("for a personal-injury Case Manager trainee", "for a Property Damage (PD) Sp
 rep("in a personal-injury Case Management training program", "in a Property Damage (PD) claims training program at a personal-injury law firm")
 rep("Six areas cover most of what a personal-injury Case Manager handles day to day.", "Six areas cover most of what a PD Specialist handles day to day.")
 # everything else that names the course or the role
-rep("LSH Case Management Training", "LSH Property Damage Claims Training")
-rep("Case Management Training", "Property Damage Claims Training")
+rep("LSH Case Management Training", "LSH Property Damage Claims Track")
+rep("Case Management Training", "Property Damage Claims Track")
 rep("CASE MANAGER: ", "PD SPECIALIST: ")
 rep("Case Manager", "PD Specialist")
 rep('PAGE_EYEBROWS = {clientprofile:"Case File", casedocs:"Case Documents",', 'PAGE_EYEBROWS = {clientprofile:"Claim File", casedocs:"Claim Documents",')
