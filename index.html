@@ -1656,6 +1656,20 @@ main.has-presenter{padding-right:calc(clamp(170px,16vw,250px) + 16px);}
   main select{max-width:100%;}
   .cues-day-tabs{flex-wrap:nowrap;overflow-x:auto;}
 }
+/* Phones: the safety net under the rules above. Every rule is wrapped in :where() (no
+   specificity), so any page's own rule still wins; these only catch what those miss.
+   <main> clips anything wider than the screen, so without them a too-wide picture, frame or
+   long unbroken word (an email address, a link, a claim number) is cut off, not scrolled to. */
+@media(max-width:760px){
+  :where(body){overflow-wrap:break-word;}
+  :where(img, video, iframe, embed, object){max-width:100%;}
+  :where(img, video){height:auto;}
+  :where(pre){white-space:pre-wrap;}
+  :where(input, select, textarea){max-width:100%;}
+  /* <main> breaks words anywhere, which lets a table squeeze a column to one letter a line on a
+     phone; in a table a word stays whole, and the table scrolls sideways inside itself instead. */
+  :where(td, th){overflow-wrap:break-word;}
+}
 
 .tap-selected{outline:3px solid var(--orange) !important;outline-offset:2px;box-shadow:0 0 0 6px rgba(219,132,55,.18) !important;}
 body.tap-moving [ondrop]{outline:2px dashed rgba(219,132,55,.55);outline-offset:-2px;}
@@ -17194,7 +17208,7 @@ window.addEventListener("error", (ev)=>{ if(state.isAdmin && ev && ev.message &&
 </script>
 <script src="js/pd-updates.js?v=3-a"></script>
 <script src="js/pd-documents.js?v=1"></script>
-<script src="js/pd-skillbuilders.js?v=3"></script>
+<script src="js/pd-skillbuilders.js?v=4"></script>
 <script src="js/pd-practice.js?v=1"></script>
 <script src="js/deck-pages.js?v=c9e7caaf"></script>
 <script src="js/pd-canva.js?v=7"></script>
