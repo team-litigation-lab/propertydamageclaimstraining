@@ -246,7 +246,7 @@ const OWN = (id) => [`trainee:${id}`, `progress:${id}`, `feedback:${id}`, `focus
 const FIRST_WRITE_FIELDS = ["name", "firstName", "lastName", "batch"];
 const PROTECTED_TRAINEE_FIELDS = ["name", "firstName", "lastName", "batch", "fullName", "portalUid", "batchFrom", "batchMovedAt", "approved", "rejected", "archived", "labAttemptsResetAt", "certTrainer", "aiReview", "flaggedInvalidInput", "assignedRoleplay", "registeredAt"];
 
-// callsim:<id>: the trainee's graded calls from the Call Sim (☎ LSH Voice), kept by the Training Portal (its /api/call-results).
+// callsim:<id>: the trainee's graded calls from the Call Sim (☎ LSH CommX), kept by the Training Portal (its /api/call-results).
 // The trainee reads it (js/graded-calls.js), but never writes it (traineeWrite refuses keys it doesn't know).
 function canRead(tok, key) {
   if (tok.role === "a") return true;

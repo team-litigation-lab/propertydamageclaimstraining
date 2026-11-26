@@ -152,11 +152,11 @@ const PD_TOOL_DEFAULTS = [
    evidence:"LSH CaseWorX Case ID", idHint:"LSH CaseWorX Case ID (e.g. LSH-2026-PI-000123)"},
   // Shared simulators on the LSH Training Portal (used by every program). The course
   // opens them with ?program=PD and the trainee's name and batch, so results carry them.
-  // The Call Sim is ☎ LSH Voice's (the training phone): this Portal address opens it signed in
+  // The Call Sim is ☎ LSH CommX's (the training phone): this Portal address opens it signed in
   // (→ /api/launch?tool=ringchannel&to=calls), with ?program=PD (the course the call counts in) and &mode=graded
-  // (a step's ?line= is sent once LSH Voice has PD's own pack: js/pd-practice.js). It opens in its own tab, and a graded call is reported to the Portal's
+  // (a step's ?line= is sent once LSH CommX has PD's own pack: js/pd-practice.js). It opens in its own tab, and a graded call is reported to the Portal's
   // /api/call-results, so it still counts here.
-  {id:"calls", icon:"📞", name:"Call Sim (☎ LSH Voice)", short:"Call Sim", status:"live",
+  {id:"calls", icon:"📞", name:"Call Sim (☎ LSH CommX)", short:"Call Sim", status:"live",
    url:"https://cm-training-activity.pages.dev/simulators/call.html", portalSim:true,
    desc:"Live practice calls on the training phone, spoken aloud: the phone rings on the line the step names, you answer with a headset and use its own keys (mute, hold, transfer) and 🔎 Case lookup. Each call ends with the note it requires, and both are scored on the line's Mock Calls Metrics. Take a graded call, practice with an 🤖 AI caller, or answer a trainer-led mock call on the same phone.",
    evidence:"Score", idHint:"Score (e.g. 82%)"},
@@ -220,7 +220,7 @@ function placeFrame(){
 }
 function paintShell(){
   const t = pdTool(currentFrame);
-  frameShell.querySelector(".pd-tf-name").textContent = t ? `${t.icon} ${t.name.replace(/ \((LSH Training Portal|☎ LSH Voice)\)$/,"")}` : "";
+  frameShell.querySelector(".pd-tf-name").textContent = t ? `${t.icon} ${t.name.replace(/ \((LSH Training Portal|☎ LSH CommX)\)$/,"")}` : "";
   Object.entries(frames).forEach(([id,f])=>{ f.style.display = id===currentFrame ? "block" : "none"; });
 }
 // extra: an optional query string for this opening, e.g. "mock=MC-04" opens that CMS Training Library case.
@@ -231,7 +231,7 @@ window.openTool = function(id, mode, extra){
   if(!t.live){ toast(`${t.icon} ${t.name} is coming soon. For now, log this step as a Task in LSH CaseWorX.`); return; }
   let href = toolHref(t);
   if(extra) href += (href.includes("?") ? "&" : "?") + extra;
-  // The Call Sim is ☎ LSH Voice, opened through the Portal's sign-in cookie, which a frame doesn't send: its own tab.
+  // The Call Sim is ☎ LSH CommX, opened through the Portal's sign-in cookie, which a frame doesn't send: its own tab.
   if(mode==="tab" || id==="calls"){ window.open(href, "_blank", "noopener"); return; }
   ensureShell();
   if(!frames[id] || frames[id].dataset.src !== href){
@@ -816,7 +816,7 @@ window.renderCmsSimulator = window.renderTrainingTools;
 /* The Call Sim's Property Damage pack (Training-Portal: simulators/call-pack-pd.js), by line. */
 const PD_CALL_LINES = [["📋","Claim Setup","3 calls"],["🛡","Coverage & Liability","3 calls"],["🚙","Rental, Tow & Shop","4 calls"],["💵","Negotiation & Total Loss","3 calls"],["✍️","Settlement & Close","3 calls"]];
 window.PD_CALL_LINES = PD_CALL_LINES;
-/* 🛠 LSH Sims: the shared sims on the LSH Training Portal, opened for PD. */
+/* 🛠 LSH Elev8: the shared sims on the LSH Training Portal, opened for PD. */
 window.renderCallSimulator = function(){
   const calls = pdTool("calls"), mail = pdTool("email");
   const card = (t, extra)=> `<div class="card pd-tool${t.live?"":" soon"}">
@@ -824,11 +824,11 @@ window.renderCallSimulator = function(){
       <p>${E(t.desc)}</p>${extra||""}
       ${t.live?`<div class="pd-tool-act"><button class="btn btn-primary btn-sm" onclick="openTool('${t.id}')">Open here</button><button class="btn btn-ghost btn-sm" onclick="openTool('${t.id}','tab')">New tab ↗</button></div>`:""}
     </div>`;
-  return `<p class="eyebrow">LSH Sims</p>
-    <h1 style="color:var(--navy);font-size:26px;margin:6px 0 8px">🛠 LSH Sims</h1>
+  return `<p class="eyebrow">LSH Elev8</p>
+    <h1 style="color:var(--navy);font-size:26px;margin:6px 0 8px">🛠 LSH Elev8</h1>
     <p style="color:var(--ink-soft);font-size:14px;max-width:80ch;margin:0 0 16px">Phone and email practice live on the <b>LSH Training Portal</b>, shared by every program. They open here already set to <b>Property Damage</b> and carrying your name and batch, so your scores reach your trainer. On calls the caller speaks: answer by voice (Chrome or Edge, allow the microphone) or by typing. Every PD call ends with the note the call requires — the claim note, the rental confirmation, the negotiation log — graded with the call.</p>
     <div class="pd-tools">${card(calls, `<div class="cl-lines-mini">${PD_CALL_LINES.map(([i,l,n])=>`<span>${i} ${E(l)} · ${n}</span>`).join("")}</div>`)}${card(mail)}</div>
-    <div class="card" style="padding:14px 18px;font-size:12.8px;color:var(--ink-soft)">Want more? Live Roleplay (🔥) has the PD client, adjuster and vendor calls from the lessons, and every Skill Builder has a live call built in.${state.isAdmin?` <b>Admin:</b> results appear on the Training Portal's LSH Sims page when you're signed in there as admin. Addresses are set in 🧰 Tools.`:""}</div>`;
+    <div class="card" style="padding:14px 18px;font-size:12.8px;color:var(--ink-soft)">Want more? Live Roleplay (🔥) has the PD client, adjuster and vendor calls from the lessons, and every Skill Builder has a live call built in.${state.isAdmin?` <b>Admin:</b> results appear on the Training Portal's LSH Elev8 page when you're signed in there as admin. Addresses are set in 🧰 Tools.`:""}</div>`;
 };
 window.saveToolSettings = async function(){
   const out = {};

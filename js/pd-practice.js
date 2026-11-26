@@ -122,7 +122,7 @@ function itemView(it){
     if(it.id==="email" && !state.simResults && window.pdSimResults) window.pdSimResults.load();
     const simBest = it.id==="email" && state.simResults && state.simResults.best && state.simResults.best["Email Workspace"];
     const name = it.title || t.name.replace(/ \(LSH Training Portal\)$/,"");
-    // (a Call Sim step names its PD line (it.line), but it isn't sent on as &line= yet: LSH Voice has no PD pack, and a
+    // (a Call Sim step names its PD line (it.line), but it isn't sent on as &line= yet: LSH CommX has no PD pack, and a
     // line it doesn't know could leave the phone with no calls. Send it once the PD pack is on the training phone. Until then the
     // card says so and points at the day's Live Roleplays: platform QA 2026-11-19, PD finding 5, and the regressions review)
     const callNote = it.id==="calls" ? " · PD's own calls are being added to the training phone: until they are on it, practise this day's situations in the 🔥 Live Roleplay cards beside this one." : "";
@@ -169,7 +169,7 @@ window.renderPracticeHub = function(){
     <div class="card" style="padding:14px 18px;margin-bottom:14px"><b style="color:var(--navy)">Any day</b>
       <div class="px-grid" style="margin-top:10px">
         <div class="px-col think"><h3>${CATS.think.icon} Review</h3>${itemHTML({icon:"📁", title:"Claim Documents", desc:"Every Angela Carter document the tools use — dec pages, invoices, estimates, the valuation, the release.", where:"In this portal", act:"goto('casedocs')"})}${itemHTML({icon:"📂", title:"Claim File", desc:"The one-page summary of Angela's PD claim and its timeline.", where:"In this portal", act:"goto('clientprofile')"})}</div>
-        <div class="px-col talk"><h3>${CATS.talk.icon} Open practice</h3>${itemHTML({icon:"🎲", title:"Quick roleplay call", desc:"A random live PD call, no setup.", where:"Live roleplay", act:"rpLaunchQuickPractice()"})}${itemHTML({icon:"🔥", title:"All roleplay situations", desc:"Pick any category, situation, difficulty and persona.", where:"Live roleplay", act:"state.rpHub={step:'category'};goto('crisisroleplay')"})}${itemHTML({icon:"📞", title:"Call Sim (the training phone)", desc:"A caller rings your phone: answer with a headset, handle the call and write its note. Graded on the line's Mock Calls Metrics.", where:"☎ LSH Voice", act:"openTool('calls')"})}</div>
+        <div class="px-col talk"><h3>${CATS.talk.icon} Open practice</h3>${itemHTML({icon:"🎲", title:"Quick roleplay call", desc:"A random live PD call, no setup.", where:"Live roleplay", act:"rpLaunchQuickPractice()"})}${itemHTML({icon:"🔥", title:"All roleplay situations", desc:"Pick any category, situation, difficulty and persona.", where:"Live roleplay", act:"state.rpHub={step:'category'};goto('crisisroleplay')"})}${itemHTML({icon:"📞", title:"Call Sim (the training phone)", desc:"A caller rings your phone: answer with a headset, handle the call and write its note. Graded on the line's Mock Calls Metrics.", where:"☎ LSH CommX", act:"openTool('calls')"})}</div>
         <div class="px-col do"><h3>${CATS.do.icon} Platforms</h3>${itemHTML({icon:"🗂", title:"LSH CaseWorX", desc:"Build and update Angela's PD file.", where:"🗂 LSH CaseWorX", act:"openTool('cms')"})}${itemHTML({icon:"🧰", title:"All tools, sign-in help & my work log", desc:"Every platform's address, how sign-in works inside the portal, and the IDs and scores you've logged.", where:"In this portal", act:"goto('tools')"})}</div>
       </div></div>`;
 };

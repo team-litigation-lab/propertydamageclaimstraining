@@ -6189,7 +6189,7 @@ function renderClientProfile(){
 
 
 function renderTopbar(){
-  let views = [["dashboard","Dashboard"],["tasks","🎲 Tasks"],["clientprofile","Claim File"],["casedocs","📁 Documents"],["practice","Skill Builders"],["calls","🛠 LSH Sims"],["tools","🧰 Tools"],["crisisroleplay","🔥 Roleplay"],["notes","Notes"],["handouts","Handouts"]];
+  let views = [["dashboard","Dashboard"],["tasks","🎲 Tasks"],["clientprofile","Claim File"],["casedocs","📁 Documents"],["practice","Skill Builders"],["calls","🛠 LSH Elev8"],["tools","🧰 Tools"],["crisisroleplay","🔥 Roleplay"],["notes","Notes"],["handouts","Handouts"]];
   if(state.isAdmin){
     // Admin is a trainer monitoring dashboard, not a trainee workspace — hide
     // the trainee-facing-only views that have no role here.
@@ -8008,7 +8008,7 @@ window.addEventListener("resize", ()=>{ clearTimeout(window.__heroFitT); window.
 if(document.fonts && document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", ()=>fitHeroText());
 
 /* ---------- Uniform page heroes: every page title gets the dashboard hero look ---------- */
-const PAGE_EYEBROWS = {clientprofile:"Claim File", casedocs:"Claim Documents", tools:"Training Tools", cms:"Training Tools", calls:"LSH Sims", practice:"Skill Builders", notes:"My Notes", handouts:"Reference Library", crisisroleplay:"Live Roleplay", facilitatorguide:"For Trainers", admin:"Admin Dashboard"};
+const PAGE_EYEBROWS = {clientprofile:"Claim File", casedocs:"Claim Documents", tools:"Training Tools", cms:"Training Tools", calls:"LSH Elev8", practice:"Skill Builders", notes:"My Notes", handouts:"Reference Library", crisisroleplay:"Live Roleplay", facilitatorguide:"For Trainers", admin:"Admin Dashboard"};
 function applyPageHero(){
   if(["dashboard","day","login","pendingApproval","registrationDenied","orientation","tool"].includes(state.view)) return;
   const main = document.querySelector("#app > main"); if(!main) return;
@@ -17206,10 +17206,10 @@ window.addEventListener("unhandledrejection", (ev)=>{ const e = ev.reason; if(e 
 window.addEventListener("error", (ev)=>{ if(state.isAdmin && ev && ev.message && !/ResizeObserver|Script error/.test(ev.message)) showActionError(new Error(ev.message), ""); });
 
 </script>
-<script src="js/pd-updates.js?v=3-a"></script>
+<script src="js/pd-updates.js?v=4"></script>
 <script src="js/pd-documents.js?v=1"></script>
-<script src="js/pd-skillbuilders.js?v=4"></script>
-<script src="js/pd-practice.js?v=1"></script>
+<script src="js/pd-skillbuilders.js?v=5"></script>
+<script src="js/pd-practice.js?v=2"></script>
 <script src="js/deck-pages.js?v=c9e7caaf"></script>
 <script src="js/pd-canva.js?v=7"></script>
 <script src="js/pd-deck-style.js?v=1"></script>
@@ -17226,7 +17226,7 @@ window.addEventListener("error", (ev)=>{ if(state.isAdmin && ev && ev.message &&
 <script src="/js/lsh-blueprint-course.js?v=2"></script>
 <script src="/js/lsh-blueprint.js?v=2"></script>
 <script src="js/lsh-dashboard.js?v=4"></script>
-<script src="js/graded-calls.js?v=1"></script>
+<script src="js/graded-calls.js?v=2"></script>
 <script src="js/checkin.js?v=1"></script>
 <script src="js/sim-results.js?v=1"></script>
 <script src="/js/portal-link.js?v=3"></script>
@@ -17236,6 +17236,7 @@ window.addEventListener("error", (ev)=>{ if(state.isAdmin && ev && ev.message &&
 <script src="/js/lsh-academy-frame.js?v=1"></script>
 <!-- 📋 Compliance and Platform Utilization Monitoring in View Detail: lesson decks, Knowledge Checks, Skill Builders, last opened, last on the platform, 📝 Send Feedback -->
 <script src="/js/lsh-compliance-monitor.js?v=1"></script>
+<script src="/js/lsh-footer.js?v=1"></script>
 <script src="/js/lsh-topbar.js?v=3"></script>
 <script src="/js/lsh-one-screen.js?v=1"></script>
 </body>
