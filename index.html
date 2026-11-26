@@ -17,6 +17,12 @@
   --orange:#DB8437;
   --orange-deep:#B5651F;
   --orange-soft:#F0C08A;
+  /* LSH gold, the Training Portal's button colour: every button that was filled orange is gold
+     with dark navy words (a navy button's orange words are --gold). */
+  --gold:#f5c451;
+  --g-gold:linear-gradient(180deg, #fde7b0 0%, #f5c451 50%, #e0a43a 100%);
+  --g-gold-hover:linear-gradient(180deg, #ffefc4 0%, #f7cf6a 50%, #e8b04a 100%);
+  --glow-gold:rgba(224,164,58,.55);
   --bg:#EEF0F6;
   --paper:#FFFFFF;
   --ink:#1B1E2E;
@@ -245,7 +251,7 @@ button{font-family:inherit;cursor:pointer;}
   background:transparent;border:none;color:#D7DAEC;font-size:13px;font-weight:600;
   padding:8px 9px;border-radius:7px;transition:all .15s ease;white-space:nowrap;
 }
-.nav button.active{background:var(--orange);color:#241304;}
+.nav button.active{background:var(--g-gold);color:#1E2340;}
 .nav button:not(.active):hover{background:rgba(255,255,255,.09);color:#fff;}
 
 
@@ -269,8 +275,8 @@ main{flex:1;max-width:1400px;margin:0 auto;padding:36px 20px 80px;width:100%;ani
   display:inline-flex;align-items:center;gap:8px;border-radius:9px;border:1px solid transparent;
   font-weight:600;font-size:var(--font-body);padding:10px 18px;transition:all .15s ease;
 }
-.btn-primary{background:var(--orange);color:#241304;}
-.btn-primary:hover{background:var(--orange-deep);color:#fff;}
+.btn-primary{background:var(--g-gold);color:#1E2340;}
+.btn-primary:hover{background:var(--g-gold-hover);color:#1E2340;}
 .btn-ghost{background:transparent;border-color:var(--line);color:var(--ink);}
 .btn-ghost:hover{border-color:var(--navy-soft);background:#F6F7FB;}
 .btn-navy{background:var(--navy);color:#fff;}
@@ -1542,7 +1548,7 @@ main{overflow-wrap:anywhere;}
 .vc-controls{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;}
 .vc-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
 .vc-btn:hover{background:rgba(255,255,255,.18);}
-.vc-btn.vc-on{background:var(--orange);border-color:var(--orange);}
+.vc-btn.vc-on{background:var(--g-gold);border-color:#e0a43a;color:#1E2340;}
 .vc-btn.vc-hang{background:#B54A3F;border-color:#B54A3F;margin-left:auto;}
 .vc-btn.vc-hang span{margin-left:2px;}
 .vc-note{grid-column:1/-1;font-size:11.5px;color:#C9CCDD;}
@@ -1850,7 +1856,7 @@ body.tap-moving [ondrop]{outline:2px dashed rgba(219,132,55,.55);outline-offset:
 .studio-checklist li{font-size:13px;margin:4px 0;}
 
 .tfb-fab{position:fixed;left:16px;bottom:16px;z-index:6;background:var(--navy);color:#fff;border:none;border-radius:24px;padding:10px 16px;font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px -6px rgba(38,43,69,.45);}
-.tfb-fab:hover{background:var(--orange);}
+.tfb-fab:hover{background:var(--g-gold-hover);color:#1E2340;}
 .overlay .card.tfb-modal{max-width:620px;padding:0;}
 .tfb-body{padding:16px 22px;overflow:auto;}
 .tfb-intro{font-size:13px;color:var(--ink-soft);margin:0 0 10px;}
@@ -2142,7 +2148,7 @@ em.warn{font-style:normal;color:var(--danger);}
 @media(max-width:760px){.or-slide{padding:24px 18px 60px;} .or-3,.or-nav{grid-template-columns:1fr;} .or-client,.or-cert{flex-direction:column;}}
 
 .update-banner{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:14px;background:var(--navy);color:#fff;border-radius:14px;padding:12px 16px;box-shadow:0 14px 34px -12px rgba(20,24,48,.6);font-size:13.5px;max-width:min(680px, calc(100vw - 24px));}
-.update-banner button{background:var(--orange);color:#fff;border:none;border-radius:9px;padding:8px 14px;font:inherit;font-weight:800;cursor:pointer;white-space:nowrap;}
+.update-banner button{background:var(--g-gold);color:#1E2340;border:none;border-radius:9px;padding:8px 14px;font:inherit;font-weight:800;cursor:pointer;white-space:nowrap;}
 
 .or-export-host{position:fixed;left:-20000px;top:0;width:1280px;height:720px;overflow:hidden;z-index:-1;}
 .or-slide.or-export{width:1280px;height:720px;min-height:0;box-sizing:border-box;border-radius:0;padding:44px 56px 56px;}
@@ -2209,7 +2215,7 @@ em.warn{font-style:normal;color:var(--danger);}
 /* ---------- audio controls ---------- */
 .audio-bar{display:inline-flex;align-items:center;gap:6px;margin-right:auto;}
 .audio-rate{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:8px;padding:5px 6px;background:#fff;}
-#audioModeBtn.on{background:var(--orange);color:#fff;border-color:var(--orange);}
+#audioModeBtn.on{background:var(--g-gold);color:#1E2340;border-color:#e0a43a;}
 .ls-top{justify-content:space-between !important;}
 /* ---------- full-screen alignment: no big empty card, content centred and larger ---------- */
 .lesson-stage:fullscreen .lesson-slide{display:flex;flex-direction:column;justify-content:center;font-size:1.4em;}
@@ -2446,13 +2452,12 @@ body::before{opacity:.40;}
    -------------------------------------------------------------------------- */
 :root{
   --g-navy:linear-gradient(135deg,var(--navy-deep) 0%,var(--navy) 55%,var(--navy-soft) 100%);
-  /* Starts at the brand orange and travels lighter, never darker: the dark
-     label these buttons carry reads 6.3:1 at the first stop and 7.9:1 at the
-     last, where the deep orange would have taken it to 4.1:1. */
-  --g-accent:linear-gradient(135deg,var(--orange) 0%,#E59A52 55%,#EFA560 100%);
+  /* LSH gold, as the Portal's theme.css: light at the top to deep gold at the
+     foot, with dark navy words (it was the brand orange travelling lighter). */
+  --g-accent:var(--g-gold);
   --edge-cyan:rgba(56,189,248,.38);
   --glow-navy:0 12px 30px -16px rgba(22,24,41,.65);
-  --glow-accent:0 10px 26px -14px rgba(219,132,55,.55);
+  --glow-accent:0 10px 26px -14px var(--glow-gold);
   --glow-cyan:0 0 0 1px rgba(56,189,248,.30),0 10px 26px -16px rgba(56,189,248,.5);
 }
 .topbar{background-image:var(--g-navy);box-shadow:inset 0 -1px 0 var(--edge-cyan),var(--glow-navy);}
@@ -17206,13 +17211,13 @@ window.addEventListener("unhandledrejection", (ev)=>{ const e = ev.reason; if(e 
 window.addEventListener("error", (ev)=>{ if(state.isAdmin && ev && ev.message && !/ResizeObserver|Script error/.test(ev.message)) showActionError(new Error(ev.message), ""); });
 
 </script>
-<script src="js/pd-updates.js?v=4"></script>
+<script src="js/pd-updates.js?v=5"></script>
 <script src="js/pd-documents.js?v=1"></script>
-<script src="js/pd-skillbuilders.js?v=5"></script>
+<script src="js/pd-skillbuilders.js?v=6"></script>
 <script src="js/pd-practice.js?v=2"></script>
 <script src="js/deck-pages.js?v=c9e7caaf"></script>
 <script src="js/pd-canva.js?v=7"></script>
-<script src="js/pd-deck-style.js?v=1"></script>
+<script src="js/pd-deck-style.js?v=2"></script>
 <script src="js/slide-scripts/day1.js?v=1"></script>
 <script src="js/slide-scripts/day2.js?v=1"></script>
 <script src="js/slide-scripts/day3.js?v=1"></script>
@@ -17225,7 +17230,7 @@ window.addEventListener("error", (ev)=>{ if(state.isAdmin && ev && ev.message &&
 <script src="/js/blueprint-content.js?v=2"></script>
 <script src="/js/lsh-blueprint-course.js?v=2"></script>
 <script src="/js/lsh-blueprint.js?v=2"></script>
-<script src="js/lsh-dashboard.js?v=5"></script>
+<script src="js/lsh-dashboard.js?v=6"></script>
 <script src="js/graded-calls.js?v=2"></script>
 <script src="js/checkin.js?v=1"></script>
 <script src="js/sim-results.js?v=1"></script>

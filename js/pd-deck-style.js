@@ -65,7 +65,7 @@ ${S} .ls-top .or-tip{font-size:12.5px;font-weight:600;color:#2B2F3E;}
 ${S} .ls-top .btn{border-radius:10px;font-weight:700;letter-spacing:.01em;}
 ${S} .ls-top .btn-ghost{background:#fff;border-color:rgba(30,35,64,.16);color:#1E2340;box-shadow:0 1px 2px rgba(30,35,64,.06);}
 ${S} .ls-top .btn-ghost:hover{background:#F4F6FB;border-color:rgba(30,35,64,.3);}
-${S} .ls-top .btn-ghost.on{background:#DB8437;border-color:#DB8437;color:#241304;}
+${S} .ls-top .btn-ghost.on{background:linear-gradient(180deg,#fde7b0 0%,#f5c451 50%,#e0a43a 100%);border-color:#e0a43a;color:#1E2340;}
 ${S} .ls-top .btn-navy, ${S} .ls-top .btn-primary{color:#fff;border:0;background:linear-gradient(180deg,#2a3058 0%,#1E2340 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 #DB8437,0 8px 16px -10px rgba(30,35,64,.8);}
 ${S} .ls-top .btn-navy:hover, ${S} .ls-top .btn-primary:hover{background:linear-gradient(180deg,#343b6b 0%,#262c52 100%);color:#fff;}
@@ -106,9 +106,9 @@ ${S} .lesson-stage .slide-nav{margin:10px 0 0;padding-top:10px;border-top:1px so
 ${S} .lesson-stage .slide-nav .btn{border-radius:11px;font-weight:700;letter-spacing:.01em;padding:9px 20px;}
 ${S} .lesson-stage .slide-nav .btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.28);color:#fff;box-shadow:none;}
 ${S} .lesson-stage .slide-nav .btn-ghost:hover{background:rgba(255,255,255,.14);border-color:rgba(240,192,138,.7);color:#fff;}
-${S} .lesson-stage .slide-nav .btn-primary{color:#241304;border:0;background:linear-gradient(180deg,#F2B878 0%,#DB8437 100%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 0 #A8692F,0 10px 20px -12px rgba(219,132,55,.9);}
-${S} .lesson-stage .slide-nav .btn-primary:hover{background:linear-gradient(180deg,#F5C48C 0%,#E08F45 100%);color:#241304;}
+${S} .lesson-stage .slide-nav .btn-primary{color:#1E2340;border:0;background:linear-gradient(180deg,#fde7b0 0%,#f5c451 50%,#e0a43a 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 -2px 0 #B8862A,0 10px 20px -12px rgba(224,164,58,.55);}
+${S} .lesson-stage .slide-nav .btn-primary:hover{background:linear-gradient(180deg,#ffefc4 0%,#f7cf6a 50%,#e8b04a 100%);color:#1E2340;}
 ${S} .lesson-stage .slide-counter{font-family:${MONO};font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E6E9F5;
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px 14px;}
 ${S} .lesson-stage .slide-done-banner{border-radius:12px;font-weight:600;background:rgba(255,255,255,.07);border:1px solid rgba(240,192,138,.4);color:#fff;}

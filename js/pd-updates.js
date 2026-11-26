@@ -933,7 +933,7 @@ window.afterRender = function(){
 .lab-shell .wizard-nav{border-top:1px solid var(--line);padding-top:16px;margin-top:26px;}
 /* Practice Lab list: same card language as the dashboard */
 .tool-card .tool-open-btn{background:var(--navy);color:#fff;border-color:var(--navy);border-radius:10px;padding:11px;font-size:14px;}
-.tool-card:hover .tool-open-btn{background:var(--orange);border-color:var(--orange);}
+.tool-card:hover .tool-open-btn{background:linear-gradient(180deg,#fde7b0 0%,#f5c451 50%,#e0a43a 100%);border-color:#e0a43a;color:#1E2340;}
 .tool-card .tool-status-row{font-weight:700;font-size:12.5px;border-radius:999px;padding:4px 10px;align-self:flex-start;background:#F3F4F9;}
 .tool-card .tool-status-row.st-done{background:#EAF6EF;}
 .tool-card .tool-desc2{font-size:13.5px;line-height:1.5;}
