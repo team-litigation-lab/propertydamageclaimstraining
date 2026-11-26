@@ -1014,7 +1014,7 @@ window.afterRender = function(){
    so it always matches what trainees see. Clock times follow a start time the
    trainer picks. Never shown in Present mode. */
 const SOP_LAB_ACTIVITIES = {
-  pdSetup1:["Intake Packet Audit","Claims & Actions Today","First Call & Claim Setup Note","Client Call & LSH CaseWorks"],
+  pdSetup1:["Intake Packet Audit","Claims & Actions Today","First Call & Claim Setup Note","Client Call & LSH CaseWorX"],
   pdCoverage2:["Which Coverage Pays?","Verify the Coverage","What If?","Coverage Memo"],
   pdRental3:["Rental Math","Who Pays Which Charge?","Storage & the Estimate","Email the Adjuster"],
   pdTotal4:["Audit the Valuation","Pick the Comparables","Build the Counter","Counter & Negotiate"],
@@ -1097,7 +1097,7 @@ function sopRunOfShow(dRaw){
       parts.length ? `Parts (≈10 min each): ${parts.map((a,k)=>`<b>${k+1}. ${esc(a)}</b>`).join(" · ")}.` : "",
       ti>0 ? `If time is short, trainees finish this one after the session; debrief it at the start of tomorrow.` : "",
       /Roleplay|The Call|Transportation Wall|Break the Adjuster|Deposition Prep/i.test(parts.join(" ")) ? `The live roleplay part can be run by you, or trainees rehearse solo first.` : "",
-      `Steps marked <b>Do this in LSH CaseWorks</b> are done in 🗂 LSH CaseWorks (🧰 Tools); trainees log the Case ID.`,
+      `Steps marked <b>Do this in LSH CaseWorX</b> are done in 🗂 LSH CaseWorX (🧰 Tools); trainees log the Case ID.`,
       `First submission of each exercise is free; repeats use one of 3 program-wide attempts (reset in Trainee Audit if someone is blocked by a technical issue).`].filter(Boolean),
       watch:"Anyone stuck on the same part for more than 10 minutes — nudge them to submit and move on; the debrief is where the learning lands."});
   });
@@ -1151,7 +1151,7 @@ function sopProgramFlow(){
         <li><b>Before:</b> approvals, unlocks, open Presenter view (≈15 min early).</li>
         <li><b>Open:</b> recap + today's objectives (5 min).</li>
         <li><b>Teach:</b> topics in ~45-minute blocks with breaks; Quick Checks where they fall; one random task mid-way.</li>
-        <li><b>Practise:</b> the day's Skill Builder (with its Call Sim and LSH CaseWorks steps), then a live debrief.</li>
+        <li><b>Practise:</b> the day's Skill Builder (with its Call Sim and LSH CaseWorX steps), then a live debrief.</li>
         <li><b>Discuss:</b> the end-of-day question.</li>
         <li><b>Assess:</b> Knowledge Check (70% = day complete).</li>
         <li><b>Close:</b> feedback button, preview tomorrow.</li></ol></section>
@@ -1179,7 +1179,7 @@ function sopProgramFlow(){
         <tr><td>Read what trainees think of the program</td><td>Admin → <b>Trainee Feedback</b></td></tr>
         <tr><td>See the portal as a trainee does</td><td>Top bar → <b>👁 Trainee view</b></td></tr>
         <tr><td>See the planted errors in each claim document</td><td><b>📁 Documents</b> signed in as admin (red 🔑 trainer key under each file)</td></tr>
-        <tr><td>Check a trainee's file work in LSH CaseWorks</td><td><b>🧰 Tools</b> → 🗂 LSH CaseWorks (trainees log their Case ID in each Skill Builder)</td></tr>
+        <tr><td>Check a trainee's file work in LSH CaseWorX</td><td><b>🧰 Tools</b> → 🗂 LSH CaseWorX (trainees log their Case ID in each Skill Builder)</td></tr>
         <tr><td>Run extra call or email practice</td><td><b>🧪 Practice</b> → Call Sim (one of the LSH Training Portal's 🛠 LSH Sims, opened on the Property Damage calls)</td></tr>
       </tbody></table></section>
     <section class="card sopf-card" style="margin-top:14px;"><h3>The ${DAYS.length} days</h3>

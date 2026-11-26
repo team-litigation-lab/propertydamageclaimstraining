@@ -39,7 +39,7 @@ The facts are in `build/pd_casefile.js` (the Claim File page). The AI grader rea
 | **Days 1–5 lessons** (65 topics, 15 Quick Checks, 75 Knowledge Check questions) | `build/day1.js` – `build/day5.js`. The topics no longer show as slides (the Canva decks do), but they still feed the Quick Checks, Knowledge Checks, the day's Objectives and the trainer's talking points in Presenter view |
 | **Skill Builders** (one per day, 4 parts each) | registry in `build/pd_practice_tools.js`; the exercises are in `js/pd-skillbuilders.js` |
 | **📁 Documents** (21 claim documents, 4 templates, 5 handouts — all mock PDFs) | generated into `documents/` by `build/make_documents.py`; every page is marked *TRAINING — MOCK DOCUMENT*. Metadata and trainer audit keys in `js/pd-documents.js` |
-| **🧪 Practice** | `js/pd-practice.js`: every day has three columns — 🧠 Skill Builder, 🗣 Communication (Call Sim line + roleplay), 🗂 Systems (LSH CaseWorks) |
+| **🧪 Practice** | `js/pd-practice.js`: every day has three columns — 🧠 Skill Builder, 🗣 Communication (Call Sim line + roleplay), 🗂 Systems (LSH CaseWorX) |
 | **🔥 Live Roleplay** | `build/pd_roleplay.js`: 14 situations with clients, adjusters, tow yards, rental counters and lenders, plus a live call inside each Skill Builder |
 | **📞 Call Sim** | ☎ **LSH Voice**, the training phone (the lshringchannel repo), opened through the Portal with `?program=PD` |
 | **Trainer scripts** (Presenter view, Admin → Trainer Cues, Speaker Notes PDF) | `js/slide-scripts/day1.js`–`day5.js`, hand-written in the EA/PA course's format: one script per topic with four beats — ① the why, ② talk it through, ③ walk through it (First, Next, Then, Finally), ④ ask the room — plus the topic's scenario. `js/pd-scripts.js` shows them: on the Canva deck step, Presenter view steps through the topics with Next → / ← Previous (then on to the Quick Checks), while the deck itself moves in the slides window. |
@@ -52,7 +52,7 @@ The facts are in `build/pd_casefile.js` (the Claim File page). The AI grader rea
 
 | Day | Topic | Skill Builder |
 |---|---|---|
-| 1 | PD claims foundations and setting up the claim | **Claim Setup Challenge**: audit the intake packet (a transposed VIN, an expired at-fault dec page, the storage clock), choose the claims and actions for today, make the first carrier call and write the claim setup note, then the day-one client call and the LSH CaseWorks file |
+| 1 | PD claims foundations and setting up the claim | **Claim Setup Challenge**: audit the intake packet (a transposed VIN, an expired at-fault dec page, the storage clock), choose the claims and actions for today, make the first carrier call and write the claim setup note, then the day-one client call and the LSH CaseWorX file |
 | 2 | Coverage: reading the policy and spotting coverages | **Coverage Spotter**: match each loss to the coverage that pays it, verify both dec pages, five "what if" files (hit-and-run, uninsured, excluded driver, limits too low), and a coverage memo to the attorney and the BI Case Manager |
 | 3 | Rental, storage, inspections and repairs | **Rental, Storage & Repair Desk**: rental math (who pays which days), who pays each charge, the storage bill, a line-by-line estimate review (aftermarket parts, labor rate, missing scans and radar calibration), and the email to the adjuster |
 | 4 | Total loss, valuation and negotiation | **Total Loss Valuation & Counter**: audit the valuation, pick the true comparables, build the counter (ACV, tax, fees, payoff, equity), write the counter letter, then negotiate live |
@@ -111,7 +111,7 @@ The statuses, the per-batch summaries, the CSV downloads and the Google Sheet sy
 in the Training Portal's README.
 ## 📉 Staying under Cloudflare's monthly request limit
 
-The Cloudflare account is on **Workers Paid**: **10 million requests a month** for every Worker and Pages Function on the account, shared by every LSH site (this course's Worker, meaning everything under `/api/` and `/version`, plus the other courses, LSH CaseWorks and the Training Portal). Static files (the page, `js/`) don't count. `slides/` and `documents/` now come from R2 through the Worker, so each of those files a browser loads (or re-checks) counts too: see *Documents in R2*. Past the limit, Cloudflare charges for every extra million requests. Usage is under **Workers & Pages** in the Cloudflare dashboard.
+The Cloudflare account is on **Workers Paid**: **10 million requests a month** for every Worker and Pages Function on the account, shared by every LSH site (this course's Worker, meaning everything under `/api/` and `/version`, plus the other courses, LSH CaseWorX and the Training Portal). Static files (the page, `js/`) don't count. `slides/` and `documents/` now come from R2 through the Worker, so each of those files a browser loads (or re-checks) counts too: see *Documents in R2*. Past the limit, Cloudflare charges for every extra million requests. Usage is under **Workers & Pages** in the Cloudflare dashboard.
 
 So an open page asks the server sparingly (`POLL` in `index.html`, the same as the EA/PA course), and not at all while its tab is in the background. When it's back, whatever came due runs then; a quick look at another tab (Google Meet) asks nothing:
 
@@ -157,7 +157,7 @@ python3 build/build.py ../Case-Management-Training/index.html      # path to the
 
 ## 🗄 Documents in R2
 
-The document-heavy folders (`slides/`, `documents/`) are kept in **Cloudflare R2**, the `DOCUMENTS` binding (bucket `lshtraining`, the same bucket the EA/PA course and LSH CaseWorks use), under `courses/pd/` (e.g. `courses/pd/slides/...`). `wrangler.json`'s `assets.run_worker_first` sends those paths to `worker.js`, and `docFromR2` answers from R2, with byte ranges (PDF viewers) and 304s for a file the browser already has.
+The document-heavy folders (`slides/`, `documents/`) are kept in **Cloudflare R2**, the `DOCUMENTS` binding (bucket `lshtraining`, the same bucket the EA/PA course and LSH CaseWorX use), under `courses/pd/` (e.g. `courses/pd/slides/...`). `wrangler.json`'s `assets.run_worker_first` sends those paths to `worker.js`, and `docFromR2` answers from R2, with byte ranges (PDF viewers) and 304s for a file the browser already has.
 
 - **Uploading:** `.github/workflows/r2-docs.yml` runs on every push to `main` that changes those folders: it uploads the files that changed and removes deleted ones (`.github/scripts/r2-sync.mjs`). **Actions → R2 documents → Run workflow** uploads every file (do this once, after setting the secret). It needs the repository secret `CLOUDFLARE_API_TOKEN` (a Cloudflare API token with *Workers R2 Storage: Edit*); until it's set, the run only prints a notice.
 - **Fallback:** a file that isn't in R2 yet (the upload still running, or the token not set) comes from the Worker's static assets as before, and so does everything if the binding is missing or R2 fails. The files stay in the repository and in the deploy, so nothing breaks while R2 fills; once R2 has them all, the folders can be added to `.assetsignore` to leave them out of the deploy.

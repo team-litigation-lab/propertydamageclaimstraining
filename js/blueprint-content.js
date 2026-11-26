@@ -51,8 +51,8 @@ window.LSH_BLUEPRINT = {
         tip: 'Check the day cards for 💬 at the end of each day: that is your trainer\'s feedback waiting.' },
       { icon: '🧭', title: 'Getting around', points: [
           '🎲 Tasks: surprise tasks from your trainer — acknowledge, plan and resolve before the timer ends. Graded.',
-          "Claim File: Angela Carter's PD claim, the working file. Read it first. 📁 Documents holds every dec page, invoice, estimate, valuation and release, with its LSH CaseWorks upload category.",
-          "🧪 Practice: every practice tool, the same way for each day — 🧠 Skill Builders on the claim documents, 🗣 Communication (the Call Sim's Property Damage calls and live roleplay) and 🗂 Systems (LSH CaseWorks).",
+          "Claim File: Angela Carter's PD claim, the working file. Read it first. 📁 Documents holds every dec page, invoice, estimate, valuation and release, with its LSH CaseWorX upload category.",
+          "🧪 Practice: every practice tool, the same way for each day — 🧠 Skill Builders on the claim documents, 🗣 Communication (the Call Sim's Property Damage calls and live roleplay) and 🗂 Systems (LSH CaseWorX).",
           'My Notes and Handouts: your private notes, downloadable as a PDF, and printable checklists and Excel templates for each day.',
           '🎯 Focus and 💬 Feedback: your trainer\'s priorities for you, and your say on what is working.'],
         where: 'The top bar. On a phone, everything is under ☰ Menu; Search finds any topic or tool.',
@@ -60,7 +60,7 @@ window.LSH_BLUEPRINT = {
       { icon: '🚗', title: 'The claim: Angela Carter — 2022 Toyota RAV4', points: [
           "Stopped at a red light, rear-ended by a driver looking at his GPS in his mother's Explorer.",
           'Her RAV4 is at a tow yard at $65 a day, she has no car, and the other insurer wants a recorded statement.',
-          'Every lesson, Skill Builder, call and LSH CaseWorks exercise works this one claim.',
+          'Every lesson, Skill Builder, call and LSH CaseWorX exercise works this one claim.',
           'Read the Claim File before Day 1, then open the documents in 📁 Documents.',
           'The documents contain real-world errors — a transposed VIN, an expired dec page, a wrong valuation. Catching them is the job.',
           'Treat everything as confidential, like a real client file.'],
@@ -146,7 +146,7 @@ window.LSH_BLUEPRINT = {
         where: 'Top bar → Claim File · 📁 Documents.',
         tip: 'Use the 🔑 keys to check what a trainee caught and what they missed.' },
       { icon: '🧪', title: 'Practice and the Skill Builders', points: [
-          '🧪 Practice: every day has a 🧠 Skill Builder, 🗣 Communication (a call and a roleplay) and 🗂 Systems (LSH CaseWorks).',
+          '🧪 Practice: every day has a 🧠 Skill Builder, 🗣 Communication (a call and a roleplay) and 🗂 Systems (LSH CaseWorX).',
           'Skill Builders are auto-graded against keys taken from the documents; written parts use the 100-point AI rubric.',
           'The Call Sim\'s Property Damage pack: 16 calls across five lines, each ending with the note it needs.'],
         where: 'Top bar → 🧪 Practice.',
