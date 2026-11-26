@@ -229,10 +229,10 @@ img[alt="Legal Support Help"]{border-radius:8px;}
 .dash-main > .dash-side .stat .num, .dash-main > .dash-side .card .num{color:#fff !important;}
 .dash-main > .dash-side .stat .lbl, .dash-main > .dash-side .card .sub, .dash-main > .dash-side .stat .lbl span, .dash-main > .dash-side .card .lbl{color:#E6E9F5 !important;}
 .dash-main > .dash-side .tfb-dash{background:rgba(219,132,55,.22) !important;border-color:rgba(240,192,138,.55) !important;}
-/* The primary button here is a solid orange; a white label on it is 3.6:1,
-   so only the ghost button (transparent, on the navy rail) stays white. */
+/* The primary button here is LSH gold with dark navy words; only the ghost
+   button (transparent, on the navy rail) stays white. */
 .dash-main > .dash-side .tfb-dash .btn-ghost{color:#fff !important;}
-.dash-main > .dash-side .tfb-dash .btn-primary{color:#241304 !important;}
+.dash-main > .dash-side .tfb-dash .btn-primary{color:#1E2340 !important;}
 .dash-main > .dash-side .tfb-dash-stars button{color:#D5D8E3 !important;}
 .dash-main > .dash-side .tfb-dash-stars button.on, .dash-main > .dash-side .tfb-dash-stars button.lit{color:var(--orange) !important;}
 /* "Resume where you left off": a compact button, not a full-width bar */
