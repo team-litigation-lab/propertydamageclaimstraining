@@ -1754,6 +1754,25 @@ body.tap-moving [ondrop]{outline:2px dashed rgba(219,132,55,.55);outline-offset:
 .fb-chip{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;border-radius:20px;padding:2px 8px;margin-left:6px;font-weight:800;}
 .fb-chip.sent{background:var(--success-bg);color:var(--success);} .fb-chip.draft{background:#FFF1E2;color:var(--orange-deep);} .fb-chip.none{background:#EEF0F6;color:var(--ink-soft);}
 .fb-evidence{font-size:11.5px;color:var(--ink-soft);background:#F8F9FC;border-radius:8px;padding:8px 10px;margin:8px 0;max-height:160px;overflow:auto;}
+/* "Their work this day": the standard LSH "why this score" table, one row per scored activity */
+.pdst-mk{margin:8px 0;}
+.pdst-mk-h{margin:0 0 6px;font:800 12px 'Inter',system-ui,sans-serif;color:#3B4160;text-transform:uppercase;letter-spacing:.04em;}
+.pdst-sw{overflow-x:auto;border:1px solid #E1E5EE;border-radius:10px;background:#fff;margin-bottom:6px;}
+.pdst-t{width:100%;min-width:980px;border-collapse:collapse;font-size:13px;line-height:1.42;color:#262B45;text-transform:none;letter-spacing:0;}
+.pdst-t thead th{background:#262B45 !important;color:#fff !important;font:800 12.5px 'Inter',system-ui,sans-serif;text-align:left;padding:8px 10px;border-bottom:2px solid #DB8437;white-space:nowrap;text-transform:none;letter-spacing:0;}
+.pdst-t td,.pdst-t tbody th{padding:8px 10px;border-top:1px solid #E6E9F1;vertical-align:top;text-align:left;}
+.pdst-t tbody th{width:170px;font-weight:600;background:#fff !important;border-bottom:0 !important;box-shadow:none !important;color:#1B1E2E !important;text-transform:none !important;letter-spacing:0 !important;font-size:13px !important;}
+.pdst-t tbody th b{color:#0f2148;}
+.pdst-t tbody th small{display:block;font-size:12px;color:#4A5070 !important;font-weight:600;margin-top:2px;}
+.pdst-t td.pdst-sc{width:64px;text-align:center;}
+.pdst-t ul{margin:0;padding-left:16px;} .pdst-t li+li{margin-top:3px;}
+.pdst-t i{color:#5A6078;}
+.pdst-t td.pdst-w{background:#F7F8FC;} .pdst-t td.pdst-g{background:#F1F9F3;} .pdst-t td.pdst-b{background:#FDF3F0;} .pdst-t td.pdst-n{background:#F2F4FB;}
+.pdst-pill{display:inline-block;min-width:48px;text-align:center;font:800 13px 'Inter',system-ui,sans-serif;border-radius:999px;padding:3px 8px;}
+.pdst-hi{background:#DDF2E3;color:#0F4A28;} .pdst-ok{background:#EDF7EF;color:#14532D;} .pdst-lo{background:#FDE7E3;color:#8A1C10;} .pdst-none{background:#F5F6F9;color:#6A7088;}
+.pdst-ex summary{cursor:pointer;font-size:12.5px;font-weight:800;color:#3B4160;margin-top:6px;}
+.pdst-ex p{font-size:13px;color:#262B45;white-space:pre-wrap;margin:4px 0 0;font-weight:400;}
+.pdst-sub{margin:0;font-size:12px;color:var(--ink-soft);}
 .fb-form{display:grid;gap:8px;} .fb-form label{display:flex;flex-direction:column;gap:3px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);}
 .fb-form textarea, .fb-form select{font:inherit;font-size:13px;text-transform:none;letter-spacing:0;font-weight:400;border:1px solid var(--line);border-radius:8px;padding:8px 10px;}
 .fb-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
@@ -13645,6 +13664,110 @@ function evidenceText(ev){
   if(ev.drafts) L.push(`Skill Builders work in progress (their own words): ${ev.drafts.replace(/\s+/g," ").slice(0,900)}`);
   return L.join("\n");
 }
+/* ---------- "Their work this day": the standard LSH "why this score" table ----------
+   One row per scored activity of the day (Knowledge Check, Quick Checks, each Skill Builder, any other graded
+   lab work, the random task, any roleplay): the score, why it scored that way, what was done great, what was
+   wrong and what could have been done better, from the grader's notes saved in the work log (strengths /
+   blindspots → gaps / growth suggestions). Same data the bullet list showed; nothing is re-graded. A score saved
+   without notes is explained from what was saved, and says so, rather than left blank. */
+const PD_PASS = 70;   // the course's pass mark (a Knowledge Check passes at 70%)
+const PD_SUBS = {accuracy:"Accuracy", presence:"Executive presence", risk:"Risk & SOP", efficiency:"Efficiency",
+  bluf:"BLUF", composure:"Composure", act:"ACT protocol"};
+function dayScoreRows(rec, work, ev){
+  const num = v => typeof v==="number" && isFinite(v);
+  const plural = (n, w) => `${n} ${w}${n===1?"":"s"}`;
+  const passLine = v => v>=PD_PASS ? `${PD_PASS}% passes: this passes.` : `Below the ${PD_PASS}% pass mark.`;
+  const tierOf = (e, v) => displayTier(e && e.tier) || gradeTierFor(v);
+  const subsLine = e => { const xs = Object.entries((e && e.subs) || {}).filter(([k,v])=>PD_SUBS[k] && num(v)).map(([k,v])=>`${PD_SUBS[k]} ${v}%`);
+    return xs.length ? `By area: ${xs.join(" · ")}.` : ""; };
+  // the run whose notes explain a score: the run that got it, else the best-scoring run
+  const runFor = (runs, score) => { const hit = runs.filter(e=>num(e.score) && e.score===score); if(hit.length) return hit[hit.length-1];
+    return runs.slice().sort((x,y)=>(y.score||0)-(x.score||0))[0] || null; };
+  const noted = e => !!(e && ((e.strengths||[]).length || (e.gaps||[]).length || (e.growth||[]).length));
+  const D = `Day ${ev.d.id}`, rows = [], allLog = ((work.snap||{})["work-log"]||[]);
+  // Knowledge Check
+  const dp = ev.dp || {};
+  if(num(dp.score)){
+    const hist = (dp.history||[]).filter(h=>num(h.score)), tries = hist.length || 1, kc = dp.score;
+    const q = ev.log.filter(e=>e.kind==="quiz").slice(-1)[0], missed = (q && q.missed) || [], hasN = q && num(q.correct) && num(q.total);
+    rows.push({name:"Knowledge Check", sub:`best of ${plural(tries, "attempt")}`, score:kc,
+      why:[`Best score of ${plural(tries, "attempt")}${hist.length>1 ? ` (${hist.map(h=>h.score+"%").join(", ")})` : ""}.`,
+        hasN ? `Latest try: ${q.correct} of ${q.total} questions right.` : "", passLine(kc)],
+      great: kc>=90 ? ["Knew the day's key points cold."] : kc>=PD_PASS ? ["Got most of the day's key points right."] : hasN && q.correct ? [`${q.correct} of ${q.total} questions right.`] : [],
+      wrong: missed.length ? missed.map(m=>`Missed: ${m}`) : kc<100 ? [`${100-kc}% of the questions answered wrong (which ones wasn't recorded for this attempt).`] : [],
+      better: kc>=100 ? [] : [`Re-read ${D}'s slides on ${missed.length ? "the questions missed" : "the points missed"}, then retake the Knowledge Check${kc>=PD_PASS ? " to lift the score" : ""}.`]});
+  } else rows.push({name:"Knowledge Check", sub:"not taken yet", score:null, why:["Not taken yet."], great:[], wrong:[],
+    better:[`Finish ${D}'s slides, then take its Knowledge Check (${PD_PASS}% passes).`]});
+  // Quick Checks
+  if(ev.qc.length){
+    const right = ev.qc.filter(([k,v])=>v.correct).length, total = ev.qc.length, bad = total-right, sc = Math.round(right/total*100);
+    rows.push({name:"Quick Checks", sub:"on the slides", score:sc,
+      why:[`${right} of ${total} Quick Checks on ${D}'s slides answered right.`, passLine(sc)],
+      great: right ? [`${plural(right, "Quick Check")} answered right.`] : [],
+      wrong: bad ? [`${plural(bad, "Quick Check")} answered wrong.`] : [],
+      better: bad ? ["Pause on each Quick Check and re-read the slide it follows before answering."] : []});
+  }
+  // each Skill Builder for the day
+  const used = new Set();
+  ev.tools.forEach(t=>{
+    const p = ev.pp[t.id];
+    const runs = allLog.filter(e=>e.kind==="lab" && num(e.score) && e.toolId===t.id); runs.forEach(e=>used.add(e));
+    if(!p || !(p.runs>0)){ rows.push({name:t.title, sub:"Skill Builder · not run yet", score:null, why:["Not run yet."], great:[], wrong:[],
+      better:[`Open ${t.title} in Skill Builders and complete every part.`]}); return; }
+    const best = num(p.bestScore) ? p.bestScore : 0, n = p.runs || runs.length || 1;
+    const scores = (p.history||[]).filter(h=>num(h.score)).map(h=>h.score+"%");
+    const e = runFor(runs, best), has = noted(e), same = e && e.score===best;
+    rows.push({name:t.title, sub:`Skill Builder · best of ${plural(n, "run")}`, score:best, run:e,
+      why:[`Best of ${plural(n, "run")}${scores.length>1 ? ` (${scores.join(", ")})` : ""}.`, `Graded ${same ? tierOf(e, best) : gradeTierFor(best)}.`,
+        same ? subsLine(e) : "", has && !same ? `The notes are from the graded run that scored ${e.score}%; the ${best}% run's notes weren't recorded.` : "", passLine(best)],
+      great: has ? (e.strengths||[]) : best>=PD_PASS ? [`Passed at ${best}%: most of the Skill Builder done right.`] : [],
+      wrong: has ? (e.gaps||[]) : best<100 ? [`${100-best}% of the points were lost. Which items were missed wasn't recorded for this run.`] : [],
+      better: has ? (e.growth||[]) : best<100 ? ["Run it again: the next graded run records what went well and what to do better."] : []});
+  });
+  // other graded work logged against this day (a lab not tied to the day's Skill Builder)
+  const other = {};
+  ev.log.filter(e=>(e.kind==="lab" || e.kind==="roleplay") && num(e.score) && !used.has(e)).forEach(e=>{ const k = e.kind+"|"+(e.label||""); (other[k] = other[k] || []).push(e); });
+  Object.entries(other).forEach(([k, runs])=>{
+    const rp = k.startsWith("roleplay|"), best = Math.max(...runs.map(e=>e.score)), e = runFor(runs, best), has = noted(e);
+    const name = (e.label || (rp ? "Roleplay" : "Graded work")).replace(/^Roleplay — /, "") || "Roleplay";
+    rows.push({name, sub:`${rp ? "Live Roleplay" : "Graded work"} · best of ${plural(runs.length, "run")}`, score:best, run:e,
+      why:[`Best of ${plural(runs.length, "run")}${runs.length>1 ? ` (${runs.map(x=>x.score+"%").join(", ")})` : ""}.`, `Graded ${tierOf(e, best)}.`, subsLine(e), passLine(best)],
+      great: has ? (e.strengths||[]) : best>=PD_PASS ? [`Passed at ${best}%.`] : [],
+      wrong: has ? (e.gaps||[]) : best<100 ? [`${100-best}% of the points were lost. Which items were missed wasn't recorded for this run.`] : [],
+      better: (e.growth||[]).length ? e.growth : (e.gaps||[]).length ? ["Work on the points under What was wrong, then run it again."] : best<100 && !has ? ["Run it again: the next graded run records what went well and what to do better."] : []});
+  });
+  // the random task
+  const tasks = ev.log.filter(e=>e.kind==="task" && num(e.score));
+  if(num(dp.surpriseTaskScore) || tasks.length){
+    const sc = num(dp.surpriseTaskScore) ? dp.surpriseTaskScore : Math.round(tasks.reduce((a,e)=>a+e.score,0)/tasks.length);
+    const missedN = tasks.filter(e=>/missed/i.test(e.label||"")).length, last = tasks[tasks.length-1];
+    rows.push({name:"Random task", sub:"the interruption during the day", score:sc,
+      why:[tasks.length>1 ? `Average of ${plural(tasks.length, "random task")} (${tasks.map(x=>x.score+"%").join(", ")}).` : tasks.length ? `Graded ${tierOf(last, sc)}.` : "The day's random-task average.",
+        missedN ? `${plural(missedN, "task")} not answered in time, scored 0%.` : "", passLine(sc)],
+      great: sc>=PD_PASS ? ["Acknowledged the interruption, planned it and closed it out in time."] : [],
+      wrong: missedN ? [`${plural(missedN, "task")} missed: not answered before it ran out of time.`] : sc<PD_PASS ? ["The interruption wasn't acknowledged, planned and closed out in time."] : sc<100 ? ["A step of the response was thin or late (the details weren't recorded)."] : [],
+      better: sc>=100 ? [] : ["Acknowledge it fast, jot a three-step plan, then resolve it before going back to the lesson."]});
+  }
+  return rows;
+}
+function dayScoreTable(rec, work, ev){
+  const num = v => typeof v==="number" && isFinite(v);
+  const tint = v => v>=85 ? "hi" : v>=PD_PASS ? "ok" : "lo";
+  const cell = (xs, none) => (xs = (xs||[]).filter(Boolean)).length ? `<ul>${xs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>` : `<i>${none}</i>`;
+  const rows = dayScoreRows(rec, work, ev);
+  return `<div class="pdst-mk"><p class="pdst-mk-h">Their work this day · every score against the ${PD_PASS}% pass mark</p>
+    <div class="pdst-sw"><table class="pdst-t"><thead><tr><th>Activity</th><th>Score</th><th>🧾 Why this score</th><th>⭐ What you did great</th><th>❌ What was wrong</th><th>💡 What could have been done better</th></tr></thead>
+    <tbody>${rows.map(x=>`<tr>
+      <th scope="row"><b>${esc(x.name)}</b><small>${esc(x.sub)}${x.run && x.run.at ? ` · ${esc(new Date(x.run.at).toLocaleDateString())}` : ""}</small>
+        ${x.run && x.run.excerpt ? `<details class="pdst-ex"><summary>Their answer</summary><p>${esc(x.run.excerpt)}</p></details>` : ""}</th>
+      <td class="pdst-sc"><span class="pdst-pill pdst-${num(x.score) ? tint(x.score) : "none"}">${num(x.score) ? Math.round(x.score)+"%" : "—"}</span></td>
+      <td class="pdst-w">${cell(x.why, "—")}</td>
+      <td class="pdst-g">${cell(x.great, num(x.score) ? "Nothing noted." : "—")}</td>
+      <td class="pdst-b">${cell(x.wrong, num(x.score) ? (x.score>=100 ? "Nothing — full marks." : "Nothing noted.") : "—")}</td>
+      <td class="pdst-n">${cell(x.better, num(x.score) ? "Keep the same approach." : "—")}</td></tr>`).join("")}
+    </tbody></table></div>
+    <p class="pdst-sub">Lesson progress: reached slide ${Math.min(ev.slides+1, ev.totalSlides)} of ${ev.totalSlides}.${ev.drafts ? " Skill Builder work in progress is saved (not graded yet)." : ""}</p></div>`;
+}
 async function draftDayFeedback(id, dayId, silent){
   const rec = (state.adminData||[]).find(r=>r.id===id);
   if(!rec) throw new Error("trainee record not loaded — click Refresh on the Trainee Audit and try again");
@@ -13855,7 +13978,7 @@ function renderFeedbackAdmin(rec){
     const ta = (k, v, rows)=>`<textarea id="fb_${sid}_${d.id}_${k}" rows="${rows}">${esc(v)}</textarea>`;
     return `<details class="fb-day" ${fb && st!=="sent" ? "open" : ""}>
       <summary><b>Day ${d.id}</b> — ${esc(d.title)} ${chip}${ev.active?"":` <span class="fb-chip none">no work yet</span>`}</summary>
-      ${ev.active ? `<div class="fb-evidence"><b>Their work this day:</b>${esc(evidenceText(ev)).split("\n").map(x=>`<div>• ${x}</div>`).join("")}</div>` : ""}
+      ${ev.active ? dayScoreTable(rec, work, ev) : ""}
       ${fb ? `<div class="fb-form">
         <label>Overall<select id="fb_${sid}_${d.id}_rating">${["Strong","On Track","Needs Support"].map(o=>`<option ${f.rating===o?"selected":""}>${o}</option>`).join("")}</select></label>
         <label>Summary${ta("summary", f.summary||"", 3)}</label>
