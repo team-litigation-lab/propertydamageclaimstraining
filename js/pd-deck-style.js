@@ -38,6 +38,24 @@ ${S} .day-head-compact .dhc-title{font-family:${SANS};font-size:17px;font-weight
 /* the slideshow page keeps its links and bars tight, so the slide gets the height */
 ${S} main:has(#lessonStage) .nav-back-row{margin:0 0 6px;}
 ${S} main:has(#lessonStage) .back-link{margin-bottom:8px;}
+/* On a laptop or desktop the slide gets the height: the back links and the day header share one row,
+   the toolbar the next, and on a deck page the slide's tag sits on the progress row and the "Click the
+   slide…" hint is kept for screen readers (the slide's own tooltip says the same). Nothing is removed. */
+@media(min-width:1001px){
+  ${S} > main:has(> #lessonStage){display:flex;flex-wrap:wrap;align-items:center;align-content:flex-start;gap:8px 12px;padding-top:14px;}
+  ${S} > main:has(> #lessonStage) > *{margin:0 !important;flex:1 1 100%;min-width:0;}
+  ${S} > main:has(> #lessonStage) > :has(> .nav-back-row), ${S} > main:has(> #lessonStage) > :empty, ${S} > main:has(> #lessonStage) > .back-link{flex:0 0 auto;}
+  ${S} > main:has(> #lessonStage) .nav-back-row{margin:0;}
+  ${S} > main:has(> #lessonStage) > .day-head-compact{flex:1 1 360px;}
+  ${S} .lesson-stage:has(.pd-deck){position:relative;}
+  ${S} .lesson-stage #lessonSlideWrap:has(.pd-deck){position:static;}
+  ${S} .lesson-stage .pd-deck .topic-separator{position:absolute;top:8px;left:20px;margin:0 !important;}
+  ${S} .lesson-stage:has(.pd-deck) .slide-dots{min-height:26px;align-items:center;align-content:center;justify-content:flex-end;padding-left:340px;margin-bottom:8px;}
+  ${S} .pd-deck-cap{position:absolute !important;width:1px;height:1px;margin:-1px !important;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0;}
+  ${S} .lesson-stage:has(.pd-deck){padding-top:8px;padding-bottom:10px;}
+  ${S} .lesson-stage:has(.pd-deck) .slide-nav{margin-top:8px;padding-top:8px;}
+  ${S} .lesson-stage:has(.pd-deck) .slide-nav .btn{padding-top:8px;padding-bottom:8px;}
+}
 
 /* ---------- the toolbar above the stage: one glass bar, navy primary buttons ---------- */
 ${S} .ls-top{margin:0 0 10px;padding:6px 8px 6px 14px;border-radius:14px;border:1px solid rgba(30,35,64,.12);background:rgba(255,255,255,.84);
@@ -78,7 +96,7 @@ ${S} .pd-deck{gap:8px;}
 ${S} .lesson-stage #lessonSlideWrap:has(.pd-deck){padding:2px 0;}
 ${S} .pd-deck-frame, ${S} .pd-canva-frame{border-radius:14px;background:#11142A;
   box-shadow:0 0 0 1px rgba(240,192,138,.38),0 0 0 5px rgba(255,255,255,.04),0 22px 44px -22px rgba(0,0,0,.75),0 6px 14px -8px rgba(0,0,0,.45);}
-${S} .pd-deck-frame{max-width:min(calc((clamp(440px,66vh,720px) - 100px) * var(--ar)), var(--pd-fit-w, 100000px));}
+${S} .pd-deck-frame{max-width:var(--pd-fit-w, calc((clamp(440px,66vh,720px) - 100px) * var(--ar)));}   /* measured: as large as the stage allows */
 ${S} .pd-deck-nav span{width:44px;height:44px;background:rgba(30,35,64,.78);border:1px solid rgba(240,192,138,.55);color:#fff;
   box-shadow:0 8px 18px -8px rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
 ${S} .pd-deck-cap, ${S} .pd-canva-hint{font-size:12.5px;font-weight:600;letter-spacing:.01em;color:#C9CEE6;}
@@ -145,7 +163,7 @@ function fitDeck(){
   const chrome = stage.getBoundingClientRect().height - wrap.clientHeight;         // dots, the nav bar, the stage's padding and frame
   const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
   const gap = parseFloat(dcs.rowGap) || 0;
-  let others = 0; [...deck.children].forEach(c=>{ if(c !== frame && getComputedStyle(c).display !== "none") others += c.getBoundingClientRect().height + gap; });
+  let others = 0; [...deck.children].forEach(c=>{ const cs = getComputedStyle(c); if(c !== frame && cs.display !== "none" && cs.position !== "absolute") others += c.getBoundingClientRect().height + gap; });
   const h = max - chrome - pad - others - 8;   // a few px for rounding, so the slide never scrolls
   const ar = parseFloat(getComputedStyle(frame).getPropertyValue("--ar")) || 16/9;
   const w = h > 120 ? Math.floor(h * ar) + "px" : "";
