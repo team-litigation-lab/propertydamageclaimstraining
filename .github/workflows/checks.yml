@@ -73,6 +73,10 @@ jobs:
         env:
           NODE_PATH: ${{ runner.temp }}/pw/node_modules
         run: node .github/scripts/compliance-monitor.cjs http://localhost:8787/ || { echo "--- server log ---"; cat "$RUNNER_TEMP/server.log"; exit 1; }
+      - name: Day-by-Day Feedback's "Their work this day" is the standard why-this-score table (a row per scored activity, the grader's notes in their columns)
+        env:
+          NODE_PATH: ${{ runner.temp }}/pw/node_modules
+        run: node .github/scripts/score-table.cjs http://localhost:8787/ || { echo "--- server log ---"; cat "$RUNNER_TEMP/server.log"; exit 1; }
       - name: Graded calls from the CMS Call Simulator (read only by the trainee; the dashboard's Graded calls card)
         env:
           NODE_PATH: ${{ runner.temp }}/pw/node_modules

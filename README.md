@@ -173,6 +173,7 @@ The document-heavy folders (`slides/`, `documents/`) are kept in **Cloudflare R2
 - `wrangler deploy --dry-run`
 - a browser smoke test that signs in and renders every slide, Knowledge Check, page and Skill Builder part at desktop and phone width (`smoke.cjs`)
 - server requests (`requests.cjs`): `get-many` gives a trainee only their own and public records and an Admin every one, reads under the `pd:` prefix, and refuses more than 100 keys. With the checks sped up, a trainee's page loads every day's content in one request, reads their record and the day's task about once per check, checks for a new version rarely, and asks nothing while the tab is in the background (catching up when it's back) or on a quick switch to another tab and back. A server that doesn't answer doesn't sign the trainee out; a revoke does. The Trainee Audit and Trainee Feedback read every record in two requests.
+- the score table (`score-table.cjs`): in Admin → Trainee Audit → View Detail → Day-by-Day Feedback, each day's **Their work this day** is the standard LSH "why this score" table — a row per scored activity (Knowledge Check, Quick Checks, the day's Skill Builder, other graded work and roleplays, the random task) with its score against the 70% pass mark and the columns 🧾 Why this score, ⭐ What you did great, ❌ What was wrong and 💡 What could have been done better, filled from the grader's notes in the work log (strengths, blindspots, growth suggestions). A score saved without notes says the details weren't recorded; no cell is left blank. The AI's "Suggest wording" still reads the same evidence.
 - graded calls (`graded-calls.cjs`): a trainee reads their own `callsim:` record (kept by the Training Portal), never another trainee's, and can't write it; the dashboard band's Graded calls card shows — and 0 lines without graded calls, and the best on each line averaged with them.
 
 To run them locally:
@@ -185,6 +186,7 @@ node .github/scripts/smoke.cjs http://localhost:8787/
 node .github/scripts/blueprint.cjs http://localhost:8787/
 node .github/scripts/requests.cjs http://localhost:8787/
 node .github/scripts/graded-calls.cjs http://localhost:8787/
+node .github/scripts/score-table.cjs http://localhost:8787/
 ```
 
 The smoke and requests tests need Playwright.
