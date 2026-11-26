@@ -222,13 +222,13 @@ img[alt="Legal Support Help"]{border-radius:8px;}
 .dash-main .module-card.mc-clean .mc-row .module-finish-btn:hover{background:#E9EBF2;border-color:#E9EBF2;color:var(--navy);}
 .dash-main .module-card.mc-clean > :last-child{margin-bottom:12px;}
 .dash-main .module-card.mc-clean .module-theme{color:#6B7088;}
-/* the scores band: light, so it doesn't compete with the lessons */
-.dash-main > .dash-side{background:var(--surface-glass,rgba(255,255,255,.60)) !important;backdrop-filter:var(--surface-blur,saturate(118%) blur(10px));-webkit-backdrop-filter:var(--surface-blur,saturate(118%) blur(10px));border:1px solid #E3E6EE !important;box-shadow:none !important;}
-.dash-main > .dash-side .card{background:rgba(255,255,255,.30) !important;border:1px solid #EDEFF5 !important;box-shadow:none !important;color:var(--navy) !important;}
+/* the scores band: navy, like the LSH Academy Index's banners and the Foundational dashboard — navy tiles, white values, light caps labels */
+.dash-main > .dash-side{background:linear-gradient(135deg,#1E2340 0%,#343C66 100%) !important;border:1px solid #2C335A !important;box-shadow:0 10px 24px -14px rgba(15,20,40,.6) !important;}
+.dash-main > .dash-side .card{background:linear-gradient(160deg,#1E2340,#2D3762) !important;border:1px solid rgba(255,255,255,.22) !important;box-shadow:0 6px 16px -10px rgba(0,0,0,.6) !important;color:#fff !important;}
 .dash-main > .dash-side .card *{color:inherit;}
-.dash-main > .dash-side .stat .num{color:var(--navy) !important;}
-.dash-main > .dash-side .stat .lbl, .dash-main > .dash-side .card .sub, .dash-main > .dash-side .stat .lbl span{color:#6B7088 !important;}
-.dash-main > .dash-side .tfb-dash{background:rgba(255,247,239,.55) !important;border-color:#F7DEC6 !important;}
+.dash-main > .dash-side .stat .num, .dash-main > .dash-side .card .num{color:#fff !important;}
+.dash-main > .dash-side .stat .lbl, .dash-main > .dash-side .card .sub, .dash-main > .dash-side .stat .lbl span, .dash-main > .dash-side .card .lbl{color:#E6E9F5 !important;}
+.dash-main > .dash-side .tfb-dash{background:rgba(219,132,55,.22) !important;border-color:rgba(240,192,138,.55) !important;}
 /* The primary button here is a solid orange; a white label on it is 3.6:1,
    so only the ghost button (transparent, on the navy rail) stays white. */
 .dash-main > .dash-side .tfb-dash .btn-ghost{color:#fff !important;}
