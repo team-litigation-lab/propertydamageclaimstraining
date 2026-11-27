@@ -37,7 +37,7 @@ const failures = []; const fail = (m) => failures.push(m);
     const row = (l) => r.rows.find(x => x[0].includes(l)) || [];
     if (row('Lesson decks')[1] !== `1 / ${r.days}` || !r.deck.startsWith('✓✗')) fail(`📚 Lesson decks: Day 1 finished → 1 / ${r.days}: ${JSON.stringify(row('Lesson decks'))} ${r.deck}`);
     if (row('Knowledge Checks')[1] !== `1 / ${r.days}` || !r.kc.startsWith('✓✗')) fail(`✍️ Knowledge Checks: Day 1 passed (90%), Day 2 not (55%) → 1 / ${r.days}: ${JSON.stringify(row('Knowledge Checks'))} ${r.kc}`);
-    if (row('Skill Builders')[1] !== `1 / ${r.tools}` || r.lab[0] !== '✓') fail(`🛠 Skill Builders: the first one practised → 1 / ${r.tools}: ${JSON.stringify(row('Skill Builders'))}`);
+    if (row('Skill Builders')[1] !== `1 / ${r.tools}` || r.lab[0] !== '✓') fail(`🛠 Skill Builders: the first one practiced → 1 / ${r.tools}: ${JSON.stringify(row('Skill Builders'))}`);
     if (row('Last opened')[1] !== 'Day 2') fail(`🕘 Last opened should name Day 2: ${JSON.stringify(row('Last opened'))}`);
     if (!/3 h ago/.test(row('Last on the platform')[1] || '')) fail(`⏱ Last on the platform should say 3 h ago: ${JSON.stringify(row('Last on the platform'))}`);
     if (!/Send Feedback to Cara Monitor/.test(r.send)) fail(`📝 Send Feedback should name the trainee: "${r.send}"`);
