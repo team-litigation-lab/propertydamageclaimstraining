@@ -47,7 +47,7 @@ function html(rec){
   return `<div class="ccm"><table class="ccm-t"><thead><tr><th colspan="3">Compliance and Platform Utilization Monitoring</th></tr></thead><tbody>
     ${row("📚 Lesson decks", `${dsN} / ${ds.length}`, tone(dsN, ds.length), grid(ds.map(x => box("📖", dayName(x.d), x.ok, x.ok ? "Finished" : "Not finished yet"))))}
     ${row("✍️ Knowledge Checks passed", `${kcN} / ${kc.length}`, tone(kcN, kc.length), grid(kc.map(x => box("✍️", `Day ${x.d.id}`, x.ok, x.s == null ? "Not taken yet" : `Best ${Math.round(x.s)}%${x.ok ? "" : ` (passes at ${PASS}%)`}`))))}
-    ${ts.length ? row("🛠 Skill Builders", `${tsN} / ${ts.length}`, tone(tsN, ts.length), grid(ts.map(x => box(x.t.icon || "🛠", toolName(x.t), x.ok, x.ok ? `Practised${num(x.best) ? ", best " + Math.round(x.best) + "%" : ""}` : "Not practised yet")))) : ""}
+    ${ts.length ? row("🛠 Skill Builders", `${tsN} / ${ts.length}`, tone(tsN, ts.length), grid(ts.map(x => box(x.t.icon || "🛠", toolName(x.t), x.ok, x.ok ? `Practiced${num(x.best) ? ", best " + Math.round(x.best) + "%" : ""}` : "Not practiced yet")))) : ""}
     ${row("🕘 Last opened", lvWhat ? E(lvWhat) : "—", "", lv && lv.at ? E(when(lv.at)) : `<small class="ccm-mu">Nothing opened yet</small>`)}
     ${row("⏱ Last on the platform", rec.lastActive ? E(ago(rec.lastActive)) : "—", "", rec.lastActive ? E(when(rec.lastActive)) : `<small class="ccm-mu">Not seen yet</small>`)}
   </tbody></table>

@@ -125,7 +125,7 @@ function itemView(it){
     // (a Call Sim step names its PD line (it.line), but it isn't sent on as &line= yet: LSH CommX has no PD pack, and a
     // line it doesn't know could leave the phone with no calls. Send it once the PD pack is on the training phone. Until then the
     // card says so and points at the day's Live Roleplays: platform QA 2026-11-19, PD finding 5, and the regressions review)
-    const callNote = it.id==="calls" ? " · PD's own calls are being added to the training phone: until they are on it, practise this day's situations in the 🔥 Live Roleplay cards beside this one." : "";
+    const callNote = it.id==="calls" ? " · PD's own calls are being added to the training phone: until they are on it, practice this day's situations in the 🔥 Live Roleplay cards beside this one." : "";
     return {icon:t.icon, title:name, desc:(it.note || t.desc) + callNote, where: it.id==="cms" ? "🗂 LSH CaseWorX" : "LSH Training Portal",
       done: (logged && it.id!=="cms") || !!simBest, doneLabel: simBest && typeof simBest.score==="number" ? `✓ Best ${simBest.score}%` : "✓ Work logged", live:t.live,
       act: it.go ? `goto('${it.go}')` : `openTool('${it.id}')`};
