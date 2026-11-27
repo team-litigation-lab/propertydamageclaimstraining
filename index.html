@@ -2494,7 +2494,8 @@ body::before{opacity:.40;}
   .topbar,.btn-primary,.btn-navy{background-image:none;box-shadow:none;}
 }
 </style>
-<script src="/js/portal-gate.js?v=2026.10.21-dashboard"></script>
+<script src="/js/portal-gate.js?v=2026.11.27-session"></script>
+<script src="/js/lsh-session.js?v=1"></script>   <!-- 🔓 signed in until 8 hours with no activity (before the page reads its tokens) -->
 </head>
 <body>
 <div id="app"></div>
@@ -5367,13 +5368,15 @@ document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState=
    MASTER_ADMIN_PASSWORD set, the portal runs in the old open mode.
    ============================================================ */
 state.authToken = (()=>{ try{ return localStorage.getItem("lsh_auth_token")||""; }catch(e){ return ""; } })();
-state.adminToken = (()=>{ try{ return sessionStorage.getItem("lsh_admin_token")||""; }catch(e){ return ""; } })();
+// 🔓 a trainer's token is kept like a trainee's (localStorage), so closing the tab doesn't sign them out: 8 hours with no
+// activity does (js/lsh-session.js). One kept for the tab only, from before, is still read.
+state.adminToken = (()=>{ try{ return localStorage.getItem("lsh_admin_token")||sessionStorage.getItem("lsh_admin_token")||""; }catch(e){ return ""; } })();
 function authHeaders(){
   const t = (state.isAdmin && state.adminToken) || state.authToken;
   return Object.assign({"Content-Type":"application/json"}, t ? {"Authorization":"Bearer "+t} : {});
 }
 function setTraineeToken(t){ state.authToken = t||""; try{ t ? localStorage.setItem("lsh_auth_token", t) : localStorage.removeItem("lsh_auth_token"); }catch(e){} }
-function setAdminToken(t){ state.adminToken = t||""; try{ t ? sessionStorage.setItem("lsh_admin_token", t) : sessionStorage.removeItem("lsh_admin_token"); }catch(e){} }
+function setAdminToken(t){ state.adminToken = t||""; try{ sessionStorage.removeItem("lsh_admin_token"); t ? localStorage.setItem("lsh_admin_token", t) : localStorage.removeItem("lsh_admin_token"); }catch(e){} }
 async function authStatus(){
   if(typeof state.secureMode === "boolean") return state.secureMode;
   try{ const r = await fetch("/api/auth/status", {method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"}); const j = r.ok ? await r.json() : {}; state.secureMode = !!j.secure; state.portalOnly = !!j.portalOnly; state.portalSecret = j.portalSecret !== false; }
@@ -8271,6 +8274,7 @@ async function resetTraineeSessionData(){
 async function logout(){
   try{ await cloudSaveNow(); }catch(e){}
   setTraineeToken("");
+  setAdminToken("");   // 🔓 Log out ends the whole session: a trainer's token is kept past the tab now (js/lsh-session.js)
   if(state.approvalPollInterval){ clearInterval(state.approvalPollInterval); state.approvalPollInterval = null; }
   state.activeSurpriseTask = null;
   state.surpriseResult = null;
